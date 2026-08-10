@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-assistant"
+version = "0.0.0"
+description = "A privacy-conscious personal AI assistant for Windows."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "keyring>=25.5",
+    "pydantic>=2.10",
+    "python-ulid>=3.0",
+    "PyYAML>=6.0.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.14",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-timeout>=2.3",
+    "ruff>=0.9",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --timeout=60"
+timeout_func_only = false
+testpaths = ["tests"]
+markers = [
+    "phase0: Phase 0 완료 기준",
+    "phase1: Phase 1 완료 기준",
+    "phase2: Phase 2 완료 기준",
+    "phase3: Phase 3 완료 기준",
+    "phase4: Phase 4 완료 기준",
+    "phase5: Phase 5 완료 기준",
+    "phase6: Phase 6 완료 기준",
+    "phase7: Phase 7 완료 기준",
+    "phase8: Phase 8 완료 기준",
+    "security: 보안 회귀",
+    "slow: 수십 초 이상 소요",
+    "needs_admin: 관리자 권한 필요 (없으면 skip)",
+    "needs_gpu: GPU 필요 (없으면 skip)",
+    "allow_network: 실제 외부 API를 쓰는 수동 smoke test",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["app", "scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+files = ["app"]
+

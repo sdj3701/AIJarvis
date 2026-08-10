@@ -1,0 +1,43 @@
+# Local Python environment
+.venv/
+
+# Development secrets
+.env
+.env.*
+!.env.example
+
+# Python caches and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Packaging output
+build/
+dist/
+*.egg-info/
+
+# Local IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime data copies must not enter the source repository.
+config/settings.yaml
+config/privacy.yaml
+config/tools.yaml
+/jarvis.sqlite3
+/jarvis.sqlite3-*
+/memory/
+/logs/
+/state/
+/models/
+/skills/
+/backups/
+
+# artifacts/gates is intentionally tracked as Phase-gate evidence.

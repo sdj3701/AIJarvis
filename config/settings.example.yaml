@@ -1,0 +1,168 @@
+# 자비스 기본 설정 템플릿
+# 사본 위치: D:\Jarvis\config\settings.yaml
+# 스키마 규칙: SCHEMAS.md 11장 / 값의 의미: DESIGN.md
+# 이 파일에 API 키를 적지 않는다. 시크릿은 Windows 자격 증명 관리자에 저장한다.
+
+schema_version: 1
+
+# true면 .env 폴백 시크릿 로딩을 허용한다. 운영에서는 반드시 false.
+dev_mode: false
+
+app:
+  language: ko
+  timezone: Asia/Seoul
+
+paths:
+  # 모든 상대 경로는 data_root 기준으로 해석된다.
+  data_root: "D:\\Jarvis"
+  memory_db: "memory\\jarvis.sqlite3"
+  raw_dir: "memory\\raw"
+  export_dir: "memory\\export"
+  docs_dir: "docs"
+  notes_dir: "docs\\notes"
+  skills_dir: "skills"
+  state_dir: "state"
+  logs_dir: "logs"
+  models_dir: "models"
+  backups_dir: "backups"
+
+llm:
+  # PLAN 15장 결정 항목. Phase 1에서 제공자 1개, 모델 1개만 고정한다.
+  provider: openai            # openai | anthropic
+  model: "<사용할 모델 ID>"    # 예: 제공자 문서의 모델 식별자를 그대로 적는다
+  temperature: 0.3
+  max_output_tokens: 2000
+  timeout_s: 60
+  max_retries: 3
+  backoff_base_s: 0.5
+  backoff_max_s: 8.0
+  # 재시도 대상 이외(4xx 인증·잘못된 요청)는 즉시 실패시킨다.
+  retry_on: [timeout, rate_limit, server_error]
+
+  context:
+    max_input_tokens: 24000
+    reserve_output_tokens: 2000
+    memory_share: 0.20        # 기억 블록 상한 비율
+    history_share: 0.50       # 대화 히스토리 상한 비율
+    # memory_share + history_share <= 1.0 이어야 한다 (로더가 검증)
+    keep_recent_turns: 3      # 절대 잘라내지 않는 최근 턴 수
+
+  pricing:
+    # 1000 토큰당 USD. 문자열로 적는다(Decimal 파싱).
+    # 모델명을 키로 쓰고, 모델을 바꾸면 여기도 바꾼다.
+    "<사용할 모델 ID>":
+      input_per_1k: "0.00"
+      output_per_1k: "0.00"
+
+budget:
+  currency: USD
+  daily_limit: "1.00"
+  monthly_limit: "20.00"
+  warn_ratio: 0.8
+  # 100% 도달 시 신규 외부 요청 차단은 고정 동작이다. warn_only 같은 완화 옵션을 두지
+  # 않는다 — 비용 한도는 PLAN 12.1의 정량 기준이므로 설정으로 끌 수 있으면 기준이 아니다.
+  # 진행 중 요청은 한도 초과 시에도 완료시킨다(중간 종료가 데이터 손상을 만들 수 있음).
+  on_exceed: block_new_requests   # 이 값만 허용. 다른 값은 로더가 ConfigError
+
+memory:
+  retrieval:
+    top_k: 8
+    min_score: 0.15
+    include_candidates: true
+    max_candidates: 3
+    kind_weights:
+      correction: 1.00
+      fact: 0.90
+      summary: 0.60
+      doc_chunk: 0.50
+    half_life_days:
+      correction: 365
+      fact: 180
+      summary: 30
+      doc_chunk: 3650
+    # relevance 혼합 가중치 (임베딩 활성 시)
+    fts_weight: 0.6
+    embedding_weight: 0.4
+
+  # 질문에서 key를 추정할 때 쓰는 별칭 표. 확장 가능.
+  key_aliases:
+    "pref.answer_style": ["말투", "답변 스타일", "응답 형식", "짧게", "길게"]
+    "pref.language": ["언어", "한국어", "영어"]
+    "identity.name": ["내 이름", "이름"]
+    "env.notes_dir": ["노트 폴더", "메모 위치"]
+
+  checkpoint_every_turns: 3
+  summarize_on_exit: true
+  quota_gb: 5
+  quota_warn_ratio: 0.8
+  # 임베딩은 Phase 3 이후 활성화한다.
+  embedding:
+    enabled: false
+    provider: local           # local | api
+    model: ""
+    dim: 0
+
+rag:
+  chunk_chars: 1200
+  chunk_overlap_chars: 150
+  max_chunks_per_answer: 6
+  max_file_bytes: 10485760
+  # PDF parser 결정(D012) 전에는 .pdf를 추가하지 않는다.
+  supported_extensions: [".md", ".txt"]
+  # 웹 fetch 제한. SCHEMAS.md 8.6과 일치해야 한다.
+  fetch:
+    max_bytes: 2097152
+    max_redirects: 3
+    timeout_s: 15
+    allowed_content_types: ["text/html", "text/plain", "text/markdown", "application/json"]
+  search:
+    provider: "<검색 API 제공자>"   # PLAN 15장 결정 항목
+    max_results: 5
+    require_min_sources: 2          # 교차 확인 목표. 미달 시 답변에 '근거 부족' 라벨
+    cost_per_request: "0.00"       # USD 문자열. 유료/무료 모두 명시
+
+agent:
+  max_steps: 8
+  max_tool_calls_per_step: 1
+  step_timeout_s: 60
+  total_timeout_s: 300
+  # 자동 재시도는 idempotent=true 도구에만 적용된다.
+  auto_retry_idempotent: 1
+
+session:
+  recovery: prompt            # prompt | auto | discard
+  idle_timeout_min: 120
+
+logging:
+  level: INFO
+  fsync_events: true         # 크래시 내구성 우선. 성능 문제 없으면 유지
+  rotate_daily: true
+  keep_days: 180
+  mask_in_logs: true
+
+metrics:
+  enabled: true
+  p95_window: 200
+
+voice:                       # Phase 7
+  enabled: false
+  stt:
+    engine: faster-whisper
+    model: medium
+    device: cuda
+    compute_type: float16
+    language: ko
+  tts:
+    # D009 결정 후 edge-tts 또는 local로 변경한다.
+    engine: disabled           # disabled | edge-tts | local
+    voice: ""
+    max_chars: 400
+    cost_per_1k_chars: "0.00"     # 온라인 엔진 비용. 로컬/무료도 명시
+    # 긴 요약은 낭독하지 않고 화면에만 표시한다.
+  push_to_talk_hotkey: "ctrl+alt+j"
+
+ui:                          # Phase 8
+  tray_enabled: false
+  hotkey: "ctrl+alt+space"
+  autostart: false           # 사용자 opt-in
+  show_mic_indicator: true
