@@ -19,7 +19,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-03 완료, P0-04 대기 |
+| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-04 완료, P0-05 대기 |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 필요 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
@@ -39,7 +39,7 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | P0-01 프로젝트·품질 도구 | completed | Codex | 2026-08-10 | 2026-08-10 | pytest collect·Ruff·mypy·pip check 통과, phase0 smoke 1 passed |
 | P0-02 설정 모델·로더 | completed | Codex | 2026-08-10 | 2026-08-10 | 설정 테스트 31 passed, 전체 32 passed, 설정 코드 커버리지 95% |
 | P0-03 시크릿 로더 | completed | Codex | 2026-08-11 | 2026-08-11 | 시크릿 테스트 30 passed, 전체 62 passed, 시크릿 코드 커버리지 98% |
-| P0-04 공통 타입 | not_started | — | — | — | — |
+| P0-04 공통 타입 | completed | Codex | 2026-08-11 | 2026-08-11 | 공통 타입 테스트 35 passed, 전체 97 passed, 대상 커버리지 96% |
 | P0-05 데이터 트리·SQLite | not_started | — | — | — | — |
 | P0-06 이벤트·마스킹 | not_started | — | — | — | — |
 | P0-07 원자적 쓰기·복구·락 | not_started | — | — | — | — |
