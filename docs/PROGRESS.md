@@ -21,10 +21,10 @@
 |-------|------|-----------|-------------|------|
 | 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
 | 1 대화 | completed | [Phase 1](./phase-01-chat/README.md) | [phase1-20260811.json](../artifacts/gates/phase1-20260811.json) | P1-01~P1-07 완료, 283 passed |
-| 2 기억 | completed | [Phase 2](./phase-02-memory/README.md) | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) | P2-01~P2-07 완료, 301 passed |
-| 3 검색/RAG | completed | [Phase 3](./phase-03-research/README.md) | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) | P3-01~P3-08 완료, 333 passed |
-| 4 PC 도구 | completed | [Phase 4](./phase-04-tools/README.md) | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) | P4-01~P4-07 완료, 372 passed |
-| 5 에이전트 | completed | [Phase 5](./phase-05-agent/README.md) | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) | TaskStore·멀티스텝·복구, 384 passed |
+| 2 기억 | completed | [Phase 2](./phase-02-memory/README.md) | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) | P2-01~P2-07 완료, 300 passed |
+| 3 검색/RAG | completed | [Phase 3](./phase-03-research/README.md) | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) | P3-01~P3-08 완료, 337 passed |
+| 4 PC 도구 | completed | [Phase 4](./phase-04-tools/README.md) | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) | P4-01~P4-07 완료, 379 passed |
+| 5 에이전트 | completed | [Phase 5](./phase-05-agent/README.md) | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) | TaskStore·멀티스텝·복구, 393 passed |
 | 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
 | 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 하이브리드 STT·적응형 VAD 끼어들기·1.55배 TTS 선행 구현, 사람 발화 스모크와 정식 게이트는 별도 |
 | 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
@@ -72,10 +72,10 @@ Phase를 완료할 때 행을 추가한다.
 |------|-------|--------------|------|-----------|-----------|-----------|
 | 2026-08-11 | Phase 0 | 298f093 | `python scripts\gate.py --phase 0` | 0 | 137 passed, failed 0, skipped 0 | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) |
 | 2026-08-11 | Phase 1 | 368e8e4 | `python scripts\gate.py --phase 1` | 0 | 283 passed, failed 0, skipped 0, crash 20/20 입력 유실 0 | [phase1-20260811.json](../artifacts/gates/phase1-20260811.json) |
-| 2026-08-11 | Phase 2 | 1891e87 | `python scripts\gate.py --phase 2` | 0 | 301 passed, failed 0, skipped 0, memory_eval ≥90% | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) |
-| 2026-08-11 | Phase 3 | — | `python scripts\gate.py --phase 3` | 0 | 333 passed, failed 0, security·phase3 green | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) |
-| 2026-08-11 | Phase 4 | 1891e87 | `python scripts\gate.py --phase 4` | 0 | 372 passed, failed 0, skipped 1, phase4·security green | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) |
-| 2026-08-11 | Phase 5 | — | `python scripts\gate.py --phase 5` | 0 | 384 passed, failed 0, skipped 1, phase5·security green | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) |
+| 2026-08-11 | Phase 2 | 40ba9cc | `python scripts\gate.py --phase 2` | 0 | 300 passed, failed 0, skipped 0, memory_eval ≥90% | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) |
+| 2026-08-11 | Phase 3 | 40ba9cc | `python scripts\gate.py --phase 3` | 0 | 337 passed, failed 0, skipped 0, security·phase3 green | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) |
+| 2026-08-11 | Phase 4 | 40ba9cc | `python scripts\gate.py --phase 4` | 0 | 379 passed, failed 0, skipped 0, phase4·security green | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) |
+| 2026-08-11 | Phase 5 | 40ba9cc | `python scripts\gate.py --phase 5` | 0 | 393 passed, failed 0, skipped 0, phase5·security green | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) |
 
 기록 예:
 

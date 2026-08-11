@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "phase": 4,
+  "started_at": "2026-08-11T19:29:21.424+09:00",
+  "finished_at": "2026-08-11T19:29:50.109+09:00",
+  "exit_code": 0,
+  "commit": "40ba9cc",
+  "worktree_clean": true,
+  "marker_expr": "(phase0 or phase1 or phase2 or phase3 or phase4) and not allow_network",
+  "tests": {
+    "passed": 379,
+    "failed": 0,
+    "skipped": 0,
+    "skipped_reasons": []
+  },
+  "metrics": [
+    {
+      "name": "recovery.input_loss",
+      "value": 0,
+      "threshold": 0,
+      "ok": true,
+      "note": "5개 종료 지점마다 4회씩, 총 20회 별도 프로세스 강제 종료"
+    },
+    {
+      "name": "turn.latency.p95_ms",
+      "value": null,
+      "threshold": 15000,
+      "ok": null,
+      "note": "자동 테스트는 가짜 LLM을 사용하므로 실제 모델 수동 측정 대상"
+    }
+  ],
+  "unmet": [],
+  "notes": [
+    "Phase 1 자동 게이트는 외부 네트워크를 사용하지 않습니다.",
+    "Ollama 모델 digest·GPU 적재·3턴 대화는 실제 로컬 모델로 별도 확인합니다."
+  ]
+}
