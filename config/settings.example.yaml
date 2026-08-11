@@ -155,13 +155,33 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
   wake_word: "자비스"
   acknowledgement: "무엇을 도와드릴까요."
   stt:
-    engine: vosk
-    model: vosk-model-small-ko-0.22
-    model_archive_sha256: "eea36124087fed26c59996a4761519458e3bd185e8ea9d9865ad8760c4a1d989"
+    engine: hybrid
     device: "USB Condenser Microphone"
     sample_rate_hz: 16000
     language: ko
     max_command_seconds: 15
+    wake:
+      engine: vosk
+      model: vosk-model-small-ko-0.22
+      model_archive_sha256: "eea36124087fed26c59996a4761519458e3bd185e8ea9d9865ad8760c4a1d989"
+    command:
+      engine: faster-whisper
+      model: faster-whisper-small
+      model_revision: "536b0662742c02347bc0e980a01041f333bce120"
+      model_sha256: "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+      device: cuda
+      compute_type: int8_float16
+      cpu_fallback: true
+      cpu_compute_type: int8
+      beam_size: 5
+      vad_filter: true
+      initial_prompt: "한국어 자비스 음성 비서 질문입니다. Jarvis, Ollama, 파이썬."
+      pre_roll_ms: 500
+      speech_threshold_dbfs: -42
+      trailing_silence_ms: 900
+      min_speech_ms: 400
+      min_avg_logprob: -1.0
+      max_no_speech_probability: 0.6
   tts:
     engine: local
     voice: "Microsoft Heami Desktop"

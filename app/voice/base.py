@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import array
+import math
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
@@ -32,6 +35,22 @@ class AudioFrame:
     def duration_ms(self) -> int:
         samples = len(self.pcm) // self.sample_width_bytes
         return samples * 1000 // self.sample_rate
+
+    @property
+    def rms_dbfs(self) -> float:
+        """Return the PCM16 RMS level in dBFS without persisting audio."""
+        if not self.pcm:
+            return -96.0
+        samples = array.array("h")
+        samples.frombytes(self.pcm)
+        if sys.byteorder != "little":
+            samples.byteswap()
+        if not samples:
+            return -96.0
+        mean_square = sum(sample * sample for sample in samples) / len(samples)
+        if mean_square <= 0:
+            return -96.0
+        return max(-96.0, 20 * math.log10(math.sqrt(mean_square) / 32_768))
 
 
 @dataclass(frozen=True, slots=True)

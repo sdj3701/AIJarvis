@@ -13,6 +13,13 @@ def test_audio_frame_is_fixed_to_mono_pcm16() -> None:
     frame = AudioFrame(b"\x00\x00" * 160, sample_rate=16_000)
 
     assert frame.duration_ms == 10
+    assert frame.rms_dbfs == -96.0
+
+
+def test_audio_frame_reports_pcm_level_in_dbfs() -> None:
+    frame = AudioFrame((16_384).to_bytes(2, "little", signed=True) * 160, sample_rate=16_000)
+
+    assert frame.rms_dbfs == pytest.approx(-6.02, abs=0.01)
 
 
 @pytest.mark.parametrize(

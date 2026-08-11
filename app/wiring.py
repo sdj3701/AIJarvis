@@ -195,13 +195,13 @@ def run_application(
                 raise ConfigError("설정에서 음성 모드가 비활성화되어 있습니다.")
             model_path = (
                 _data_path(runtime.config, runtime.config.settings.paths.models_dir)
-                / voice_settings.stt.model
+                / voice_settings.stt.wake.model
             )
             stt = VoskSTTEngine(
                 model_path,
                 sample_rate=voice_settings.stt.sample_rate_hz,
                 language=voice_settings.stt.language,
-                expected_archive_sha256=voice_settings.stt.model_archive_sha256,
+                expected_archive_sha256=voice_settings.stt.wake.model_archive_sha256,
             )
             listener = LocalVoiceListener(
                 stt=stt,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import queue
+from collections import deque
 from collections.abc import Callable, Sequence
 from contextlib import suppress
 from dataclasses import dataclass
@@ -193,3 +194,97 @@ class MicrophoneStream:
     def __exit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
         del exc_type, exc_value, traceback
         self.close()
+
+
+@dataclass(frozen=True, slots=True)
+class SpeechCapturePolicy:
+    pre_roll_ms: int
+    speech_threshold_dbfs: float
+    trailing_silence_ms: int
+    min_speech_ms: int
+    max_duration_ms: int
+
+    def __post_init__(self) -> None:
+        if min(
+            self.pre_roll_ms,
+            self.trailing_silence_ms,
+            self.min_speech_ms,
+            self.max_duration_ms,
+        ) <= 0:
+            raise ValueError("speech capture durations must be positive")
+        if not -96 <= self.speech_threshold_dbfs <= 0:
+            raise ValueError("speech threshold must be between -96 and 0 dBFS")
+
+
+class SpeechCapture:
+    """Select one in-memory utterance using level and trailing-silence boundaries."""
+
+    def __init__(self, policy: SpeechCapturePolicy) -> None:
+        self._policy = policy
+        self._pre_roll: deque[AudioFrame] = deque()
+        self._pre_roll_duration_ms = 0
+        self._frames: list[AudioFrame] = []
+        self._input_duration_ms = 0
+        self._speech_duration_ms = 0
+        self._silence_duration_ms = 0
+        self._speech_started = False
+        self._finished = False
+
+    def feed(self, frame: AudioFrame) -> None:
+        if self._finished:
+            raise RuntimeError("speech capture is already finished")
+        self._input_duration_ms += frame.duration_ms
+        speech = frame.rms_dbfs >= self._policy.speech_threshold_dbfs
+        if not self._speech_started:
+            self._append_pre_roll(frame)
+            if speech:
+                self._speech_started = True
+                self._frames.extend(self._pre_roll)
+                self._pre_roll.clear()
+                self._pre_roll_duration_ms = 0
+                self._speech_duration_ms += frame.duration_ms
+        else:
+            self._frames.append(frame)
+            if speech:
+                self._speech_duration_ms += frame.duration_ms
+                self._silence_duration_ms = 0
+            else:
+                self._silence_duration_ms += frame.duration_ms
+                if self._silence_duration_ms >= self._policy.trailing_silence_ms:
+                    self._finished = True
+        if self._input_duration_ms >= self._policy.max_duration_ms:
+            self._finished = True
+
+    def _append_pre_roll(self, frame: AudioFrame) -> None:
+        self._pre_roll.append(frame)
+        self._pre_roll_duration_ms += frame.duration_ms
+        while (
+            len(self._pre_roll) > 1
+            and self._pre_roll_duration_ms - self._pre_roll[0].duration_ms
+            >= self._policy.pre_roll_ms
+        ):
+            self._pre_roll_duration_ms -= self._pre_roll.popleft().duration_ms
+
+    @property
+    def finished(self) -> bool:
+        return self._finished
+
+    @property
+    def speech_started(self) -> bool:
+        return self._speech_started
+
+    @property
+    def acceptable(self) -> bool:
+        return self._speech_duration_ms >= self._policy.min_speech_ms
+
+    @property
+    def frames(self) -> tuple[AudioFrame, ...]:
+        return tuple(self._frames)
+
+    @property
+    def input_duration_ms(self) -> int:
+        return self._input_duration_ms
+
+    @property
+    def speech_duration_ms(self) -> int:
+        return self._speech_duration_ms

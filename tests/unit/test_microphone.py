@@ -6,7 +6,14 @@ from collections.abc import Callable, Sequence
 
 import pytest
 
-from app.voice.microphone import InputDevice, MicrophoneStream, select_input_device
+from app.voice.base import AudioFrame
+from app.voice.microphone import (
+    InputDevice,
+    MicrophoneStream,
+    SpeechCapture,
+    SpeechCapturePolicy,
+    select_input_device,
+)
 
 pytestmark = pytest.mark.phase7
 
@@ -72,3 +79,50 @@ def test_microphone_keeps_only_bounded_pcm_blocks() -> None:
     assert frame is not None and frame.pcm == b"\x01\x00" * 10
     assert microphone.overflows == 1
     assert backend.stream.closed is True
+
+
+def _level_frame(amplitude: int, duration_ms: int = 250) -> AudioFrame:
+    samples = 16_000 * duration_ms // 1000
+    pcm = amplitude.to_bytes(2, "little", signed=True) * samples
+    return AudioFrame(pcm, 16_000)
+
+
+def test_speech_capture_keeps_pre_roll_and_stops_after_trailing_silence() -> None:
+    capture = SpeechCapture(
+        SpeechCapturePolicy(
+            pre_roll_ms=500,
+            speech_threshold_dbfs=-42,
+            trailing_silence_ms=750,
+            min_speech_ms=500,
+            max_duration_ms=5_000,
+        )
+    )
+
+    for amplitude in (0, 0, 4_000, 4_000, 0, 0, 0):
+        capture.feed(_level_frame(amplitude))
+
+    assert capture.finished is True
+    assert capture.speech_started is True
+    assert capture.acceptable is True
+    assert capture.speech_duration_ms == 500
+    assert sum(frame.duration_ms for frame in capture.frames) == 1_500
+
+
+def test_speech_capture_times_out_without_sending_silence() -> None:
+    capture = SpeechCapture(
+        SpeechCapturePolicy(
+            pre_roll_ms=500,
+            speech_threshold_dbfs=-42,
+            trailing_silence_ms=750,
+            min_speech_ms=500,
+            max_duration_ms=1_000,
+        )
+    )
+
+    for _ in range(4):
+        capture.feed(_level_frame(0))
+
+    assert capture.finished is True
+    assert capture.speech_started is False
+    assert capture.acceptable is False
+    assert capture.frames == ()

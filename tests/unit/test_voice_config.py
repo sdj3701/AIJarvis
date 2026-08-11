@@ -42,7 +42,11 @@ def test_local_wake_word_configuration_loads(config_dir: Path) -> None:
     assert settings.voice.enabled is True
     assert settings.voice.wake_word == "자비스"
     assert settings.voice.acknowledgement == "무엇을 도와드릴까요."
-    assert settings.voice.stt.engine == "vosk"
+    assert settings.voice.stt.engine == "hybrid"
+    assert settings.voice.stt.wake.engine == "vosk"
+    assert settings.voice.stt.command.engine == "faster-whisper"
+    assert settings.voice.stt.command.model == "faster-whisper-small"
+    assert settings.voice.stt.command.device == "cuda"
     assert settings.voice.tts.voice == "Microsoft Heami Desktop"
 
 

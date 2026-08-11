@@ -219,14 +219,40 @@ class MetricsSettings(StrictModel):
     p95_window: PositiveInt
 
 
-class STTSettings(StrictModel):
+class WakeSTTSettings(StrictModel):
     engine: Literal["vosk"]
     model: Literal["vosk-model-small-ko-0.22"]
     model_archive_sha256: Sha256Hex
+
+
+class CommandSTTSettings(StrictModel):
+    engine: Literal["faster-whisper"]
+    model: Literal["faster-whisper-small"]
+    model_revision: NonEmptyString
+    model_sha256: Sha256Hex
+    device: Literal["cuda", "cpu"]
+    compute_type: Literal["int8_float16"]
+    cpu_fallback: bool
+    cpu_compute_type: Literal["int8"]
+    beam_size: PositiveInt
+    vad_filter: bool
+    initial_prompt: NonEmptyString
+    pre_roll_ms: PositiveInt
+    speech_threshold_dbfs: Annotated[float, Field(ge=-96, le=0)]
+    trailing_silence_ms: PositiveInt
+    min_speech_ms: PositiveInt
+    min_avg_logprob: Annotated[float, Field(ge=-10, le=0)]
+    max_no_speech_probability: Ratio
+
+
+class STTSettings(StrictModel):
+    engine: Literal["hybrid"]
     device: NonEmptyString
     sample_rate_hz: Literal[16000]
     language: Literal["ko"]
     max_command_seconds: PositiveFloat
+    wake: WakeSTTSettings
+    command: CommandSTTSettings
 
 
 class TTSSettings(StrictModel):
