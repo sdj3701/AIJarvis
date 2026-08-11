@@ -10,6 +10,8 @@ from app.core.errors import ConfigError
 from app.memory.migrations import REQUIRED_TABLES, REQUIRED_TRIGGERS, initialize_database
 from scripts.bootstrap import CONFIG_COPIES, TREE_DIRECTORIES, bootstrap, create_tree, main
 
+pytestmark = pytest.mark.phase0
+
 
 def _config_source(tmp_path: Path) -> Path:
     source = tmp_path / "examples"

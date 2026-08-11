@@ -19,7 +19,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-07 완료, P0-08 대기 |
+| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-08 구현 완료, Phase 게이트 대기 |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 필요 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
@@ -43,7 +43,7 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | P0-05 데이터 트리·SQLite | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 106 passed, SQLite v1·WAL·FTS 무결성·멱등 초기화 검증 |
 | P0-06 이벤트·마스킹 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 118 passed, 이벤트 봉투·flush/fsync·민감정보 비기록 검증 |
 | P0-07 원자적 쓰기·복구·락 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 126 passed, 원자적 교체·JSONL 꼬리 격리·Windows 락 검증 |
-| P0-08 CLI·조립 | not_started | — | — | — | — |
+| P0-08 CLI·조립 | completed | Codex | 2026-08-11 | 2026-08-11 | Phase 0 마커 136 passed, 모듈 실행·Ctrl+C 130·오류 표시 정책 검증 |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 

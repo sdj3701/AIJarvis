@@ -1,0 +1,95 @@
+"""Run a documented Phase test gate and write machine-readable evidence."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+from app.core.atomic import write_atomic
+from app.core.clock import KST
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+ARTIFACTS_DIR = REPOSITORY_ROOT / "artifacts" / "gates"
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Jarvis Phase 완료 게이트")
+    parser.add_argument("--phase", type=int, choices=range(0, 9), required=True)
+    return parser
+
+
+def _marker_expression(phase: int) -> str:
+    phases = " or ".join(f"phase{number}" for number in range(phase + 1))
+    return f"({phases}) and not allow_network"
+
+
+def _count(output: str, label: str) -> int:
+    matches = re.findall(rf"(\d+) {label}", output)
+    return int(matches[-1]) if matches else 0
+
+
+def _commit() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=REPOSITORY_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip() if result.returncode == 0 else "unknown"
+
+
+def run_gate(phase: int) -> int:
+    started_at = datetime.now(tz=KST)
+    marker = _marker_expression(phase)
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "-m", marker],
+        cwd=REPOSITORY_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    combined = result.stdout + result.stderr
+    sys.stdout.write(combined)
+    sys.stdout.flush()
+    exit_code = 0 if result.returncode == 0 else 1
+    finished_at = datetime.now(tz=KST)
+    evidence = {
+        "schema_version": 1,
+        "phase": phase,
+        "started_at": started_at.isoformat(timespec="milliseconds"),
+        "finished_at": finished_at.isoformat(timespec="milliseconds"),
+        "exit_code": exit_code,
+        "commit": _commit(),
+        "marker_expr": marker,
+        "tests": {
+            "passed": _count(combined, "passed"),
+            "failed": _count(combined, "failed"),
+            "skipped": _count(combined, "skipped"),
+            "skipped_reasons": [],
+        },
+        "metrics": [],
+        "notes": ["Phase 0에는 외부 API 호출과 정량 성능 기준이 없습니다."],
+    }
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    artifact = ARTIFACTS_DIR / f"phase{phase}-{finished_at:%Y%m%d}.json"
+    write_atomic(
+        artifact,
+        (json.dumps(evidence, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+    )
+    print(f"게이트 증거: {artifact}")
+    return exit_code
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    return run_gate(args.phase)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

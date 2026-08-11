@@ -6,8 +6,10 @@ import pytest
 
 from app.ui.single_instance import AlreadyRunningError, SingleInstanceLock
 
+pytestmark = pytest.mark.phase0
 
-def test_second_instance_is_rejected_until_first_releases(tmp_path: Path) -> None:
+
+def test_second_instance_refused(tmp_path: Path) -> None:
     path = tmp_path / "state" / "jarvis.lock"
     first = SingleInstanceLock(path)
     second = SingleInstanceLock(path)

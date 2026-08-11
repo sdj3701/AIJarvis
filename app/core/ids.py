@@ -15,6 +15,10 @@ class IdGenerator(Protocol):
     def new(self) -> str: ...
 
 
+class PrefixedIdFactory(Protocol):
+    def new(self, prefix: str) -> str: ...
+
+
 class SystemUlidGenerator:
     def new(self) -> str:
         return str(ULID())
@@ -31,3 +35,10 @@ def new_id(prefix: str, *, generator: IdGenerator | None = None) -> str:
     if not _ULID_PATTERN.fullmatch(ulid):
         raise ValueError("ID generator returned an invalid ULID")
     return f"{prefix}_{ulid}"
+
+
+class SystemIdFactory:
+    """Production factory injected into the runtime wiring."""
+
+    def new(self, prefix: str) -> str:
+        return new_id(prefix)

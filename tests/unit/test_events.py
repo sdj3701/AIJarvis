@@ -12,6 +12,8 @@ from app.telemetry.events import EventIdentity, JsonlEventWriter
 from app.telemetry.masking import LogMasker
 from tests.fakes.clock import FrozenClock
 
+pytestmark = pytest.mark.phase0
+
 
 def _writer(logs_dir: Path, *, fsync_events: bool = False) -> JsonlEventWriter:
     masker = LogMasker(

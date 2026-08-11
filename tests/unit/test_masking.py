@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from app.config.models import DetectorPolicy, MaskPolicy
 from app.telemetry.masking import LogMasker
+
+pytestmark = pytest.mark.phase0
 
 
 def _masker() -> LogMasker:

@@ -7,6 +7,8 @@ import pytest
 
 from app.core.atomic import write_atomic
 
+pytestmark = pytest.mark.phase0
+
 
 def test_write_atomic_flushes_before_replace(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch

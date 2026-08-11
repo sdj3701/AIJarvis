@@ -11,6 +11,8 @@ from app.core.errors import RecoveryError
 from app.orchestrator.recovery import recover_startup
 from scripts.bootstrap import create_tree
 
+pytestmark = pytest.mark.phase0
+
 
 class RecordingEvents:
     def __init__(self) -> None:
