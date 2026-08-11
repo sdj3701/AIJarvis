@@ -32,6 +32,7 @@ tests/data/audio/                 # 직접 제작한 짧은 테스트 음성만
 Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 → Transcribing → Orchestrator(text, channel=voice)
 → Speaking 또는 ApprovalWaiting → Idle
+              └─ Speaking 중 “자비스” → TTS cancel → 안내 → Recording
 ```
 
 동시에 녹음과 TTS를 수행하지 않는다. 녹음 중 TTS가 시작되면 자신의 출력을 다시 입력으로 듣는 루프가 생긴다.
@@ -87,8 +88,11 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 2. 모든 문자열은 `PrivacyGate.for_tts`를 통과한다. 온라인 TTS는 추가로 `for_external_text(..., purpose="online_tts")`를 통과한 문자열만 전송한다.
 3. secret/pii_high는 화면 전용 fallback 문장으로 대체한다.
 4. 최대 글자 수를 넘으면 첫 요약만 읽고 전체는 화면에 표시한다.
-5. 사용자가 말하기 시작하면 현재 TTS를 취소한다.
+5. 사용자가 답변 중 “자비스”만 말하면 현재 TTS를 취소한다.
 6. Windows SAPI `Microsoft Heami Desktop`만 사용하며 온라인 TTS로 폴백하지 않는다.
+7. Heami `rate=6`으로 기본 대비 실측 약 1.92배 속도로 낭독한다.
+8. 답변 중 전체 Vosk 최종 결과가 정확히 `자비스`일 때만 끼어들기로 판정하고 현재
+   SAPI 프로세스를 종료한 뒤 새 질문을 받는다.
 
 ### P7-06 자원 관리
 
@@ -120,6 +124,9 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 - [x] RTX 4070 Ti CUDA Whisper 모델 load·forward 성공
 - [x] 로컬 SAPI 한국어 “오늘 날짜를 알려줘.” 정확히 복원
 - [x] Vosk 부분 결과로 호출하지 않음·10초 무음 잘못된 최종 호출 0회
+- [x] 답변 중 `자비스` 호출→TTS cancel→웨이크 대기 생략→새 질문 조립 테스트
+- [x] `자비스 프로젝트` 문장은 끼어들기로 오인하지 않음
+- [x] Heami rate 0/6 동일 문장 비교에서 약 1.92배 속도 확인
 - [ ] Vosk 호출어 + Whisper 질문 하이브리드 실장치 스모크
 
 ## 7. 완료 게이트

@@ -1099,6 +1099,11 @@ class TTSEngine(Protocol):
 가드를 통과하지 못한 결과는 `handle_turn`으로 넘기지 않는다. 구체적인 모델·임계값·
 폴백 정책은 [한국어 STT 운영 가이드](./docs/reference/VOICE_STT.md)를 단일 기준으로 삼는다.
 
+답변 TTS는 별도 작업에서 실행하고 같은 시간에 마이크의 전체 Vosk 결과를 감시한다.
+최종 정규화 결과가 호출어와 정확히 같을 때만 `TTSEngine.cancel()`을 호출한다. 중단에
+사용한 호출은 소비된 것으로 보고 다시 웨이크워드를 기다리지 않은 채 확인 음성 후 새
+질문을 녹음한다. TTS 속도는 설정의 SAPI `rate`(-10~10)로만 제어한다.
+
 오디오 형식은 mono, 16-bit PCM으로 고정하고 sample rate는 설정값을 사용한다. 온라인 TTS는 `for_tts` 후 다시 `for_external_text(..., purpose="online_tts")`를 통과한 문자열만 전송한다.
 
 ### 17.2 UI

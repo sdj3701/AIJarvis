@@ -14,7 +14,7 @@
 | D006 | pending | 검색 제공자 | 미정 | Phase 3 진입 전 | API·비용·결과 스키마 확정 |
 | D007 | pending | 백업 대상 | 미정 | Phase 6 진입 전 | 별도 장치/보안 위치 경로 확정 |
 | D008 | pending | 백업 암호화 도구 | 7-Zip AES-256 또는 age | Phase 6 진입 전 | 설치·복원 자동화 방식 확정 |
-| D009 | decided | TTS | Windows SAPI `Microsoft Heami Desktop` 로컬 TTS | 음성 세로 기능 | 한국어 음성·외부 전송 0 확인 |
+| D009 | decided | TTS | Windows SAPI `Microsoft Heami Desktop`, rate 6 로컬 TTS | 음성 세로 기능 | 한국어 음성·약 2배 속도·외부 전송 0 확인 |
 | D010 | decided | 음성 호출 | opt-in 로컬 웨이크워드 `자비스`, PTT는 후속 보조 입력 | 음성 세로 기능 | `--voice`에서만 마이크 열림·호출 전 PCM 비저장 |
 | D011 | decided | 상주 시작 | autostart 기본 false | Phase 8 | 사용자 opt-in만 허용 |
 | D012 | pending | PDF parser | 미정 | Phase 3 PDF 활성화 전 | 파서·라이선스·실패 처리 확정 |

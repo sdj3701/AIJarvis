@@ -641,6 +641,7 @@ Summarizer(LLM) → summary + candidate facts
 - Vosk 제한 문법으로 “자비스” 호출어를 감지하고 faster-whisper small로 한국어 질문을 로컬 인식
 - `--voice` opt-in 실행에서 “자비스” 웨이크워드, PTT는 후속 보조 입력
 - Windows SAPI 한국어 로컬 TTS로 짧은 응답 낭독 (긴 요약은 화면 우선)
+- Heami 약 2배 읽기와 답변 중 “자비스” 호출에 의한 즉시 중단·새 질문 전환
 - 기존 Orchestrator는 그대로 재사용 (입력만 음성으로)
 
 **완료 기준**
