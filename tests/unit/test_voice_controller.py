@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import StringIO
+from threading import Event
 from typing import Any
 
 import pytest
@@ -22,8 +23,9 @@ NOW = datetime(2026, 8, 11, 21, 0, tzinfo=timezone(timedelta(hours=9)))
 
 
 class FakeListener:
-    def __init__(self, commands: list[str]) -> None:
+    def __init__(self, commands: list[str], *, barge_ins: list[bool] | None = None) -> None:
         self.commands = commands
+        self.barge_ins = barge_ins or []
         self.wakes = 0
 
     def wait_for_wake(self) -> Transcript:
@@ -33,18 +35,23 @@ class FakeListener:
     def listen_for_command(self) -> Transcript:
         return Transcript(self.commands.pop(0), "ko", 800, None)
 
+    def wait_for_barge_in(self, speech_done: Event) -> bool:
+        del speech_done
+        return self.barge_ins.pop(0) if self.barge_ins else False
+
 
 class FakeTTS:
     def __init__(self) -> None:
         self.spoken: list[str] = []
         self.closed = False
+        self.cancelled = 0
 
     def speak(self, text: str, *, ctx: Any = None) -> None:
         del ctx
         self.spoken.append(text)
 
     def cancel(self) -> None:
-        pass
+        self.cancelled += 1
 
     def close(self) -> None:
         self.closed = True
@@ -88,6 +95,28 @@ class FakeStreamingSTT:
     def stream(self, *, phrases: Any = None) -> FakeStreamingRecognizer:
         del phrases
         return FakeStreamingRecognizer()
+
+
+class CompletingStreamingRecognizer:
+    def __init__(self, speech_done: Event) -> None:
+        self._speech_done = speech_done
+
+    def feed(self, pcm: bytes) -> RecognitionUpdate:
+        del pcm
+        self._speech_done.set()
+        return RecognitionUpdate("자비스 프로젝트", True)
+
+    def finish(self) -> RecognitionUpdate:
+        return RecognitionUpdate("", True)
+
+
+class CompletingStreamingSTT:
+    def __init__(self, speech_done: Event) -> None:
+        self._speech_done = speech_done
+
+    def stream(self, *, phrases: Any = None) -> CompletingStreamingRecognizer:
+        del phrases
+        return CompletingStreamingRecognizer(self._speech_done)
 
 
 class FakeCommandSTT:
@@ -176,6 +205,42 @@ def test_spoken_exit_does_not_call_llm() -> None:
 
     assert chat.calls == []
     assert tts.spoken == ["무엇을 도와드릴까요.", "안전하게 종료합니다."]
+
+
+def test_answer_barge_in_cancels_tts_and_accepts_next_question_without_new_wake() -> None:
+    listener = FakeListener(
+        ["첫 번째 질문", "두 번째 질문"],
+        barge_ins=[True, False],
+    )
+    tts = FakeTTS()
+    chat = FakeChat("답변입니다.")
+    events = FakeEvents()
+    output = StringIO()
+    controller = VoiceController(
+        listener=listener,  # type: ignore[arg-type]
+        tts=tts,
+        chat=chat,  # type: ignore[arg-type]
+        masker=_masker(),
+        acknowledgement="무엇을 도와드릴까요.",
+        max_tts_chars=400,
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    assert controller.run(max_interactions=2) == 0
+
+    assert listener.wakes == 1
+    assert chat.calls == [("첫 번째 질문", "voice"), ("두 번째 질문", "voice")]
+    assert tts.spoken == [
+        "무엇을 도와드릴까요.",
+        "답변입니다.",
+        "무엇을 도와드릴까요.",
+        "답변입니다.",
+    ]
+    assert tts.cancelled == 1
+    assert events.records[1][1]["state"] == "interrupted"
+    assert "[답변 중단] 새 질문을 받을 준비를 합니다." in output.getvalue()
 
 
 def test_voice_and_once_modes_are_mutually_exclusive() -> None:
@@ -290,3 +355,47 @@ def test_local_listener_rejects_low_quality_whisper_text() -> None:
 
     assert transcript.text == ""
     assert transcript.avg_logprob == -2.0
+
+
+def test_local_listener_detects_final_wake_word_during_tts() -> None:
+    events = FakeEvents()
+    output = StringIO()
+    listener = LocalVoiceListener(
+        wake_stt=FakeStreamingSTT(),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    detected = listener.wait_for_barge_in(Event())
+
+    assert detected is True
+    assert events.types == ["voice.barge_in", "voice.barge_in", "voice.barge_in"]
+    assert events.records[1][1]["state"] == "detected"
+    assert "[말 끼어들기] '자비스'를 감지했습니다." in output.getvalue()
+
+
+def test_barge_in_does_not_trigger_on_answer_sentence_containing_jarvis() -> None:
+    speech_done = Event()
+    listener = LocalVoiceListener(
+        wake_stt=CompletingStreamingSTT(speech_done),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=FakeEvents(),
+        clock=FrozenClock(NOW),
+        output_stream=StringIO(),
+    )
+
+    assert listener.wait_for_barge_in(speech_done) is False

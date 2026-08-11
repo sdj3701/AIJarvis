@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Mapping
+from threading import Event, Thread
 from typing import Any, Protocol, TextIO
 
 from app.core.clock import Clock
+from app.core.errors import JarvisError
 from app.orchestrator.loop import ChatOrchestrator
 from app.telemetry.masking import LogMasker
 from app.voice.base import Transcript, TTSEngine
@@ -69,6 +71,55 @@ class LocalVoiceListener:
 
     def listen_for_command(self) -> Transcript:
         return self._capture_and_transcribe_command()
+
+    def wait_for_barge_in(self, speech_done: Event) -> bool:
+        """Watch for a final wake word while TTS is speaking."""
+        if speech_done.is_set():
+            return False
+        recognizer = self._wake_stt.stream()
+        detected = False
+        duration_ms = 0
+        microphone: MicrophoneStream | None = None
+        self._events.emit(
+            "voice.barge_in",
+            {"state": "started", "device": self._device_label, "duration_ms": 0},
+        )
+        _write(self._output, "[끼어들기 감시] 답변 중 '자비스'라고 부르면 중단합니다.")
+        try:
+            with self._microphone_factory() as microphone:
+                while not speech_done.is_set():
+                    frame = microphone.next_frame(timeout_s=0.1)
+                    if frame is None:
+                        continue
+                    duration_ms += frame.duration_ms
+                    update = recognizer.feed(frame.pcm)
+                    normalized = normalize_spoken_command(update.text)
+                    if update.final and normalized == self._wake_word:
+                        detected = True
+                        self._events.emit(
+                            "voice.barge_in",
+                            {
+                                "state": "detected",
+                                "device": self._device_label,
+                                "duration_ms": duration_ms,
+                            },
+                        )
+                        _write(self._output, "[말 끼어들기] '자비스'를 감지했습니다.")
+                        break
+                    if update.final:
+                        recognizer = self._wake_stt.stream()
+        finally:
+            self._events.emit(
+                "voice.barge_in",
+                {
+                    "state": "stopped",
+                    "device": self._device_label,
+                    "duration_ms": duration_ms,
+                    "detected": detected,
+                    "overflows": 0 if microphone is None else microphone.overflows,
+                },
+            )
+        return detected
 
     def _listen_for_wake(self) -> Transcript:
         wake_phrases = ("자비스", "자 비스")
@@ -269,10 +320,14 @@ class VoiceController:
 
     def run(self, *, max_interactions: int | None = None) -> int:
         interactions = 0
+        wake_already_detected = False
         _write(self._output, "로컬 음성 모드입니다. 종료하려면 Ctrl+C 또는 '종료'라고 말하세요.")
         try:
             while max_interactions is None or interactions < max_interactions:
-                self._listener.wait_for_wake()
+                if wake_already_detected:
+                    wake_already_detected = False
+                else:
+                    self._listener.wait_for_wake()
                 self._speak(self._acknowledgement)
                 transcript = self._listener.listen_for_command()
                 if not transcript.text:
@@ -289,7 +344,10 @@ class VoiceController:
                     masker=self._masker,
                     max_chars=self._max_tts_chars,
                 )
-                self._speak(prepared.text, refused=prepared.refused)
+                wake_already_detected = self._speak_interruptibly(
+                    prepared.text,
+                    refused=prepared.refused,
+                )
                 interactions += 1
             return 0
         finally:
@@ -314,6 +372,56 @@ class VoiceController:
                     "latency_ms": max(0, self._clock.monotonic_ms() - started_ms),
                 },
             )
+
+    def _speak_interruptibly(self, text: str, *, refused: bool = False) -> bool:
+        started_ms = self._clock.monotonic_ms()
+        speech_done = Event()
+        errors: list[BaseException] = []
+
+        def run_speech() -> None:
+            try:
+                self._tts.speak(text)
+            except BaseException as error:
+                errors.append(error)
+            finally:
+                speech_done.set()
+
+        worker = Thread(target=run_speech, name="jarvis-tts", daemon=True)
+        worker.start()
+        interrupted = False
+        monitor_unavailable = False
+        try:
+            interrupted = self._listener.wait_for_barge_in(speech_done)
+        except JarvisError as error:
+            monitor_unavailable = True
+            _write(self._output, f"[끼어들기 감시 불가] {error.user_message}")
+        except BaseException:
+            self._tts.cancel()
+            worker.join(timeout=5)
+            raise
+        if interrupted:
+            self._tts.cancel()
+        worker.join(timeout=5 if interrupted else 65)
+        if worker.is_alive():
+            self._tts.cancel()
+            raise JarvisError("중단한 음성 합성 프로세스가 종료되지 않았습니다.")
+        if errors and not interrupted:
+            raise errors[0]
+
+        state = "interrupted" if interrupted else "refused" if refused else "completed"
+        self._events.emit(
+            "tts.result",
+            {
+                "state": state,
+                "engine": "windows-sapi",
+                "chars": len(text),
+                "latency_ms": max(0, self._clock.monotonic_ms() - started_ms),
+                "barge_in_monitor": "unavailable" if monitor_unavailable else "active",
+            },
+        )
+        if interrupted:
+            _write(self._output, "[답변 중단] 새 질문을 받을 준비를 합니다.")
+        return interrupted
 
 
 def _write(stream: TextIO, text: str) -> None:

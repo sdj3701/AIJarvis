@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from threading import Event, Thread
 
 import pytest
 
@@ -51,6 +52,25 @@ class FakeFactory:
         self.args = args
         self.environment = env
         return self.process
+
+
+class BlockingProcess(FakeProcess):
+    def __init__(self) -> None:
+        super().__init__()
+        self.returncode = None
+        self.started = Event()
+        self.released = Event()
+
+    def communicate(self, input: bytes, timeout: float | None = None) -> tuple[bytes, bytes]:
+        del timeout
+        self.input += input
+        self.started.set()
+        self.released.wait(timeout=2)
+        return b"", b""
+
+    def kill(self) -> None:
+        super().kill()
+        self.released.set()
 
 
 @pytest.fixture
@@ -131,3 +151,26 @@ def test_sapi_failure_does_not_expose_text() -> None:
     with pytest.raises(JarvisError) as captured:
         tts.speak("비밀 응답")
     assert "비밀 응답" not in str(captured.value)
+
+
+def test_cancel_kills_active_sapi_process() -> None:
+    process = BlockingProcess()
+    tts = WindowsSapiTTS("Microsoft Heami Desktop", process_factory=FakeFactory(process))
+    errors: list[BaseException] = []
+
+    def speak() -> None:
+        try:
+            tts.speak("긴 답변")
+        except BaseException as error:
+            errors.append(error)
+
+    worker = Thread(target=speak)
+    worker.start()
+    assert process.started.wait(timeout=1)
+
+    tts.cancel()
+    worker.join(timeout=1)
+
+    assert not worker.is_alive()
+    assert process.killed is True
+    assert len(errors) == 1
