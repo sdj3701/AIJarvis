@@ -19,7 +19,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-05 완료, P0-06 대기 |
+| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-06 완료, P0-07 대기 |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 필요 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
@@ -41,7 +41,7 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | P0-03 시크릿 로더 | completed | Codex | 2026-08-11 | 2026-08-11 | 시크릿 테스트 30 passed, 전체 62 passed, 시크릿 코드 커버리지 98% |
 | P0-04 공통 타입 | completed | Codex | 2026-08-11 | 2026-08-11 | 공통 타입 테스트 35 passed, 전체 97 passed, 대상 커버리지 96% |
 | P0-05 데이터 트리·SQLite | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 106 passed, SQLite v1·WAL·FTS 무결성·멱등 초기화 검증 |
-| P0-06 이벤트·마스킹 | not_started | — | — | — | — |
+| P0-06 이벤트·마스킹 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 118 passed, 이벤트 봉투·flush/fsync·민감정보 비기록 검증 |
 | P0-07 원자적 쓰기·복구·락 | not_started | — | — | — | — |
 | P0-08 CLI·조립 | not_started | — | — | — | — |
 
