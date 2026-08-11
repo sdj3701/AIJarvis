@@ -25,6 +25,7 @@ MISHEARD_TEXT = "잘 듣지 못했습니다. 다시 자비스라고 불러 주�
 EXIT_TEXT = "안전하게 종료합니다."
 INPUT_STATUS_INTERVAL_MS = 2_000
 LEVEL_STATUS_INTERVAL_MS = 500
+BARGE_IN_RECENT_SPEECH_MS = 1_000
 MAX_PREVIEW_CHARS = 160
 
 
@@ -72,13 +73,20 @@ class LocalVoiceListener:
     def listen_for_command(self) -> Transcript:
         return self._capture_and_transcribe_command()
 
-    def wait_for_barge_in(self, speech_done: Event) -> bool:
-        """Watch for a final wake word while TTS is speaking."""
+    def wait_for_barge_in(self, speech_done: Event, *, spoken_text: str = "") -> bool:
+        """Watch partial and final wake-word results while TTS is speaking."""
         if speech_done.is_set():
             return False
         recognizer = self._wake_stt.stream()
+        spoken_text_contains_wake = self._wake_word in normalize_spoken_command(spoken_text)
         detected = False
         duration_ms = 0
+        last_loud_input_ms: int | None = None
+        last_preview = ""
+        next_level_status_ms = LEVEL_STATUS_INTERVAL_MS
+        partial_updates = 0
+        final_updates = 0
+        peak_dbfs = -96.0
         microphone: MicrophoneStream | None = None
         self._events.emit(
             "voice.barge_in",
@@ -92,9 +100,37 @@ class LocalVoiceListener:
                     if frame is None:
                         continue
                     duration_ms += frame.duration_ms
+                    level_dbfs = frame.rms_dbfs
+                    peak_dbfs = max(peak_dbfs, level_dbfs)
+                    if level_dbfs >= self._capture_policy.speech_threshold_dbfs:
+                        last_loud_input_ms = duration_ms
+                    if duration_ms >= next_level_status_ms:
+                        _write(
+                            self._output,
+                            f"[끼어들기 마이크] {level_dbfs:.1f} dBFS · 감시 중",
+                        )
+                        next_level_status_ms += LEVEL_STATUS_INTERVAL_MS
+
                     update = recognizer.feed(frame.pcm)
+                    if update.final:
+                        final_updates += 1
+                    else:
+                        partial_updates += 1
+                    preview = _preview_text(update.text)
+                    if preview and preview != last_preview:
+                        label = "끼어들기 STT 확정" if update.final else "끼어들기 STT 부분"
+                        _write(self._output, f"[{label}] {preview}")
+                        last_preview = preview
+
                     normalized = normalize_spoken_command(update.text)
-                    if update.final and normalized == self._wake_word:
+                    wake_seen = self._wake_word in normalized
+                    recent_loud_input = (
+                        last_loud_input_ms is not None
+                        and duration_ms - last_loud_input_ms <= BARGE_IN_RECENT_SPEECH_MS
+                    )
+                    partial_allowed = not spoken_text_contains_wake
+                    wake_recognized = wake_seen and (update.final or partial_allowed)
+                    if wake_recognized and recent_loud_input:
                         detected = True
                         self._events.emit(
                             "voice.barge_in",
@@ -102,6 +138,8 @@ class LocalVoiceListener:
                                 "state": "detected",
                                 "device": self._device_label,
                                 "duration_ms": duration_ms,
+                                "recognition_state": "final" if update.final else "partial",
+                                "level_dbfs": round(level_dbfs, 1),
                             },
                         )
                         _write(self._output, "[말 끼어들기] '자비스'를 감지했습니다.")
@@ -117,6 +155,9 @@ class LocalVoiceListener:
                     "duration_ms": duration_ms,
                     "detected": detected,
                     "overflows": 0 if microphone is None else microphone.overflows,
+                    "partial_updates": partial_updates,
+                    "final_updates": final_updates,
+                    "peak_dbfs": round(peak_dbfs, 1),
                 },
             )
         return detected
@@ -391,7 +432,7 @@ class VoiceController:
         interrupted = False
         monitor_unavailable = False
         try:
-            interrupted = self._listener.wait_for_barge_in(speech_done)
+            interrupted = self._listener.wait_for_barge_in(speech_done, spoken_text=text)
         except JarvisError as error:
             monitor_unavailable = True
             _write(self._output, f"[끼어들기 감시 불가] {error.user_message}")

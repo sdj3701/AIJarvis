@@ -26,6 +26,7 @@ class FakeListener:
     def __init__(self, commands: list[str], *, barge_ins: list[bool] | None = None) -> None:
         self.commands = commands
         self.barge_ins = barge_ins or []
+        self.barge_texts: list[str] = []
         self.wakes = 0
 
     def wait_for_wake(self) -> Transcript:
@@ -35,8 +36,9 @@ class FakeListener:
     def listen_for_command(self) -> Transcript:
         return Transcript(self.commands.pop(0), "ko", 800, None)
 
-    def wait_for_barge_in(self, speech_done: Event) -> bool:
+    def wait_for_barge_in(self, speech_done: Event, *, spoken_text: str = "") -> bool:
         del speech_done
+        self.barge_texts.append(spoken_text)
         return self.barge_ins.pop(0) if self.barge_ins else False
 
 
@@ -97,26 +99,41 @@ class FakeStreamingSTT:
         return FakeStreamingRecognizer()
 
 
-class CompletingStreamingRecognizer:
+class PartialStreamingRecognizer:
+    def feed(self, pcm: bytes) -> RecognitionUpdate:
+        del pcm
+        return RecognitionUpdate("자비스", False)
+
+    def finish(self) -> RecognitionUpdate:
+        return RecognitionUpdate("", True)
+
+
+class PartialStreamingSTT:
+    def stream(self, *, phrases: Any = None) -> PartialStreamingRecognizer:
+        del phrases
+        return PartialStreamingRecognizer()
+
+
+class CompletingPartialRecognizer:
     def __init__(self, speech_done: Event) -> None:
         self._speech_done = speech_done
 
     def feed(self, pcm: bytes) -> RecognitionUpdate:
         del pcm
         self._speech_done.set()
-        return RecognitionUpdate("자비스 프로젝트", True)
+        return RecognitionUpdate("자비스", False)
 
     def finish(self) -> RecognitionUpdate:
         return RecognitionUpdate("", True)
 
 
-class CompletingStreamingSTT:
+class CompletingPartialSTT:
     def __init__(self, speech_done: Event) -> None:
         self._speech_done = speech_done
 
-    def stream(self, *, phrases: Any = None) -> CompletingStreamingRecognizer:
+    def stream(self, *, phrases: Any = None) -> CompletingPartialRecognizer:
         del phrases
-        return CompletingStreamingRecognizer(self._speech_done)
+        return CompletingPartialRecognizer(self._speech_done)
 
 
 class FakeCommandSTT:
@@ -147,7 +164,7 @@ class FakeMicrophone:
         if self._sent:
             return None
         self._sent = True
-        return AudioFrame(b"\x00\x00" * 160, 16_000)
+        return AudioFrame((4_000).to_bytes(2, "little", signed=True) * 160, 16_000)
 
     def __exit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
         del exc_type, exc_value, traceback
@@ -239,6 +256,7 @@ def test_answer_barge_in_cancels_tts_and_accepts_next_question_without_new_wake(
         "답변입니다.",
     ]
     assert tts.cancelled == 1
+    assert listener.barge_texts == ["답변입니다.", "답변입니다."]
     assert events.records[1][1]["state"] == "interrupted"
     assert "[답변 중단] 새 질문을 받을 준비를 합니다." in output.getvalue()
 
@@ -382,10 +400,32 @@ def test_local_listener_detects_final_wake_word_during_tts() -> None:
     assert "[말 끼어들기] '자비스'를 감지했습니다." in output.getvalue()
 
 
+def test_local_listener_detects_partial_wake_word_during_tts() -> None:
+    events = FakeEvents()
+    output = StringIO()
+    listener = LocalVoiceListener(
+        wake_stt=PartialStreamingSTT(),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    assert listener.wait_for_barge_in(Event(), spoken_text="서울은 대한민국의 수도입니다.")
+    assert events.records[1][1]["recognition_state"] == "partial"
+    assert "[끼어들기 STT 부분] 자비스" in output.getvalue()
+
+
 def test_barge_in_does_not_trigger_on_answer_sentence_containing_jarvis() -> None:
     speech_done = Event()
     listener = LocalVoiceListener(
-        wake_stt=CompletingStreamingSTT(speech_done),  # type: ignore[arg-type]
+        wake_stt=CompletingPartialSTT(speech_done),  # type: ignore[arg-type]
         command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
@@ -398,4 +438,10 @@ def test_barge_in_does_not_trigger_on_answer_sentence_containing_jarvis() -> Non
         output_stream=StringIO(),
     )
 
-    assert listener.wait_for_barge_in(speech_done) is False
+    assert (
+        listener.wait_for_barge_in(
+            speech_done,
+            spoken_text="자비스 프로젝트의 현재 상태를 설명합니다.",
+        )
+        is False
+    )
