@@ -672,6 +672,10 @@ ruff==0.16.2 \
     --hash=sha256:e43e1f5b8388da9eca1b9e88328d47a5cec794633ccf6f7484ac2dd15eee92c0 \
     --hash=sha256:f0eab35f80df8f134aae5d1630e751901321d317cc8e50dc39e36fa3ed34cd12
     # via jarvis-assistant (pyproject.toml)
+types-pyyaml==6.0.12.20260724 \
+    --hash=sha256:3c1ce1bb73cd5ec02e90390c2b1f00e810d241d8825fd73ff359696839271b6b \
+    --hash=sha256:d57db930a4b2efbc57cf430ec8882765d246929432fa253092f383902329a453
+    # via jarvis-assistant (pyproject.toml)
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
     --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5

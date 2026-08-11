@@ -1,7 +1,8 @@
 """Smoke tests for the initial project skeleton."""
 
-import app
 import pytest
+
+import app
 
 
 @pytest.mark.phase0
