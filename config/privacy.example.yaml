@@ -95,13 +95,13 @@ detectors:
 
   - id: krn_rrn
     label: "주민등록번호"
-    pattern: "\\b\\d{6}[-\\s]?[1-4]\\d{6}\\b"
+    pattern: "(?<!\\d)\\d{6}[-\\s]?[1-4]\\d{6}(?!\\d)"
     action: block
     kind: pii_high
 
   - id: card_number
     label: "카드번호"
-    pattern: "\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b"
+    pattern: "(?<!\\d)(?:\\d{4}[-\\s]?){3}\\d{4}(?!\\d)"
     action: block
     kind: pii_high
 
