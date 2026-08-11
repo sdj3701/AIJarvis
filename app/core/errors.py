@@ -21,3 +21,7 @@ class JarvisError(Exception):
 
 class ConfigError(JarvisError):
     """A configuration file is missing, malformed, or unsafe."""
+
+
+class SecretsError(JarvisError):
+    """A secret is missing or its secure storage cannot be accessed."""

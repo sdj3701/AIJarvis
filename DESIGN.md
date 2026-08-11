@@ -824,7 +824,7 @@ def assert_in_sandbox(p: Path, roots: Sequence[Path]) -> None:
 
 ### 11.5 시크릿 저장
 
-운영: `keyring` 패키지(Windows Credential Manager 백엔드). 서비스명 `jarvis`, 사용자명은 키 종류(`llm_api_key`, `search_api_key`). 개발: `.env` 폴백은 `settings.dev_mode=true`일 때만 동작하고, 사용 시 경고 이벤트를 남긴다. 키 값은 **어떤 로그에도 들어가지 않으며**, 로드 직후 `masking`에 등록해 우연한 출력까지 마스킹한다.
+운영: `keyring` 패키지(Windows Credential Manager 백엔드). 서비스명 `jarvis`, 사용자명은 키 종류(`llm_api_key`, `search_api_key`). 개발: `.env` 폴백은 `settings.dev_mode=true`일 때만 동작하고, 사용 시 경고 이벤트를 남긴다. `.env` 키는 Credential Manager 사용자명을 대문자로 바꾸고 `JARVIS_`를 붙인다(`llm_api_key` → `JARVIS_LLM_API_KEY`). 셸 확장·다른 환경 변수 참조·멀티라인 값은 허용하지 않는다. 키 값은 **어떤 로그에도 들어가지 않으며**, 로드 직후 `masking`에 등록해 우연한 출력까지 마스킹한다.
 
 ### 11.6 프로세스 실행
 
