@@ -12,6 +12,7 @@ from typing import Any
 import pytest
 import yaml
 
+from app.budget import BudgetGuard
 from app.core.errors import ExitCode
 from app.llm.ollama_client import OllamaClient
 from app.memory.store import SQLiteSessionStore
@@ -67,6 +68,7 @@ def test_build_assembles_config_clock_ids_events_and_secrets(runtime_config: Pat
     assert runtime.lock.acquired is False
     assert isinstance(runtime.llm, OllamaClient)
     assert isinstance(runtime.sessions, SQLiteSessionStore)
+    assert isinstance(runtime.budget, BudgetGuard)
 
 
 def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) -> None:

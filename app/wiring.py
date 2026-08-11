@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TextIO
 
 from app import __version__
+from app.budget import BudgetGuard, SQLiteBudgetLedger
 from app.cli import run_cli
 from app.config.loader import DEFAULT_CONFIG_DIR, load_config
 from app.config.models import LoadedConfig
@@ -39,6 +40,7 @@ class Runtime:
     memory_db: Path
     llm: LLMClient
     sessions: SQLiteSessionStore
+    budget: BudgetGuard
 
 
 def _data_path(config: LoadedConfig, configured: Path) -> Path:
@@ -89,6 +91,7 @@ def build(
             quarantine_dir=state_dir / "quarantine",
             fsync_raw=loaded.settings.logging.fsync_events,
         ),
+        budget=BudgetGuard(SQLiteBudgetLedger(memory_db), loaded.settings.budget),
     )
 
 
