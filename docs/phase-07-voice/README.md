@@ -117,6 +117,9 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 - [x] “자비스” 호출→음성 질문→`channel=voice` Ollama→답변 TTS 조립 테스트
 - [x] secret/pii_high 실제 문장 낭독 0건
 - [x] 호출 전 PCM 파일·외부 전송 0건
+- [x] RTX 4070 Ti CUDA Whisper 모델 load·forward 성공
+- [x] 로컬 SAPI 한국어 “오늘 날짜를 알려줘.” 정확히 복원
+- [x] Vosk 부분 결과로 호출하지 않음·10초 무음 잘못된 최종 호출 0회
 - [ ] Vosk 호출어 + Whisper 질문 하이브리드 실장치 스모크
 
 ## 7. 완료 게이트

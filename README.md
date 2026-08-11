@@ -30,18 +30,25 @@ CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 �
 로컬 음성 기능은 다음과 같이 준비하고 실행한다.
 
 ```powershell
-python -m pip install -e ".[voice]"
-python scripts\setup_voice.py
-python -m app --voice
+.\.venv\Scripts\python.exe -m pip install -e ".[voice]"
+.\.venv\Scripts\python.exe scripts\setup_voice.py
+.\.venv\Scripts\python.exe -m app --voice
 ```
 
-터미널에 `[마이크 켜짐]`이 표시되면 “자비스”라고 부른다. Jarvis가
+PowerShell 실행 정책 때문에 `Activate.ps1`을 실행할 수 없어도 위 명령은 그대로 동작한다.
+첫 준비에서는 고정 SHA의 Vosk 호출어 모델과 faster-whisper small 질문 모델을
+`D:\Jarvis\models`에 설치한다.
+
+터미널에 `[마이크 켜짐]`이 표시되면 “자비스”라고 부른다. Vosk의 최종 결과가 호출어와
+일치하면 Jarvis가
 “무엇을 도와드릴까요.”라고 말한 다음 마이크를 다시 열며, 이어서 질문하면 인식 문장을
 화면에 표시하고 Ollama 답변을 한국어 TTS로 읽는다. Ctrl+C 또는 “종료”로 끝낼 수 있다.
 음성 PCM은 메모리의 제한 버퍼에만 두며 파일이나 외부 API로 보내지 않는다.
-마이크가 켜진 동안에는 선택된 장치와 `[STT 부분]`, `[STT 확정]` 문장이 실시간으로
-표시된다. 텍스트가 잡히지 않아도 2초마다 PCM 수신 상태를 표시하며 이 진단 문장은
-콘솔 전용으로 파일 로그에 기록하지 않는다.
+호출 대기에는 `[STT 부분]`·`[STT 확정]`, 질문 녹음에는 0.5초마다 `[마이크 음량]`,
+인식 뒤에는 `[Whisper 확정]`과 품질값이 표시된다. 질문은 0.9초 연속 무음에서 자동으로
+끝난다. 품질이 낮으면 Ollama에 보내지 않고 다시 말해 달라고 안내한다. 이 진단 문장은
+콘솔 전용으로 파일 로그에 기록하지 않는다. 정확도 조정은
+[한국어 STT 운영 가이드](./docs/reference/VOICE_STT.md)를 따른다.
 
 ## 2. 문서의 역할과 우선순위
 
@@ -110,7 +117,7 @@ python -m app --voice
 - Phase 3: 검색 API 제공자와 인증 방식
 - Phase 3: PDF 지원 여부와 parser
 - Phase 6: 운영 백업 대상 경로와 암호화 도구
-- Phase 7: 온라인 TTS 또는 로컬 TTS
+- Phase 7: D009 로컬 TTS, D010 호출 방식, D016 하이브리드 한국어 STT 결정 완료
 - Phase 8: 패키징·전역 단축키·자동 시작 방식
 
 결정 상태와 선택 기준은 [DECISIONS.md](./docs/00-start-here/DECISIONS.md)에 기록한다.
