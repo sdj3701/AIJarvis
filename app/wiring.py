@@ -25,6 +25,7 @@ from app.core.clock import (
 )
 from app.core.errors import ExitCode, JarvisError, exit_code_for
 from app.core.ids import PrefixedIdFactory, SystemIdFactory
+from app.core.test_hooks import CrashTestHook, CrashTestLLMClient
 from app.llm.base import LLMClient
 from app.llm.ollama_client import OllamaClient
 from app.memory.migrations import initialize_database
@@ -33,6 +34,7 @@ from app.orchestrator.loop import ChatOrchestrator
 from app.orchestrator.recovery import recover_startup
 from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
+from app.telemetry.metrics import SQLiteMetrics
 from app.ui.single_instance import SingleInstanceLock
 
 
@@ -51,6 +53,8 @@ class Runtime:
     budget: BudgetGuard
     sleeper: Sleeper
     random: RandomSource
+    test_hook: CrashTestHook
+    metrics: SQLiteMetrics
 
 
 def _data_path(config: LoadedConfig, configured: Path) -> Path:
@@ -70,6 +74,10 @@ def build(
     loaded = load_config(config_dir)
     runtime_clock = clock or SystemClock()
     runtime_ids = ids or SystemIdFactory()
+    test_hook = CrashTestHook.from_environment(dev_mode=loaded.settings.dev_mode)
+    runtime_llm = llm
+    if runtime_llm is None and test_hook.enabled and os.environ.get("JARVIS_LLM") == "fake":
+        runtime_llm = CrashTestLLMClient()
     masker = LogMasker.from_policy(loaded.policies.privacy)
     logs_dir = _data_path(loaded, loaded.settings.paths.logs_dir)
     state_dir = _data_path(loaded, loaded.settings.paths.state_dir)
@@ -85,6 +93,7 @@ def build(
         events=events,
     )
     memory_db = _data_path(loaded, loaded.settings.paths.memory_db)
+    metrics = SQLiteMetrics(memory_db, enabled=loaded.settings.metrics.enabled)
     return Runtime(
         config=loaded,
         clock=runtime_clock,
@@ -94,7 +103,7 @@ def build(
         secrets=secrets,
         lock=SingleInstanceLock(state_dir / "jarvis.lock"),
         memory_db=memory_db,
-        llm=llm or OllamaClient(loaded.settings.llm),
+        llm=runtime_llm or OllamaClient(loaded.settings.llm),
         sessions=SQLiteSessionStore(
             memory_db,
             data_root=loaded.settings.paths.data_root,
@@ -105,6 +114,8 @@ def build(
         budget=BudgetGuard(SQLiteBudgetLedger(memory_db), loaded.settings.budget),
         sleeper=SystemSleeper(),
         random=SystemRandom(),
+        test_hook=test_hook,
+        metrics=metrics,
     )
 
 
@@ -171,6 +182,8 @@ def run_application(
             random=runtime.random,
             ids=runtime.ids,
             verify_model=verifier if callable(verifier) else None,
+            test_hook=runtime.test_hook,
+            metrics=runtime.metrics,
         )
         exit_code = run_cli(
             input_stream=input_stream,

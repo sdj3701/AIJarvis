@@ -128,6 +128,7 @@ def _chat(
         random=runtime.random,
         ids=runtime.ids,
         verify_model=verify_model,
+        metrics=runtime.metrics,
     )
 
 
@@ -209,6 +210,8 @@ def test_three_turns_keep_context_and_create_checkpoint(config_dir: Path) -> Non
     assert session.tokens_in == 33
     assert session.tokens_out == 6
     assert "session.checkpoint" in [record["event_type"] for record in _events(runtime)]
+    assert runtime.metrics.p95_ms("llm.latency", window=200) == 10
+    assert runtime.metrics.p95_ms("turn.latency", window=200) == 0
 
 
 def test_clear_drops_prompt_history_but_keeps_raw_audit(config_dir: Path) -> None:

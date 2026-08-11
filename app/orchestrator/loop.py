@@ -13,11 +13,13 @@ from app.core.clock import Clock, RandomSource, Sleeper
 from app.core.context import CancellationToken, RequestContext
 from app.core.errors import JarvisError, LLMBadResponse
 from app.core.ids import PrefixedIdFactory
+from app.core.test_hooks import CrashTestHook
 from app.llm.base import LLMClient, Message
 from app.memory.store import EndReason, RawRecord, SQLiteSessionStore
 from app.orchestrator.prompt import PromptAssembler
 from app.telemetry.events import EventIdentity
 from app.telemetry.masking import LogMasker
+from app.telemetry.metrics import SQLiteMetrics
 
 
 class IdentityEventSink(Protocol):
@@ -31,12 +33,21 @@ class IdentityEventSink(Protocol):
 
 
 class BoundEventWriter:
-    def __init__(self, sink: IdentityEventSink, identity: EventIdentity) -> None:
+    def __init__(
+        self,
+        sink: IdentityEventSink,
+        identity: EventIdentity,
+        *,
+        after_emit: Callable[[str], None] | None = None,
+    ) -> None:
         self._sink = sink
         self._identity = identity
+        self._after_emit = after_emit
 
     def emit(self, event_type: str, payload: Mapping[str, Any]) -> None:
         self._sink.emit(event_type, payload, identity=self._identity)
+        if self._after_emit is not None:
+            self._after_emit(event_type)
 
 
 class NullAuditWriter:
@@ -72,6 +83,8 @@ class ChatOrchestrator:
         random: RandomSource,
         ids: PrefixedIdFactory,
         verify_model: Callable[[], object] | None = None,
+        test_hook: CrashTestHook | None = None,
+        metrics: SQLiteMetrics | None = None,
     ) -> None:
         self._settings = settings
         self._llm = llm
@@ -84,6 +97,8 @@ class ChatOrchestrator:
         self._random = random
         self._ids = ids
         self._verify_model = verify_model
+        self._test_hook = test_hook
+        self._metrics = metrics
         self._verified = verify_model is None
         self._prompt = PromptAssembler(llm, settings.llm.context)
         self._history: list[Message] = []
@@ -126,6 +141,7 @@ class ChatOrchestrator:
         if not isinstance(text, str) or not text.strip():
             raise ValueError("사용자 입력은 비어 있을 수 없습니다")
         session_id = self.start()
+        turn_started_ms = self._clock.monotonic_ms()
         request_id = self._ids.new("req")
         turn_id = self._ids.new("turn")
         now = self._clock.now()
@@ -134,7 +150,11 @@ class ChatOrchestrator:
             session_id=session_id,
             turn_id=turn_id,
         )
-        bound_events = BoundEventWriter(self._events, identity)
+        bound_events = BoundEventWriter(
+            self._events,
+            identity,
+            after_emit=None if self._test_hook is None else self._test_hook.after,
+        )
         cancel = CancellationToken()
         context = RequestContext(
             request_id=request_id,
@@ -195,6 +215,20 @@ class ChatOrchestrator:
             if response.text is None:
                 raise LLMBadResponse("LLM 응답 본문이 없습니다.")
             self._budget.record_llm(response.usage, ctx=context)
+            if self._metrics is not None:
+                metric_time = self._clock.now()
+                self._metrics.record_ms(
+                    "llm.latency",
+                    response.usage.latency_ms,
+                    at=metric_time,
+                    labels={"model": response.model, "attempt": 1},
+                )
+                self._metrics.record_num(
+                    "llm.cost",
+                    float(response.usage.cost_usd),
+                    at=metric_time,
+                    labels={"model": response.model},
+                )
             masked_response = self._masker.for_log(response.text)
             self._sessions.append_raw(
                 RawRecord(
@@ -214,6 +248,8 @@ class ChatOrchestrator:
                     },
                 )
             )
+            if self._test_hook is not None:
+                self._test_hook.after("memory.write")
             session = self._sessions.record_turn(session_id, response.usage)
             self._history.extend((Message("user", text), Message("assistant", response.text)))
             if session.turn_count % self._settings.memory.checkpoint_every_turns == 0:
@@ -236,6 +272,13 @@ class ChatOrchestrator:
                             "tokens_out": session.tokens_out,
                         },
                     },
+                )
+            if self._metrics is not None:
+                self._metrics.record_ms(
+                    "turn.latency",
+                    max(0, self._clock.monotonic_ms() - turn_started_ms),
+                    at=self._clock.now(),
+                    labels={"channel": "text", "used_tools": False},
                 )
             return TurnOutcome(
                 ok=True,
