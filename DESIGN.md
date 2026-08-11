@@ -1081,6 +1081,7 @@ class Transcript:
     language: str
     duration_ms: int
     confidence: float | None
+    avg_logprob: float | None
     no_speech_probability: float | None
 
 class STTEngine(Protocol):

@@ -37,7 +37,8 @@ from app.telemetry.masking import LogMasker
 from app.telemetry.metrics import SQLiteMetrics
 from app.ui.single_instance import SingleInstanceLock
 from app.voice.controller import LocalVoiceListener, VoiceController, microphone_factory
-from app.voice.stt import VoskSTTEngine
+from app.voice.microphone import SpeechCapturePolicy
+from app.voice.stt import FasterWhisperSTTEngine, VoskSTTEngine
 from app.voice.tts import WindowsSapiTTS
 
 
@@ -197,20 +198,46 @@ def run_application(
                 _data_path(runtime.config, runtime.config.settings.paths.models_dir)
                 / voice_settings.stt.wake.model
             )
-            stt = VoskSTTEngine(
+            wake_stt = VoskSTTEngine(
                 model_path,
                 sample_rate=voice_settings.stt.sample_rate_hz,
                 language=voice_settings.stt.language,
                 expected_archive_sha256=voice_settings.stt.wake.model_archive_sha256,
             )
+            command_settings = voice_settings.stt.command
+            command_model_path = (
+                _data_path(runtime.config, runtime.config.settings.paths.models_dir)
+                / command_settings.model
+            )
+            command_stt = FasterWhisperSTTEngine(
+                command_model_path,
+                expected_model_sha256=command_settings.model_sha256,
+                language=voice_settings.stt.language,
+                device=command_settings.device,
+                compute_type=command_settings.compute_type,
+                cpu_fallback=command_settings.cpu_fallback,
+                cpu_compute_type=command_settings.cpu_compute_type,
+                beam_size=command_settings.beam_size,
+                vad_filter=command_settings.vad_filter,
+                initial_prompt=command_settings.initial_prompt,
+            )
             listener = LocalVoiceListener(
-                stt=stt,
+                wake_stt=wake_stt,
+                command_stt=command_stt,
                 microphone_factory=microphone_factory(
                     voice_settings.stt.device,
                     sample_rate=voice_settings.stt.sample_rate_hz,
                 ),
                 wake_word=voice_settings.wake_word,
-                command_timeout_s=voice_settings.stt.max_command_seconds,
+                capture_policy=SpeechCapturePolicy(
+                    pre_roll_ms=command_settings.pre_roll_ms,
+                    speech_threshold_dbfs=command_settings.speech_threshold_dbfs,
+                    trailing_silence_ms=command_settings.trailing_silence_ms,
+                    min_speech_ms=command_settings.min_speech_ms,
+                    max_duration_ms=int(voice_settings.stt.max_command_seconds * 1000),
+                ),
+                min_avg_logprob=command_settings.min_avg_logprob,
+                max_no_speech_probability=command_settings.max_no_speech_probability,
                 device_label=voice_settings.stt.device,
                 events=runtime.events,
                 clock=runtime.clock,

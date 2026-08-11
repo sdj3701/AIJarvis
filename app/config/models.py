@@ -231,7 +231,7 @@ class CommandSTTSettings(StrictModel):
     model_revision: NonEmptyString
     model_sha256: Sha256Hex
     device: Literal["cuda", "cpu"]
-    compute_type: Literal["int8_float16"]
+    compute_type: Literal["int8_float16", "int8"]
     cpu_fallback: bool
     cpu_compute_type: Literal["int8"]
     beam_size: PositiveInt

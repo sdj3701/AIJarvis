@@ -59,6 +59,8 @@ class Transcript:
     language: str
     duration_ms: int
     confidence: float | None
+    avg_logprob: float | None = None
+    no_speech_probability: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.text, str):
@@ -69,6 +71,10 @@ class Transcript:
             raise ValueError("Transcript.duration_ms must not be negative")
         if self.confidence is not None and not 0 <= self.confidence <= 1:
             raise ValueError("Transcript.confidence must be between zero and one")
+        if self.avg_logprob is not None and self.avg_logprob > 0:
+            raise ValueError("Transcript.avg_logprob must not be positive")
+        if self.no_speech_probability is not None and not 0 <= self.no_speech_probability <= 1:
+            raise ValueError("Transcript.no_speech_probability must be between zero and one")
 
 
 class STTEngine(Protocol):

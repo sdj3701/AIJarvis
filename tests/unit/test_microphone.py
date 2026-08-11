@@ -126,3 +126,14 @@ def test_speech_capture_times_out_without_sending_silence() -> None:
     assert capture.speech_started is False
     assert capture.acceptable is False
     assert capture.frames == ()
+
+
+def test_speech_capture_can_expire_when_device_stops_delivering_frames() -> None:
+    capture = SpeechCapture(
+        SpeechCapturePolicy(500, -42, 750, 500, 1_000)
+    )
+
+    capture.expire()
+
+    assert capture.finished is True
+    assert capture.finish_reason == "max_duration"

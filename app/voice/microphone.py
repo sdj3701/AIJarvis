@@ -229,6 +229,7 @@ class SpeechCapture:
         self._silence_duration_ms = 0
         self._speech_started = False
         self._finished = False
+        self._finish_reason: str | None = None
 
     def feed(self, frame: AudioFrame) -> None:
         if self._finished:
@@ -252,8 +253,10 @@ class SpeechCapture:
                 self._silence_duration_ms += frame.duration_ms
                 if self._silence_duration_ms >= self._policy.trailing_silence_ms:
                     self._finished = True
-        if self._input_duration_ms >= self._policy.max_duration_ms:
+                    self._finish_reason = "trailing_silence"
+        if not self._finished and self._input_duration_ms >= self._policy.max_duration_ms:
             self._finished = True
+            self._finish_reason = "max_duration"
 
     def _append_pre_roll(self, frame: AudioFrame) -> None:
         self._pre_roll.append(frame)
@@ -265,6 +268,11 @@ class SpeechCapture:
         ):
             self._pre_roll_duration_ms -= self._pre_roll.popleft().duration_ms
 
+    def expire(self) -> None:
+        if not self._finished:
+            self._finished = True
+            self._finish_reason = "max_duration"
+
     @property
     def finished(self) -> bool:
         return self._finished
@@ -272,6 +280,10 @@ class SpeechCapture:
     @property
     def speech_started(self) -> bool:
         return self._speech_started
+
+    @property
+    def finish_reason(self) -> str | None:
+        return self._finish_reason
 
     @property
     def acceptable(self) -> bool:
