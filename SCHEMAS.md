@@ -107,8 +107,9 @@
 | `budget.warn` | 80% 도달 | `period_kind`, `used`, `limit`, `ratio`, `service_breakdown` |
 | `budget.stop` | 100% 도달 | `period_kind`, `used`, `limit`, `service_breakdown` |
 | `voice.recording` | 녹음 시작/종료 | `state`(started/stopped), `device`, `duration_ms` |
+| `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms` |
 | `stt.result` | 음성 인식 완료 | `language`, `duration_ms`, `latency_ms`, `text_len` |
-| `tts.result` | 낭독 완료/취소/거부 | `state`(completed/cancelled/refused), `engine`, `chars`, `latency_ms` |
+| `tts.result` | 낭독 완료/취소/끼어들기/거부 | `state`(completed/cancelled/interrupted/refused), `engine`, `chars`, `latency_ms` |
 | `ui.state` | 상주 UI 상태 전이 | `from`, `to`, `cause` |
 | `ui.hotkey` | 단축키 등록/호출/실패 | `action`, `hotkey`, `reason` |
 | `recovery.start` | 시작 시 복구 점검 | `unfinished_sessions`, `tmp_files`, `running_steps` |

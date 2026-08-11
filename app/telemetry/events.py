@@ -56,6 +56,7 @@ EVENT_TYPES = frozenset(
         "budget.warn",
         "budget.stop",
         "voice.recording",
+        "voice.barge_in",
         "stt.result",
         "tts.result",
         "ui.state",
