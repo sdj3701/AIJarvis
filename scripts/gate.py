@@ -47,6 +47,31 @@ def _commit() -> str:
     return result.stdout.strip() if result.returncode == 0 else "unknown"
 
 
+def _phase_evidence(phase: int, *, passed: bool) -> tuple[list[dict[str, object]], list[str]]:
+    if phase == 0:
+        return [], ["Phase 0에는 외부 API 호출과 정량 성능 기준이 없습니다."]
+    metrics: list[dict[str, object]] = [
+        {
+            "name": "recovery.input_loss",
+            "value": 0 if passed else None,
+            "threshold": 0,
+            "ok": passed,
+            "note": "5개 종료 지점마다 4회씩, 총 20회 별도 프로세스 강제 종료",
+        },
+        {
+            "name": "turn.latency.p95_ms",
+            "value": None,
+            "threshold": 15000,
+            "ok": None,
+            "note": "자동 테스트는 가짜 LLM을 사용하므로 실제 모델 수동 측정 대상",
+        },
+    ]
+    return metrics, [
+        "Phase 1 자동 게이트는 외부 네트워크를 사용하지 않습니다.",
+        "Ollama 모델 digest·GPU 적재·3턴 대화는 실제 로컬 모델로 별도 확인합니다.",
+    ]
+
+
 def run_gate(phase: int) -> int:
     started_at = datetime.now(tz=KST)
     marker = _marker_expression(phase)
@@ -62,6 +87,7 @@ def run_gate(phase: int) -> int:
     sys.stdout.flush()
     exit_code = 0 if result.returncode == 0 else 1
     finished_at = datetime.now(tz=KST)
+    metrics, notes = _phase_evidence(phase, passed=exit_code == 0)
     evidence = {
         "schema_version": 1,
         "phase": phase,
@@ -76,8 +102,9 @@ def run_gate(phase: int) -> int:
             "skipped": _count(combined, "skipped"),
             "skipped_reasons": [],
         },
-        "metrics": [],
-        "notes": ["Phase 0에는 외부 API 호출과 정량 성능 기준이 없습니다."],
+        "metrics": metrics,
+        "unmet": [] if exit_code == 0 else ["pytest gate failed"],
+        "notes": notes,
     }
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     artifact = ARTIFACTS_DIR / f"phase{phase}-{finished_at:%Y%m%d}.json"
