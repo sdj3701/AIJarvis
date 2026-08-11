@@ -107,7 +107,7 @@
 | `budget.warn` | 80% 도달 | `period_kind`, `used`, `limit`, `ratio`, `service_breakdown` |
 | `budget.stop` | 100% 도달 | `period_kind`, `used`, `limit`, `service_breakdown` |
 | `voice.recording` | 녹음 시작/종료 | `state`(started/stopped), `device`, `duration_ms` |
-| `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms`, `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames` |
+| `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms`, `source`(wake_word/hotkey), `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames` |
 | `stt.result` | 음성 인식 완료 | `language`, `duration_ms`, `latency_ms`, `text_len` |
 | `tts.result` | 낭독 완료/취소/끼어들기/거부 | `state`(completed/cancelled/interrupted/refused), `engine`, `chars`, `latency_ms` |
 | `ui.state` | 상주 UI 상태 전이 | `from`, `to`, `cause` |
@@ -212,7 +212,9 @@ entry_hash = sha256( prev_hash_bytes + canonical_json(레코드 - {prev_hash, en
 - 날짜 파일이 바뀔 때 새 파일 첫 줄의 `prev_hash`는 이전 파일 마지막 줄의 `entry_hash`다. 체인은 전체 기간에 걸쳐 연속된다.
 - 검증기: `python scripts\gate.py --verify-audit`. 체인이 끊긴 지점의 `seq`를 보고한다. PLAN Phase 6의 감사 로그 무결성 기준을 구현한다.
 
-`normalized_args`도 `PrivacyGate.for_log`를 통과하지만, **경로는 마스킹하지 않는다**. 무엇이 실행됐는지 알 수 없는 감사 로그는 쓸모가 없다.
+`normalized_args`와 `args_display`는 `PrivacyGate.for_log`를 통과한다. 단,
+`normalized_args.path`와 결과의 `changed_paths`는 조사 가능성을 위해 마스킹하지 않는다.
+파일 본문, 검색어, URL의 민감한 query 값과 시크릿은 감사 로그에 원문으로 남기지 않는다.
 
 ---
 
@@ -843,7 +845,8 @@ detector는 `\b`에 의존하지 않고 `(?<!\d)`·`(?!\d)` 경계를 사용해 
 
 `settings.voice.barge_in`은 `enabled`, `speech_threshold_dbfs`,
 `min_onset_rise_db`, `baseline_window_ms`, `startup_guard_ms`, `recent_speech_ms`,
-`pre_roll_ms`, `vad_mode`, `vad_frame_ms`, `vad_min_voiced_ratio`를 모두 요구한다. dBFS는
+`pre_roll_ms`, `vad_mode`, `vad_frame_ms`, `vad_min_voiced_ratio`,
+`interrupt_hotkey_enabled`, `interrupt_hotkey`를 모두 요구한다. dBFS는
 `-96..0`, onset 상승은 `0..96`, VAD mode는 `0..3`, frame은 `10/20/30ms`, 음성 비율은
 `0 초과 1 이하`가 아니면 설정을 거부한다.
 

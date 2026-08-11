@@ -162,12 +162,12 @@ def test_fake_client_exhaustion_and_scripted_exception_fail_immediately() -> Non
     assert captured.value is timeout
 
 
-def test_phase_one_fake_rejects_tool_calls() -> None:
+def test_fake_returns_tool_calls_for_phase_four() -> None:
     client = FakeLLMClient().call_tool("web_search", query="날씨")
 
-    with pytest.raises(LLMBadResponse, match="Phase 1"):
-        client.complete(messages=[Message("user", "검색")], timeout_s=1, ctx=_context())
+    response = client.complete(messages=[Message("user", "검색")], timeout_s=1, ctx=_context())
 
+    assert response.tool_calls[0].name == "web_search"
     assert client.calls == [[Message("user", "검색")]]
 
 

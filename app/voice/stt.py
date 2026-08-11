@@ -196,7 +196,8 @@ class VoskSTTEngine:
     def stream(self, *, phrases: Sequence[str] | None = None) -> VoskStreamingRecognizer:
         grammar = None
         if phrases is not None:
-            grammar = json.dumps(list(phrases), ensure_ascii=False)
+            # Include [unk] so non-wake speech is not forced into the wake phrases.
+            grammar = json.dumps([*phrases, "[unk]"], ensure_ascii=False)
         recognizer = self._recognizer_factory(self._model, self._sample_rate, grammar)
         return VoskStreamingRecognizer(recognizer)
 

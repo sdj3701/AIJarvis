@@ -24,11 +24,30 @@ NOW = datetime(2026, 8, 11, 21, 0, tzinfo=timezone(timedelta(hours=9)))
 
 
 class FakeListener:
-    def __init__(self, commands: list[str], *, barge_ins: list[bool] | None = None) -> None:
+    def __init__(
+        self,
+        commands: list[str],
+        *,
+        barge_ins: list[bool] | None = None,
+        inline_commands: list[str] | None = None,
+    ) -> None:
         self.commands = commands
         self.barge_ins = barge_ins or []
+        self.inline_commands = inline_commands or []
         self.barge_texts: list[str] = []
         self.wakes = 0
+
+    def await_turn_start(self) -> Any:
+        from app.voice.controller import TurnStart
+
+        self.wakes += 1
+        if self.inline_commands:
+            text = self.inline_commands.pop(0)
+            return TurnStart(
+                "inline_command",
+                Transcript(text, "ko", 800, 0.9, -0.2, 0.01),
+            )
+        return TurnStart("standalone", None)
 
     def wait_for_wake(self) -> Transcript:
         self.wakes += 1
@@ -343,12 +362,13 @@ def test_voice_and_once_modes_are_mutually_exclusive() -> None:
 def test_local_listener_accepts_spaced_wake_word_and_emits_mic_state() -> None:
     events = FakeEvents()
     output = StringIO()
+    command_stt = FakeCommandSTT(Transcript("자비스", "ko", 500, 0.9, -0.2, 0.01))
     listener = LocalVoiceListener(
         wake_stt=FakeStreamingSTT(),  # type: ignore[arg-type]
-        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        command_stt=command_stt,  # type: ignore[arg-type]
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
-        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        capture_policy=SpeechCapturePolicy(500, -42, 250, 250, 15_000),
         barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
         min_avg_logprob=-1.0,
         max_no_speech_probability=0.6,
@@ -358,16 +378,130 @@ def test_local_listener_accepts_spaced_wake_word_and_emits_mic_state() -> None:
         output_stream=output,
     )
 
-    transcript = listener.wait_for_wake()
+    turn = listener.await_turn_start()
 
-    assert transcript.text == "자 비스"
-    assert events.types == ["voice.recording", "voice.recording", "stt.result"]
+    assert turn.mode == "standalone"
+    assert turn.command is None
+    assert events.types[0] == "voice.recording"
     assert events.records[0][1]["state"] == "started"
-    assert events.records[1][1]["state"] == "stopped"
     assert "[마이크 켜짐]" in output.getvalue()
     assert "(장치: 테스트 마이크)" in output.getvalue()
     assert "[STT 확정] 자 비스" in output.getvalue()
+    assert "[호출 확정]" in output.getvalue()
     assert "[마이크 꺼짐]" in output.getvalue()
+
+
+def test_wake_session_stops_vosk_after_wake_so_follow_on_words_are_not_forced() -> None:
+    class OneShotWakeRecognizer:
+        def __init__(self) -> None:
+            self.feeds = 0
+
+        def feed(self, pcm: bytes) -> RecognitionUpdate:
+            del pcm
+            self.feeds += 1
+            if self.feeds == 1:
+                return RecognitionUpdate("자비스", True)
+            raise AssertionError("Vosk must not receive audio after wake is confirmed")
+
+        def finish(self) -> RecognitionUpdate:
+            return RecognitionUpdate("", True)
+
+    class OneShotWakeSTT:
+        def __init__(self) -> None:
+            self.recognizer = OneShotWakeRecognizer()
+
+        def stream(self, *, phrases: Any = None) -> OneShotWakeRecognizer:
+            del phrases
+            return self.recognizer
+
+    loud = _audio_frame(4_000)
+    quiet = _audio_frame(0)
+    frames = [loud, loud, quiet, quiet, quiet, quiet]
+    command_stt = FakeCommandSTT(
+        Transcript("자비스 가나다", "ko", 1_500, 0.9, -0.2, 0.01)
+    )
+    output = StringIO()
+    wake_stt = OneShotWakeSTT()
+    listener = LocalVoiceListener(
+        wake_stt=wake_stt,  # type: ignore[arg-type]
+        command_stt=command_stt,  # type: ignore[arg-type]
+        microphone_factory=lambda: SequenceMicrophone(frames),  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 500, 250, 15_000),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=FakeEvents(),
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    turn = listener.await_turn_start()
+
+    assert wake_stt.recognizer.feeds == 1
+    assert turn.mode == "inline_command"
+    assert turn.command is not None
+    assert turn.command.text == "가나다"
+    assert "[호출 확정]" in output.getvalue()
+    assert "[한 문장 명령] 가나다" in output.getvalue()
+    assert output.getvalue().count("[STT 확정] 자비스") == 1
+    assert "[STT 확정] 자비스 자비스" not in output.getvalue()
+
+
+def test_inline_wake_command_skips_acknowledgement() -> None:
+    listener = FakeListener([], inline_commands=["수돗물의 성분에 대해서 알려줘"])
+    tts = FakeTTS()
+    chat = FakeChat("수돗물에는 미네랄이 있습니다.")
+    output = StringIO()
+    controller = VoiceController(
+        listener=listener,  # type: ignore[arg-type]
+        tts=tts,
+        chat=chat,  # type: ignore[arg-type]
+        masker=_masker(),
+        acknowledgement="무엇을 도와드릴까요.",
+        max_tts_chars=400,
+        events=FakeEvents(),
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    assert controller.run(max_interactions=1) == 0
+
+    assert listener.wakes == 1
+    assert tts.spoken == ["수돗물에는 미네랄이 있습니다."]
+    assert chat.calls == [("수돗물의 성분에 대해서 알려줘", "voice")]
+    assert "무엇을 도와드릴까요." not in tts.spoken
+
+
+def test_hotkey_barge_in_cancels_tts() -> None:
+    class HotkeyOnce:
+        def poll(self) -> bool:
+            return True
+
+        def close(self) -> None:
+            return None
+
+    events = FakeEvents()
+    output = StringIO()
+    listener = LocalVoiceListener(
+        wake_stt=FailOnFeedSTT(),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
+        interrupt_hotkey_factory=HotkeyOnce,  # type: ignore[arg-type]
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    assert listener.wait_for_barge_in(Event()) is True
+    assert "[단축키 끼어들기]" in output.getvalue()
+    assert events.records[1][1]["source"] == "hotkey"
 
 
 class SequenceMicrophone:

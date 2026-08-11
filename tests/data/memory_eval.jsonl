@@ -1,0 +1,4 @@
+{"query": "말투", "expect_keys": ["pref.answer_style"]}
+{"query": "답변 스타일", "expect_keys": ["pref.answer_style"]}
+{"query": "언어 선호", "expect_keys": ["pref.language"]}
+{"query": "노트 폴더", "expect_keys": ["env.notes_dir"]}

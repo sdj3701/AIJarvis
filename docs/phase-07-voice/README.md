@@ -97,6 +97,9 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 9. [D017](../00-start-here/DECISIONS.md)에 따라 Speaking 전용 임계값·적응형 onset·
    메모리 pre-roll·WebRTC VAD를 적용하고 통과 PCM만 Vosk에 보낸다. AEC는 스피커
    실장치 목표에 미달할 때만 후속 실험한다.
+10. [D018](../00-start-here/DECISIONS.md)에 따라 Vosk `[unk]`·접두 호출 판정,
+    한 문장 호출+명령(안내 TTS 생략), 답변 중 `interrupt_hotkey` 중단을 적용한다.
+    상세는 [VOICE_WAKE_COMMAND_UX.md](../reference/VOICE_WAKE_COMMAND_UX.md).
 
 ### P7-06 자원 관리
 

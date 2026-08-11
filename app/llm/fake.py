@@ -90,7 +90,9 @@ class FakeLLMClient:
         if isinstance(item, Exception):
             raise item
         if item.tool_calls:
-            raise LLMBadResponse("Phase 1에서는 도구 호출 응답을 처리하지 않습니다.")
+            return item
+        if item.text is None:
+            raise LLMBadResponse("FakeLLMClient: text 응답이 없습니다.")
         return item
 
     def count_tokens(self, messages: Sequence[Message]) -> int:

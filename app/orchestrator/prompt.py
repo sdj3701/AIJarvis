@@ -73,6 +73,9 @@ class PromptAssembler:
         current_user_text: str,
         history: Sequence[Message] = (),
         cancel: CancelToken | None = None,
+        confirmed_memory: str | None = None,
+        candidate_memory: str | None = None,
+        extra_system: Sequence[str] = (),
     ) -> PromptPlan:
         if not isinstance(current_user_text, str) or not current_user_text.strip():
             raise ValueError("현재 사용자 발화는 비어 있을 수 없습니다")
@@ -81,8 +84,14 @@ class PromptAssembler:
 
         turns = _history_turns(history)
         system = Message("system", self._system_text)
+        memory_messages: list[Message] = []
+        if confirmed_memory:
+            memory_messages.append(Message("system", confirmed_memory))
+        if candidate_memory:
+            memory_messages.append(Message("system", candidate_memory))
+        extra_messages = [Message("system", block) for block in extra_system if block.strip()]
         current = Message("user", current_user_text)
-        system_tokens = self._count((system,))
+        system_tokens = self._count((system, *memory_messages, *extra_messages))
         current_tokens = self._count((current,))
         fixed_tokens = system_tokens + current_tokens + self._context.reserve_output_tokens
         if fixed_tokens > self._context.max_input_tokens:
@@ -131,7 +140,7 @@ class PromptAssembler:
             summary = self._summary_message(old_turns, token_cap=summary_cap)
             history_messages = (() if summary is None else (summary,)) + protected
 
-        messages = (system, *history_messages, current)
+        messages = (system, *memory_messages, *extra_messages, *history_messages, current)
         input_tokens = self._count(messages)
         if input_tokens + self._context.reserve_output_tokens > self._context.max_input_tokens:
             raise PromptTooLong(

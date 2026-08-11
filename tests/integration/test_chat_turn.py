@@ -18,6 +18,7 @@ from app.cli import run_cli
 from app.llm.base import LLMResponse, LLMUsage, Message, ToolSpec
 from app.llm.fake import FakeLLMClient
 from app.memory.migrations import initialize_database
+from app.memory.summarizer import SessionSummarizer
 from app.orchestrator.loop import ChatOrchestrator
 from app.wiring import Runtime, build
 from scripts.bootstrap import create_tree
@@ -56,7 +57,7 @@ class EventingFakeLLM(FakeLLMClient):
                 "prompt_tokens_est": self.count_tokens(messages),
                 "prompt_version": prompt_version,
                 "tool_count": 0,
-                "memory_record_ids": [],
+                "memory_record_ids": list(ctx.memory_record_ids),
             },
         )
         if self.before_call is not None:
@@ -115,6 +116,7 @@ def _chat(
     runtime: Runtime,
     *,
     verify_model: Callable[[], object] | None = None,
+    summarizer: SessionSummarizer | None = None,
 ) -> ChatOrchestrator:
     return ChatOrchestrator(
         settings=runtime.config.settings,
@@ -129,6 +131,7 @@ def _chat(
         ids=runtime.ids,
         verify_model=verify_model,
         metrics=runtime.metrics,
+        summarizer=summarizer or runtime.summarizer,
     )
 
 
@@ -299,7 +302,11 @@ def test_end_closes_session_and_records_event(config_dir: Path) -> None:
 
 
 def test_cli_dispatches_clear_budget_help_and_bye(config_dir: Path) -> None:
-    llm = EventingFakeLLM().reply("첫 답").reply("둘째 답")
+    summary = (
+        '{"schema_version":1,"summary":"테스트","fact_candidates":[],'
+        '"corrections":[],"tags":[]}'
+    )
+    llm = EventingFakeLLM().reply("첫 답").reply("둘째 답").reply(summary)
     runtime = _runtime(config_dir, llm)
     output = StringIO()
 

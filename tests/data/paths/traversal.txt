@@ -1,0 +1,14 @@
+..\..\Windows\System32\drivers\etc\hosts
+..%5C..%5CWindows
+....\\....\\Windows
+D:\Jarvis\docs\..\..\..\Windows\notepad.exe
+\\?\D:\Jarvis\docs\x.md
+\\localhost\C$\x.md
+CON
+NUL
+docs\notes\..\..\config\tools.yaml
+docs/notes/../../config/tools.yaml
+docs\notes\x.md::$DATA
+docs\notes\ x.md
+docs\notes\x.md.
+PROGRA~1\x.md

@@ -38,7 +38,10 @@ def runtime_config(tmp_path: Path) -> Path:
     create_tree(root)
     _mutate_yaml(
         config_dir / "settings.yaml",
-        lambda document: document["paths"].__setitem__("data_root", str(root)),
+        lambda document: (
+            document["paths"].__setitem__("data_root", str(root)),
+            document["memory"].__setitem__("summarize_on_exit", False),
+        ),
     )
     return config_dir
 
@@ -92,8 +95,12 @@ def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) 
         "app.start",
         "recovery.start",
         "recovery.result",
+        "recovery.start",
+        "recovery.result",
+        "recovery.result",
         "session.start",
         "user.input",
+        "memory.search",
         "session.end",
         "app.stop",
     ]

@@ -232,7 +232,7 @@ class OllamaClient:
                     "prompt_tokens_est": prompt_tokens_est,
                     "prompt_version": prompt_version,
                     "tool_count": 0,
-                    "memory_record_ids": [],
+                    "memory_record_ids": list(getattr(ctx, "memory_record_ids", ())),
                 },
             )
             started_ms = ctx.clock.monotonic_ms()

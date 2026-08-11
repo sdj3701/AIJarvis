@@ -51,6 +51,8 @@ def test_local_wake_word_configuration_loads(config_dir: Path) -> None:
     assert settings.voice.barge_in.speech_threshold_dbfs == -32
     assert settings.voice.barge_in.min_onset_rise_db == 8
     assert settings.voice.barge_in.vad_mode == 2
+    assert settings.voice.barge_in.interrupt_hotkey_enabled is True
+    assert settings.voice.barge_in.interrupt_hotkey == "ctrl+alt+j"
     assert settings.voice.tts.voice == "Microsoft Heami Desktop"
     assert settings.voice.tts.rate == 4
 

@@ -178,6 +178,17 @@ def test_status_rolls_over_on_korean_local_date(budget_db: Path) -> None:
     assert guard.status(after_midnight_utc).day.used == 0
 
 
+@pytest.mark.phase3
+def test_search_charge_counts_toward_total(budget_db: Path) -> None:
+    events = RecordingEvents()
+    guard = BudgetGuard(SQLiteBudgetLedger(budget_db), _settings(daily="2.00"))
+    context = _context(events=events)
+    guard.record_charge("search", Decimal("0.50"), ctx=context)
+    status = guard.status(NOW)
+    assert status.day.service_breakdown["search"] == Decimal("0.50")
+    assert status.day.used == Decimal("0.50")
+
+
 def test_qwen_local_estimate_is_zero_and_pricing_is_decimal() -> None:
     document = yaml.safe_load(
         (REPOSITORY_ROOT / "config" / "settings.example.yaml").read_text(encoding="utf-8")

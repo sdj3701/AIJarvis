@@ -28,6 +28,7 @@ dist/
 Thumbs.db
 
 # Runtime data copies must not enter the source repository.
+/AIJarvis/
 config/settings.yaml
 config/privacy.yaml
 config/tools.yaml

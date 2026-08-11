@@ -273,6 +273,18 @@ class SpeechCapture:
             self._finished = True
             self._finish_reason = "max_duration"
 
+    def clear(self) -> None:
+        """Discard buffered audio so a false wake candidate does not leak forward."""
+        self._pre_roll.clear()
+        self._pre_roll_duration_ms = 0
+        self._frames.clear()
+        self._input_duration_ms = 0
+        self._speech_duration_ms = 0
+        self._silence_duration_ms = 0
+        self._speech_started = False
+        self._finished = False
+        self._finish_reason = None
+
     @property
     def finished(self) -> bool:
         return self._finished

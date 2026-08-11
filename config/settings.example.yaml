@@ -121,10 +121,10 @@ rag:
     timeout_s: 15
     allowed_content_types: ["text/html", "text/plain", "text/markdown", "application/json"]
   search:
-    provider: "<검색 API 제공자>"   # PLAN 15장 결정 항목
+    provider: duckduckgo            # D006: DuckDuckGo via ddgs (API 키 불필요)
     max_results: 5
     require_min_sources: 2          # 교차 확인 목표. 미달 시 답변에 '근거 부족' 라벨
-    cost_per_request: "0.00"       # USD 문자열. 유료/무료 모두 명시
+    cost_per_request: "0.00"       # USD 문자열. DDG는 0
 
 agent:
   max_steps: 8
@@ -175,7 +175,7 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
       cpu_compute_type: int8
       beam_size: 5
       vad_filter: true
-      initial_prompt: "한국어 자비스 음성 비서 질문입니다. Jarvis, Ollama, 파이썬."
+      initial_prompt: "한국어 음성 비서에 대한 짧은 질문입니다. Ollama, 파이썬."
       pre_roll_ms: 500
       speech_threshold_dbfs: -42
       trailing_silence_ms: 900
@@ -193,6 +193,8 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
     vad_mode: 2                 # WebRTC VAD 0(관대)~3(엄격)
     vad_frame_ms: 20
     vad_min_voiced_ratio: 0.3
+    interrupt_hotkey_enabled: true
+    interrupt_hotkey: "ctrl+alt+j"  # 답변 TTS 중 즉시 중단 (음성 호출과 병행)
   tts:
     engine: local
     voice: "Microsoft Heami Desktop"

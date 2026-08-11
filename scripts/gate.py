@@ -47,6 +47,25 @@ def _commit() -> str:
     return result.stdout.strip() if result.returncode == 0 else "unknown"
 
 
+def _worktree_changes() -> tuple[str, ...]:
+    result = subprocess.run(
+        ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+        cwd=REPOSITORY_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return ("git_status_failed",)
+    changes: list[str] = []
+    for line in result.stdout.splitlines():
+        path = line[3:].replace("\\", "/") if len(line) > 3 else line
+        if path.startswith("artifacts/gates/"):
+            continue
+        changes.append(line)
+    return tuple(changes)
+
+
 def _phase_evidence(phase: int, *, passed: bool) -> tuple[list[dict[str, object]], list[str]]:
     if phase == 0:
         return [], ["Phase 0에는 외부 API 호출과 정량 성능 기준이 없습니다."]
@@ -73,6 +92,13 @@ def _phase_evidence(phase: int, *, passed: bool) -> tuple[list[dict[str, object]
 
 
 def run_gate(phase: int) -> int:
+    changes = _worktree_changes()
+    if changes:
+        print("게이트를 실행하려면 코드 작업 트리가 깨끗해야 합니다.", file=sys.stderr)
+        for change in changes[:20]:
+            print(f"  {change}", file=sys.stderr)
+        return 1
+
     started_at = datetime.now(tz=KST)
     marker = _marker_expression(phase)
     result = subprocess.run(
@@ -95,6 +121,7 @@ def run_gate(phase: int) -> int:
         "finished_at": finished_at.isoformat(timespec="milliseconds"),
         "exit_code": exit_code,
         "commit": _commit(),
+        "worktree_clean": True,
         "marker_expr": marker,
         "tests": {
             "passed": _count(combined, "passed"),

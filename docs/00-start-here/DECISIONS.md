@@ -11,7 +11,7 @@
 | D003 | decided | 상태 저장 | JSONL + SQLite WAL/FULL | Phase 0 | DESIGN 9장 준수 |
 | D004 | decided | 패키지 관리 | `venv`, `pip`, hash lockfile | Phase 0 | bootstrap 문서화 |
 | D005 | decided | LLM 런타임·모델 | `Ollama` + `qwen3.5:9b` | Phase 1 | 로컬 스모크·모델 식별자 검증 |
-| D006 | pending | 검색 제공자 | 미정 | Phase 3 진입 전 | API·비용·결과 스키마 확정 |
+| D006 | decided | 검색 제공자 | DuckDuckGo (`ddgs`) | Phase 3 | FakeSearchProvider 테스트·실장치 allow_network 스모크 |
 | D007 | pending | 백업 대상 | 미정 | Phase 6 진입 전 | 별도 장치/보안 위치 경로 확정 |
 | D008 | pending | 백업 암호화 도구 | 7-Zip AES-256 또는 age | Phase 6 진입 전 | 설치·복원 자동화 방식 확정 |
 | D009 | decided | TTS | Windows SAPI `Microsoft Heami Desktop`, rate 4 로컬 TTS | 음성 세로 기능 | 한국어 음성·약 1.5배 속도·외부 전송 0 확인 |
@@ -23,6 +23,7 @@
 | D015 | pending | 자동 시작 설치 방식 | 시작프로그램 바로가기 또는 설치 옵션 | Phase 8 진입 전 | 레지스트리 직접 수정 없이 opt-in 구현 |
 | D016 | decided | 한국어 STT | Vosk 호출어 + `faster-whisper small` 질문 인식 | 음성 세로 기능 | 로컬 처리·한국어 실장치 인식·낮은 신뢰도 재요청 확인 |
 | D017 | decided | 답변 중 끼어들기 마이크 게이트 | Gate A+B+WebRTC VAD, AEC·빔포밍 후순위 | 음성 세로 기능 | 스피커 에코 오발동 0·근거리 “자비스” 중단 성공률·설정 키 확정 |
+| D018 | decided | 호출 오인 방지·한 문장 호출+명령·답변 중단 핫키 | `[unk]`+접두 판정, 한 문장 Whisper, 핫키+D017 | 음성 세로 기능 | 오호출 감소·한 문장 경로·`ctrl+alt+j` 중단 |
 
 ## 결정 작성 양식
 
@@ -53,6 +54,18 @@ ID:
 - 라우팅: loopback Ollama만 허용하며 클라우드 LLM 폴백은 만들지 않음
 - 비용: 입력·출력 단가 모두 USD 0.00. 전력비는 애플리케이션 외부 비용 예산에 포함하지 않음
 - 재검토 조건: 한국어 평가 실패, 12GB VRAM 초과, 라이선스·모델 digest 변경
+
+## D006 상세 — 웹 검색 제공자 (decided)
+
+- 결정 날짜: 2026-08-11
+- 제공자: DuckDuckGo 검색 결과 (`ddgs` 패키지, 지역/언어 `kr-kr` / `ko-kr` 기본)
+- API 키: 불필요
+- 비용: `settings.rag.search.cost_per_request = "0.00"` (USD)
+- 결과 매핑: title, URL, snippet, published_at(없으면 null), fetched_at(요청 시각)
+- 테스트: 단위·통합은 `FakeSearchProvider`만 사용. 실네트워크는 `pytest -m allow_network`
+- 이유: 하이브리드·로컬 우선 전략에서 API 키·유료 검색 없이 MVP 웹 근거를 연결할 수 있다.
+  PLAN의 Tavily 예시는 유료 키가 필요해 기본값으로 두지 않았다.
+- 재검토 조건: DDG 차단·품질 저하, 한국어 결과 부실, ToS 변경. 그때 Brave/Tavily 등으로 교체
 
 ## D016 상세 — 로컬 한국어 STT
 
@@ -88,14 +101,39 @@ ID:
 - 주의: WebRTC VAD는 비음성 소음을 거르는 장치이며 등록 사용자 화자 인증은 아니다.
 - 재검토 조건: 스피커 실장치에서 S1 게이트로 목표 미달, 또는 AEC 없이 운영 불가능 판정
 
+## D018 상세 — 호출 오인 방지·한 문장 명령·답변 중단 핫키 (decided)
+
+- 결정 날짜: 2026-08-11
+- 문제:
+  1. 마이크에 아무 말이나 들어가면 “자비스”로 오인
+  2. 답변 중 “자비스” 재호출이 잘 안 됨
+  3. “자비스”와 질문을 한 문장으로 말해도 안내 TTS 후 질문을 다시 해야 함
+- 제안서: [호출 오인·한 문장 명령·답변 중 재호출](../reference/VOICE_WAKE_COMMAND_UX.md)
+- 결정: 선택지 1 + 답변 중 끊기 D(핫키 + D017 유지, AEC 후순위)
+  1. Vosk 호출 문법에 `[unk]` 포함, 호출어 단독/접두만 인정
+  2. 같은 마이크 세션 PCM을 Whisper로 인식해 선두 호출어를 제거한 나머지가 있으면
+     안내 TTS를 생략하고 바로 질문에 응답
+  3. 답변 TTS 중 `voice.barge_in.interrupt_hotkey`(기본 `ctrl+alt+j`)로 즉시 중단,
+     음성 “자비스” 감시는 D017 게이트와 병행
+- D010 관계: 웨이크워드 opt-in·PCM 비저장 유지. 호출 후 항상 안내 TTS를 재생하던
+  고정 순서는 한 문장 명령이 있을 때 생략할 수 있게 개정한다
+- 후속 수정(P4): 호출 확정 뒤에는 Vosk를 feed하지 않고 PCM→Whisper만 사용한다.
+  “자비스 가나다”가 제한 문법 때문에 “자비스 자비스”로 보이던 문제를 막는다.
+  상세: [VOICE_WAKE_COMMAND_UX.md P4](../reference/VOICE_WAKE_COMMAND_UX.md)
+- 재검토 조건: 오호출 목표 미달, 한 문장 경로 첫 음절 손실, 핫키 충돌, Whisper 지연 초과,
+  호출 후 후속어가 다시 호출어로 강제되는 회귀
+
 ## Phase 차단 규칙
 
 - D005가 `pending`이면 Phase 1 구현을 시작하지 않는다. 현재는 위 로컬 LLM 결정으로 해소되었다.
-- D006이 `pending`이면 Phase 3의 웹 검색 구현만 차단한다. 로컬 문서 RAG는 먼저 개발할 수 있다.
+- D006은 DuckDuckGo(`ddgs`)로 해소되었다. 자동 테스트는 FakeSearchProvider만 쓰고
+  실네트워크는 allow_network 스모크로만 검증한다.
 - D007·D008이 `pending`이면 Phase 6 릴리스 게이트를 통과시킬 수 없다.
 - D009는 외부 전송 없는 Windows SAPI 한국어 음성으로 확정되었다. 다른 TTS 엔진은 별도 결정 없이는 추가하지 않는다.
 - D016은 Vosk 단독 자유 발화를 대체한다. 호출어는 Vosk, 질문은 고정 revision의 faster-whisper small만 사용하며 온라인 STT 폴백은 추가하지 않는다.
 - D017은 Gate A+B+WebRTC VAD로 해소되었다. AEC는 S2 실장치 결과가 목표에 미달할
   때만 별도 결정으로 추가한다.
+- D018은 `[unk]`·접두 호출 판정·한 문장 명령·답변 중단 핫키로 해소되었다. AEC는
+  D017과 동일하게 실장치 목표 미달 시에만 별도 결정한다.
 - D012가 `pending`이면 Phase 3에서 PDF 지원을 비활성화하고 `.md`·`.txt`만 제공한다.
 - D013~D015가 `pending`이면 Phase 8 패키징·전역 단축키·자동 시작 구현을 시작하지 않는다.

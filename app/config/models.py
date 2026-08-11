@@ -274,6 +274,8 @@ class BargeInSettings(StrictModel):
     vad_mode: Literal[0, 1, 2, 3]
     vad_frame_ms: Literal[10, 20, 30]
     vad_min_voiced_ratio: Annotated[float, Field(gt=0, le=1)]
+    interrupt_hotkey_enabled: bool
+    interrupt_hotkey: NonEmptyString
 
 
 class VoiceSettings(StrictModel):

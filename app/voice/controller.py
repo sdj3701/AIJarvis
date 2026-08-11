@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from threading import Event, Thread
-from typing import Any, Protocol, TextIO
+from typing import Any, Literal, Protocol, TextIO
 
 from app.core.clock import Clock
 from app.core.errors import JarvisError
 from app.orchestrator.loop import ChatOrchestrator
 from app.telemetry.masking import LogMasker
 from app.voice.barge_in_gate import BargeInGate
-from app.voice.base import Transcript, TTSEngine
+from app.voice.base import AudioFrame, Transcript, TTSEngine
+from app.voice.interrupt_hotkey import InterruptHotkeyFactory, NullInterruptHotkey
 from app.voice.microphone import MicrophoneStream, SpeechCapture, SpeechCapturePolicy
 from app.voice.stt import (
     FasterWhisperSTTEngine,
@@ -20,6 +21,11 @@ from app.voice.stt import (
     transcript_passes_quality,
 )
 from app.voice.tts import prepare_speech
+from app.voice.wake_match import (
+    normalize_spoken_command,
+    strip_leading_wake_word,
+    wake_match_kind,
+)
 
 EXIT_PHRASES = frozenset({"종료", "자비스종료", "그만", "그만해"})
 MISHEARD_TEXT = "잘 듣지 못했습니다. 다시 자비스라고 불러 주세요."
@@ -27,14 +33,18 @@ EXIT_TEXT = "안전하게 종료합니다."
 INPUT_STATUS_INTERVAL_MS = 2_000
 LEVEL_STATUS_INTERVAL_MS = 500
 MAX_PREVIEW_CHARS = 160
+WAKE_PHRASES = ("자비스", "자 비스")
+_SILENCE_FRAME = AudioFrame(b"\x00\x00" * 4_000, 16_000)
 
 
 class VoiceEventSink(Protocol):
     def emit(self, event_type: str, payload: Mapping[str, Any]) -> None: ...
 
 
-def normalize_spoken_command(text: str) -> str:
-    return re.sub(r"[^0-9A-Za-z가-힣]", "", text).casefold()
+@dataclass(frozen=True, slots=True)
+class TurnStart:
+    mode: Literal["standalone", "inline_command"]
+    command: Transcript | None
 
 
 class LocalVoiceListener:
@@ -49,6 +59,7 @@ class LocalVoiceListener:
         wake_word: str,
         capture_policy: SpeechCapturePolicy,
         barge_in_gate_factory: Callable[[], BargeInGate] | None = None,
+        interrupt_hotkey_factory: InterruptHotkeyFactory | None = None,
         min_avg_logprob: float,
         max_no_speech_probability: float,
         device_label: str,
@@ -59,9 +70,11 @@ class LocalVoiceListener:
         self._wake_stt = wake_stt
         self._command_stt = command_stt
         self._microphone_factory = microphone_factory
+        self._wake_word_text = wake_word.strip()
         self._wake_word = normalize_spoken_command(wake_word)
         self._capture_policy = capture_policy
         self._barge_in_gate_factory = barge_in_gate_factory
+        self._interrupt_hotkey_factory = interrupt_hotkey_factory
         self._min_avg_logprob = min_avg_logprob
         self._max_no_speech_probability = max_no_speech_probability
         self._device_label = device_label
@@ -69,20 +82,38 @@ class LocalVoiceListener:
         self._clock = clock
         self._output = output_stream
 
+    def await_turn_start(self) -> TurnStart:
+        return self._await_wake_session()
+
     def wait_for_wake(self) -> Transcript:
-        return self._listen_for_wake()
+        """Compatibility helper: wait until a wake word is accepted."""
+        started = self._await_wake_session()
+        if started.mode == "inline_command" and started.command is not None:
+            return Transcript(
+                self._wake_word_text,
+                started.command.language,
+                started.command.duration_ms,
+                started.command.confidence,
+            )
+        return Transcript(self._wake_word_text, "ko", 0, None)
 
     def listen_for_command(self) -> Transcript:
         return self._capture_and_transcribe_command()
 
     def wait_for_barge_in(self, speech_done: Event, *, spoken_text: str = "") -> bool:
-        """Watch partial and final wake-word results while TTS is speaking."""
+        """Watch wake-word results and optional hotkey while TTS is speaking."""
         if speech_done.is_set() or self._barge_in_gate_factory is None:
             return False
         gate = self._barge_in_gate_factory()
-        recognizer = self._wake_stt.stream()
+        recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
         spoken_text_contains_wake = self._wake_word in normalize_spoken_command(spoken_text)
+        hotkey = (
+            self._interrupt_hotkey_factory()
+            if self._interrupt_hotkey_factory is not None
+            else NullInterruptHotkey()
+        )
         detected = False
+        interrupt_source = ""
         duration_ms = 0
         last_preview = ""
         next_level_status_ms = LEVEL_STATUS_INTERVAL_MS
@@ -102,10 +133,28 @@ class LocalVoiceListener:
                 "gate": "adaptive_vad",
             },
         )
-        _write(self._output, "[끼어들기 감시] 답변 중 '자비스'라고 부르면 중단합니다.")
+        _write(
+            self._output,
+            "[끼어들기 감시] 답변 중 '자비스'라고 부르거나 중단 단축키를 누르면 멈춥니다.",
+        )
         try:
             with self._microphone_factory() as microphone:
                 while not speech_done.is_set():
+                    if hotkey.poll():
+                        detected = True
+                        interrupt_source = "hotkey"
+                        self._events.emit(
+                            "voice.barge_in",
+                            {
+                                "state": "detected",
+                                "device": self._device_label,
+                                "duration_ms": duration_ms,
+                                "source": "hotkey",
+                                "gate": "hotkey",
+                            },
+                        )
+                        _write(self._output, "[단축키 끼어들기] 답변을 중단합니다.")
+                        break
                     frame = microphone.next_frame(timeout_s=0.1)
                     if frame is None:
                         continue
@@ -132,7 +181,7 @@ class LocalVoiceListener:
                         )
                         next_level_status_ms += LEVEL_STATUS_INTERVAL_MS
                     if decision.reset_recognizer:
-                        recognizer = self._wake_stt.stream()
+                        recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
                         last_preview = ""
 
                     for gated_frame in decision.frames:
@@ -150,13 +199,16 @@ class LocalVoiceListener:
                             _write(self._output, f"[{label}] {preview}")
                             last_preview = preview
 
-                        normalized = normalize_spoken_command(update.text)
+                        kind = wake_match_kind(update.text, self._wake_word_text)
                         if spoken_text_contains_wake:
-                            wake_recognized = update.final and normalized == self._wake_word
+                            wake_recognized = update.final and kind == "standalone"
                         else:
-                            wake_recognized = self._wake_word in normalized
+                            wake_recognized = kind in {"standalone", "prefix"} and (
+                                update.final or kind == "standalone"
+                            )
                         if wake_recognized:
                             detected = True
+                            interrupt_source = "wake_word"
                             self._events.emit(
                                 "voice.barge_in",
                                 {
@@ -166,6 +218,7 @@ class LocalVoiceListener:
                                     "recognition_state": (
                                         "final" if update.final else "partial"
                                     ),
+                                    "source": "wake_word",
                                     "level_dbfs": round(level_dbfs, 1),
                                     "baseline_dbfs": round(decision.baseline_dbfs, 1),
                                     "gate": "open",
@@ -175,11 +228,12 @@ class LocalVoiceListener:
                             _write(self._output, "[말 끼어들기] '자비스'를 감지했습니다.")
                             break
                         if update.final:
-                            recognizer = self._wake_stt.stream()
+                            recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
                             last_preview = ""
                     if detected:
                         break
         finally:
+            hotkey.close()
             self._events.emit(
                 "voice.barge_in",
                 {
@@ -187,6 +241,7 @@ class LocalVoiceListener:
                     "device": self._device_label,
                     "duration_ms": duration_ms,
                     "detected": detected,
+                    "source": interrupt_source or None,
                     "overflows": 0 if microphone is None else microphone.overflows,
                     "partial_updates": partial_updates,
                     "final_updates": final_updates,
@@ -198,11 +253,15 @@ class LocalVoiceListener:
             )
         return detected
 
-    def _listen_for_wake(self) -> Transcript:
-        wake_phrases = ("자비스", "자 비스")
-        recognizer = self._wake_stt.stream(phrases=wake_phrases)
+    def _await_wake_session(self) -> TurnStart:
+        recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
+        capture = SpeechCapture(self._capture_policy)
         started_ms = self._clock.monotonic_ms()
         duration_ms = 0
+        wake_detected = False
+        last_preview = ""
+        next_input_status_ms = INPUT_STATUS_INTERVAL_MS
+        microphone: MicrophoneStream | None = None
         self._events.emit(
             "voice.recording",
             {"state": "started", "device": self._device_label, "duration_ms": 0},
@@ -211,17 +270,43 @@ class LocalVoiceListener:
             self._output,
             f"[마이크 켜짐] 웨이크워드를 듣고 있습니다. (장치: {self._device_label})",
         )
-        transcript = ""
-        last_preview = ""
-        next_input_status_ms = INPUT_STATUS_INTERVAL_MS
-        microphone: MicrophoneStream | None = None
         try:
             with self._microphone_factory() as microphone:
                 while True:
                     frame = microphone.next_frame(timeout_s=0.5)
+                    elapsed_ms = max(0, self._clock.monotonic_ms() - started_ms)
                     if frame is None:
+                        if wake_detected and not capture.finished:
+                            # Mic poll timeout counts as silence so trailing-silence
+                            # can finish without depending on wall-clock advancement.
+                            capture.feed(_SILENCE_FRAME)
+                            duration_ms += _SILENCE_FRAME.duration_ms
+                        if wake_detected and capture.finished:
+                            break
+                        if wake_detected and elapsed_ms >= self._capture_policy.max_duration_ms:
+                            capture.expire()
+                            break
                         continue
                     duration_ms += frame.duration_ms
+                    if not capture.finished:
+                        capture.feed(frame)
+                    if wake_detected:
+                        # Vosk wake grammar must not keep mapping later words to "자비스".
+                        if duration_ms >= next_input_status_ms:
+                            state = "음성 감지" if capture.speech_started else "대기"
+                            _write(
+                                self._output,
+                                f"[호출 후 녹음] {frame.rms_dbfs:.1f} dBFS · {state} "
+                                "(Whisper로 질문 인식)",
+                            )
+                            next_input_status_ms += LEVEL_STATUS_INTERVAL_MS
+                        if capture.finished:
+                            break
+                        if elapsed_ms >= self._capture_policy.max_duration_ms:
+                            capture.expire()
+                            break
+                        continue
+
                     update = recognizer.feed(frame.pcm)
                     preview = _preview_text(update.text)
                     if preview and preview != last_preview:
@@ -235,12 +320,23 @@ class LocalVoiceListener:
                             "새로 인식된 텍스트 없음",
                         )
                         next_input_status_ms += INPUT_STATUS_INTERVAL_MS
-                    normalized = normalize_spoken_command(update.text)
-                    if update.final and self._wake_word in normalized:
-                        transcript = update.text
-                        break
                     if update.final:
-                        recognizer = self._wake_stt.stream(phrases=wake_phrases)
+                        kind = wake_match_kind(update.text, self._wake_word_text)
+                        if kind in {"standalone", "prefix"}:
+                            wake_detected = True
+                            _write(
+                                self._output,
+                                "[호출 확정] 이어서 같은 발화를 듣고 Whisper로 인식합니다.",
+                            )
+                        else:
+                            recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
+                            capture.clear()
+                            last_preview = ""
+                    if wake_detected and capture.finished:
+                        break
+                    if wake_detected and elapsed_ms >= self._capture_policy.max_duration_ms:
+                        capture.expire()
+                        break
         finally:
             elapsed_ms = max(0, self._clock.monotonic_ms() - started_ms)
             self._events.emit(
@@ -249,20 +345,75 @@ class LocalVoiceListener:
                     "state": "stopped",
                     "device": self._device_label,
                     "duration_ms": duration_ms,
+                    "speech_ms": capture.speech_duration_ms,
+                    "reason": capture.finish_reason,
                     "overflows": 0 if microphone is None else microphone.overflows,
+                    "wake_mode": "pending_inline" if wake_detected else "none",
                 },
             )
             self._events.emit(
                 "stt.result",
                 {
                     "language": "ko",
+                    "engine": "vosk",
                     "duration_ms": duration_ms,
                     "latency_ms": elapsed_ms,
-                    "text_len": len(transcript),
+                    "text_len": len(self._wake_word_text) if wake_detected else 0,
+                    "wake_mode": "detected" if wake_detected else "none",
                 },
             )
             _write(self._output, "[마이크 꺼짐]")
-        return Transcript(transcript.strip(), "ko", duration_ms, None)
+
+        return self._command_from_wake_capture(capture, started_ms=started_ms)
+
+    def _command_from_wake_capture(
+        self, capture: SpeechCapture, *, started_ms: int
+    ) -> TurnStart:
+        if capture.finish_reason == "trailing_silence":
+            _write(self._output, "[녹음 종료] 연속 무음을 감지했습니다.")
+        elif capture.finish_reason == "max_duration":
+            _write(self._output, "[녹음 종료] 최대 녹음 시간에 도달했습니다.")
+        if not capture.acceptable or not capture.frames:
+            _write(self._output, "[한 문장 명령] 추가 질문이 없어 안내 후 질문을 듣습니다.")
+            return TurnStart("standalone", None)
+
+        _write(self._output, "[Whisper 처리] 호출과 질문을 한 문장으로 인식합니다.")
+        transcript = self._command_stt.transcribe(capture.frames)
+        if self._command_stt.fallback_reason is not None:
+            _write(self._output, "[Whisper 폴백] CUDA를 사용할 수 없어 CPU int8로 전환했습니다.")
+        quality = (
+            f"평균 logprob={_format_optional(transcript.avg_logprob)}, "
+            f"무음 확률={_format_optional(transcript.no_speech_probability)}, "
+            f"장치={self._command_stt.active_device}"
+        )
+        if transcript.text:
+            _write(self._output, f"[Whisper 확정] {_preview_text(transcript.text)} ({quality})")
+        accepted = transcript_passes_quality(
+            transcript,
+            min_avg_logprob=self._min_avg_logprob,
+            max_no_speech_probability=self._max_no_speech_probability,
+        )
+        command_text = strip_leading_wake_word(transcript.text, self._wake_word_text)
+        if not accepted or not command_text:
+            self._emit_command_result(
+                transcript,
+                started_ms=started_ms,
+                state="standalone_wake" if accepted else "rejected",
+            )
+            _write(self._output, "[한 문장 명령] 질문 부분이 없어 안내 후 질문을 듣습니다.")
+            return TurnStart("standalone", None)
+
+        command = Transcript(
+            command_text,
+            transcript.language,
+            transcript.duration_ms,
+            transcript.confidence,
+            transcript.avg_logprob,
+            transcript.no_speech_probability,
+        )
+        self._emit_command_result(command, started_ms=started_ms, state="inline_command")
+        _write(self._output, f"[한 문장 명령] {command_text}")
+        return TurnStart("inline_command", command)
 
     def _capture_and_transcribe_command(self) -> Transcript:
         started_ms = self._clock.monotonic_ms()
@@ -398,15 +549,24 @@ class VoiceController:
     def run(self, *, max_interactions: int | None = None) -> int:
         interactions = 0
         wake_already_detected = False
-        _write(self._output, "로컬 음성 모드입니다. 종료하려면 Ctrl+C 또는 '종료'라고 말하세요.")
+        _write(
+            self._output,
+            "로컬 음성 모드입니다. '자비스'와 질문을 이어서 말하거나, "
+            "호출 후 안내가 나오면 질문하세요. 종료는 Ctrl+C 또는 '종료'입니다.",
+        )
         try:
             while max_interactions is None or interactions < max_interactions:
                 if wake_already_detected:
                     wake_already_detected = False
+                    self._speak(self._acknowledgement)
+                    transcript = self._listener.listen_for_command()
                 else:
-                    self._listener.wait_for_wake()
-                self._speak(self._acknowledgement)
-                transcript = self._listener.listen_for_command()
+                    turn = self._listener.await_turn_start()
+                    if turn.mode == "inline_command" and turn.command is not None:
+                        transcript = turn.command
+                    else:
+                        self._speak(self._acknowledgement)
+                        transcript = self._listener.listen_for_command()
                 if not transcript.text:
                     self._speak(MISHEARD_TEXT)
                     continue

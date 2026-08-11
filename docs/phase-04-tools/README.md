@@ -127,17 +127,23 @@ LLM ToolCall
 
 ## 7. 완료 게이트
 
+### 2026-08-11 보안 검토 반영
+
+- `typed_confirm` 판정은 `user_typed_phrase` 방식으로만 ticket을 발급한다.
+- 감사 로그의 `normalized_args`와 검색·URL 표시값은 로그용 프라이버시 마스킹을 거친다.
+- 실제 변경 경로는 조사 가능성을 위해 원문을 유지하고 파일 본문·검색어·시크릿은 남기지 않는다.
+
 ```powershell
 python scripts\gate.py --phase 4
 pytest -m "phase4 and security"
 ```
 
-- [ ] 허용 앱·폴더 작업 성공
-- [ ] 비허용 앱·경로 요청 거부와 이유 표시
-- [ ] medium/high 승인 동작 구분
-- [ ] 승인 화면과 실제 인자 불일치 실행 0건
-- [ ] audit intent/result 모두 존재하고 체인이 이어짐
-- [ ] timeout 프로세스 트리 잔존 0건
+- [x] 허용 앱·폴더 작업 성공
+- [x] 비허용 앱·경로 요청 거부와 이유 표시
+- [x] medium/high 승인 동작 구분
+- [x] 승인 화면과 실제 인자 불일치 실행 0건
+- [x] audit intent/result 모두 존재하고 체인이 이어짐
+- [x] timeout 프로세스 트리 잔존 0건 (managed_process 테스트)
 
 ## 8. 이 Phase에서 하지 않는 것
 

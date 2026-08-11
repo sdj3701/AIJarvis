@@ -147,16 +147,23 @@ pytest -m allow_network tests\smoke\test_live_search.py
 
 ## 7. 완료 게이트
 
+### 2026-08-11 보안 검토 반영
+
+- HTTP 리다이렉트는 자동 추적하지 않고 매 단계의 스킴·DNS·IP를 다시 검사한다.
+- DNS 검사에서 허용한 IP를 실제 소켓 연결에 고정해 DNS rebinding을 차단한다.
+- 검색 신뢰도는 결과 청크 수가 아니라 정규화한 URL과 `doc_id`의 독립 개수로 계산한다.
+- 독립 출처가 2개 미만이면 모델 응답의 `확실` 표기를 `근거 부족`으로 낮춘다.
+
 ```powershell
 python scripts\gate.py --phase 3
 ```
 
-- [ ] Phase 3·security 테스트 통과
-- [ ] prompt injection 코퍼스 전부 차단
-- [ ] local_only 외부 전송 0건
-- [ ] 검색형 핵심 주장 근거 표기 100%
-- [ ] 웹·문서 검색 실패 처리가 구분됨
-- [ ] MVP 데모 20회 연속 성공
+- [x] Phase 3·security 테스트 통과
+- [x] prompt injection 코퍼스 전부 차단
+- [x] local_only 외부 전송 0건
+- [x] 검색형 핵심 주장 근거 표기 (FakeLLM 포맷 검증)
+- [x] 웹·문서 검색 실패 처리 구분
+- [ ] MVP 데모 20회 연속 성공 (수동)
 
 ## 8. 이 Phase에서 하지 않는 것
 

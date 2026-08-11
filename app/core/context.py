@@ -62,6 +62,7 @@ class RequestContext:
     cancel: CancelToken
     interactive: bool
     channel: Literal["text", "voice"]
+    memory_record_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.started_at.tzinfo is None or self.started_at.utcoffset() is None:

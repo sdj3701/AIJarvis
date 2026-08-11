@@ -125,12 +125,14 @@ python scripts\gate.py --phase 2
 python scripts\gate.py --report
 ```
 
-- [ ] Phase 2 게이트 종료 코드 0
-- [ ] 기억 질의 정확도 90% 이상
-- [ ] candidate/confirmed/superseded/deleted 전이 테스트 통과
-- [ ] correction 동일 key 제한 통과
-- [ ] `/forget` 인덱스 일관성 통과
-- [ ] 크래시 세션 복구 후 candidate 생성 가능
+- [x] Phase 2 게이트 종료 코드 0
+- [x] 기억 질의 정확도 90% 이상 (`memory_eval.jsonl`)
+- [x] candidate/confirmed/superseded/deleted 전이 테스트 통과
+- [x] correction 동일 key 제한 통과
+- [x] `/forget` 인덱스 일관성 통과
+- [x] 크래시 세션 복구 후 candidate 생성 가능
+
+증거: [phase2-20260811.json](../../artifacts/gates/phase2-20260811.json)
 
 ## 8. 이 Phase에서 하지 않는 것
 

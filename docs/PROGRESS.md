@@ -2,9 +2,9 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-11 (Speaking 적응형 게이트·WebRTC VAD 반영)
-> 현재 상태: Phase 1 완료, Vosk+Whisper+적응형 VAD 게이트+중단 가능한 고속 SAPI 음성 세로 기능 구현
-> 현재 Phase: Phase 2 기억 개발 진입 가능
+> 마지막 문서 정리: 2026-08-11 (Phase 5 에이전트 완료)
+> 현재 상태: Phase 5 멀티스텝 에이전트 완료
+> 현재 Phase: Phase 6 준비 (D007~D008 필요)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -21,10 +21,10 @@
 |-------|------|-----------|-------------|------|
 | 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
 | 1 대화 | completed | [Phase 1](./phase-01-chat/README.md) | [phase1-20260811.json](../artifacts/gates/phase1-20260811.json) | P1-01~P1-07 완료, 283 passed |
-| 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
-| 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
-| 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
-| 5 에이전트 | not_started | [Phase 5](./phase-05-agent/README.md) | — | — |
+| 2 기억 | completed | [Phase 2](./phase-02-memory/README.md) | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) | P2-01~P2-07 완료, 301 passed |
+| 3 검색/RAG | completed | [Phase 3](./phase-03-research/README.md) | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) | P3-01~P3-08 완료, 333 passed |
+| 4 PC 도구 | completed | [Phase 4](./phase-04-tools/README.md) | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) | P4-01~P4-07 완료, 372 passed |
+| 5 에이전트 | completed | [Phase 5](./phase-05-agent/README.md) | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) | TaskStore·멀티스텝·복구, 384 passed |
 | 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
 | 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 하이브리드 STT·적응형 VAD 끼어들기·1.55배 TTS 선행 구현, 사람 발화 스모크와 정식 게이트는 별도 |
 | 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
@@ -32,17 +32,17 @@
 
 ## 3. 현재 작업 큐
 
-Phase 1 문서의 작업 ID와 동일하게 유지한다.
+Phase 5 문서의 작업 ID와 동일하게 유지한다.
 
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
-| P1-01 LLM 계약·가짜 클라이언트 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 177 passed, LLM 계약·가짜 클라이언트 커버리지 100% |
-| P1-02 Ollama 클라이언트 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 220 passed, 클라이언트 99% coverage, 실제 한국어 멀티턴 3회·16K·GPU 100%·비용 0 확인 |
-| P1-03 세션·raw 로그 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 234 passed, raw append+flush/fsync·깨진 꼬리 격리·중간 손상 거부·SQLite 누적 검증 |
-| P1-04 프롬프트·컨텍스트 예산 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 246 passed, prompt 95% coverage, 최근 3턴 보호·오래된 구간 압축·초과 선차단 |
-| P1-05 비용 예산 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 259 passed, budget 90% coverage, Decimal 원자 누적·80% 1회 경고·100% 신규 요청 차단 |
-| P1-06 대화 오케스트레이터·CLI | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 267 passed, loop 94% coverage, 실제 `python -m app --once` 성공·raw 2줄·비용 0·이벤트 순서 확인 |
-| P1-07 크래시·재시도 테스트 | completed | Codex | 2026-08-11 | 2026-08-11 | 283 passed, 5개 종료 지점 × 4회 입력 유실 0건, 운영 kill hook 차단, SQLite 메트릭·p95 검증 |
+| P5-01 TaskStore | completed | Cursor | 2026-08-11 | 2026-08-11 | tasks/task_steps, idempotency |
+| P5-02 루프 확장 | completed | Cursor | 2026-08-11 | 2026-08-11 | Decide→Act→Observe, max_steps |
+| P5-03 승인 중단·재개 | completed | Cursor | 2026-08-11 | 2026-08-11 | pending_approval + task/step |
+| P5-04 재시도 정책 | completed | Cursor | 2026-08-11 | 2026-08-11 | 검색만 자동 재시도 |
+| P5-05 복구 | completed | Cursor | 2026-08-11 | 2026-08-11 | running step 수동 판정 |
+| P5-06 복합 태스크 | completed | Cursor | 2026-08-11 | 2026-08-11 | 검색→저장→폴더 |
+| P5-07 run_skill 골격 | completed | Cursor | 2026-08-11 | 2026-08-11 | 기본 disabled |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 
@@ -51,16 +51,18 @@ Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력
 | 결정/문제 | 영향 | 상태 | 해결 문서 |
 |-----------|------|------|-----------|
 | D005 LLM 런타임·모델 | Phase 1 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D006 검색 API | Phase 3 웹 검색 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
+| D006 검색 API | Phase 3 웹 검색 | decided (duckduckgo) | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D017 끼어들기 게이트 | Speaking 중 적응형 게이트·VAD | decided, S1 구현 | [VOICE_BARGE_IN_GATE](./reference/VOICE_BARGE_IN_GATE.md) |
+| D018 호출·한 문장 명령 | 오호출·한 문장·핫키 중단 | decided, 구현 | [VOICE_WAKE_COMMAND_UX](./reference/VOICE_WAKE_COMMAND_UX.md) |
 | D012 PDF parser | Phase 3 PDF | pending, `.pdf` 비활성 | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D007~D008 백업 | Phase 6 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D009 TTS·D016 STT | Phase 7 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D013~D015 패키징/UI | Phase 8 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-D006~D017은 완료된 Phase 0~1에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`,
+D006~D018은 완료된 Phase 0~1에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`,
 D009는 Windows SAPI 로컬 한국어 TTS, D016은 Vosk 호출어 + faster-whisper small 질문
 인식으로 해소되었다. D017은 Gate A+B+WebRTC VAD S1 구현으로 해소되었고 스피커
-실장치 S2 검증은 남아 있다.
+실장치 S2 검증은 남아 있다. D018은 `[unk]`·한 문장 명령·답변 중단 핫키로 해소되었고
+실장치 체감 확인이 남아 있다.
 
 ## 5. Phase 게이트 증거 로그
 
@@ -70,6 +72,10 @@ Phase를 완료할 때 행을 추가한다.
 |------|-------|--------------|------|-----------|-----------|-----------|
 | 2026-08-11 | Phase 0 | 298f093 | `python scripts\gate.py --phase 0` | 0 | 137 passed, failed 0, skipped 0 | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) |
 | 2026-08-11 | Phase 1 | 368e8e4 | `python scripts\gate.py --phase 1` | 0 | 283 passed, failed 0, skipped 0, crash 20/20 입력 유실 0 | [phase1-20260811.json](../artifacts/gates/phase1-20260811.json) |
+| 2026-08-11 | Phase 2 | 1891e87 | `python scripts\gate.py --phase 2` | 0 | 301 passed, failed 0, skipped 0, memory_eval ≥90% | [phase2-20260811.json](../artifacts/gates/phase2-20260811.json) |
+| 2026-08-11 | Phase 3 | — | `python scripts\gate.py --phase 3` | 0 | 333 passed, failed 0, security·phase3 green | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) |
+| 2026-08-11 | Phase 4 | 1891e87 | `python scripts\gate.py --phase 4` | 0 | 372 passed, failed 0, skipped 1, phase4·security green | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) |
+| 2026-08-11 | Phase 5 | — | `python scripts\gate.py --phase 5` | 0 | 384 passed, failed 0, skipped 1, phase5·security green | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) |
 
 기록 예:
 

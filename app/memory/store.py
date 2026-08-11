@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import sqlite3
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -15,11 +16,28 @@ from pathlib import Path
 from threading import RLock
 from typing import Any, Literal, cast
 
+from app.config.models import RetrievalSettings
 from app.core.atomic import write_atomic
 from app.core.errors import MemoryCorrupted, RecoveryError
 from app.core.errors import MemoryError as JarvisMemoryError
 from app.llm.base import LLMUsage
 from app.memory.migrations import configure_connection
+from app.memory.models import (
+    MemoryQuery,
+    MemoryRecord,
+    MemorySearchResult,
+    RecordKind,
+    RecordStatus,
+    ScoredRecord,
+    assert_transition_allowed,
+)
+from app.memory.retrieval import (
+    extract_key_candidates,
+    finalize_search,
+    fts_match_query,
+    normalize_bm25,
+    score_record,
+)
 
 RawRole = Literal["user", "assistant", "tool", "system_note"]
 Channel = Literal["text", "voice"]
@@ -149,7 +167,7 @@ class SessionRow:
 
 
 class SQLiteSessionStore:
-    """Own session rows and raw JSONL without mixing in Phase 2 memory records."""
+    """Session rows, raw JSONL, and Phase 2 memory records in one SQLite store."""
 
     def __init__(
         self,
@@ -159,6 +177,9 @@ class SQLiteSessionStore:
         raw_dir: Path,
         quarantine_dir: Path,
         fsync_raw: bool,
+        export_dir: Path | None = None,
+        retrieval_settings: RetrievalSettings | None = None,
+        key_aliases: Mapping[str, Sequence[str]] | None = None,
     ) -> None:
         self._database_path = Path(database_path).resolve(strict=False)
         self._data_root = Path(data_root).resolve(strict=False)
@@ -167,6 +188,13 @@ class SQLiteSessionStore:
         self._raw_dir.mkdir(parents=True, exist_ok=True)
         self._quarantine_dir.mkdir(parents=True, exist_ok=True)
         self._fsync_raw = fsync_raw
+        self._export_dir = (
+            Path(export_dir).resolve(strict=False) if export_dir is not None else None
+        )
+        if self._export_dir is not None:
+            self._export_dir.mkdir(parents=True, exist_ok=True)
+        self._retrieval_settings = retrieval_settings
+        self._key_aliases = dict(key_aliases or {})
         self._lock = RLock()
 
     def start_session(self, session_id: str, started_at: datetime) -> SessionRow:
@@ -380,6 +408,446 @@ class SQLiteSessionStore:
             raise MemoryCorrupted("종료한 세션을 다시 읽을 수 없습니다.")
         return ended
 
+    def put_record(self, rec: MemoryRecord) -> str:
+        existing = self.get_record(rec.id)
+        if existing is not None:
+            return rec.id
+        values = self._record_insert_values(rec)
+        with self._lock, self._connection() as connection, connection:
+            try:
+                connection.execute(
+                    """
+                    INSERT INTO records(
+                        id, schema_version, kind, key, value, status,
+                        source_session_id, source_turn_id, source_kind,
+                        created_at, updated_at, expires_at, sensitivity,
+                        supersedes, tags, deleted_at, delete_reason
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    values,
+                )
+            except sqlite3.IntegrityError as error:
+                if rec.status == "confirmed" and rec.key is not None:
+                    raise JarvisMemoryError(
+                        "같은 key에 confirmed 기억이 이미 존재합니다.",
+                        {"key": rec.key, "record_id": rec.id},
+                    ) from error
+                raise JarvisMemoryError(
+                    "기억 레코드를 저장하지 못했습니다.",
+                    {"record_id": rec.id},
+                ) from error
+        return rec.id
+
+    def get_record(self, record_id: str) -> MemoryRecord | None:
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT * FROM records WHERE id = ?", (record_id,)
+            ).fetchone()
+        return None if row is None else self._row_to_record(row)
+
+    def confirm(self, record_id: str, at: datetime) -> MemoryRecord:
+        _validate_time(at, "at")
+        with self._lock, self._connection() as connection, connection:
+            row = connection.execute(
+                "SELECT * FROM records WHERE id = ?", (record_id,)
+            ).fetchone()
+            if row is None:
+                raise JarvisMemoryError(
+                    "확정할 기억 레코드를 찾을 수 없습니다.",
+                    {"record_id": record_id},
+                )
+            current = self._row_to_record(row)
+            assert_transition_allowed(current.status, "confirmed")
+            try:
+                connection.execute(
+                    """
+                    UPDATE records
+                    SET status = 'confirmed', updated_at = ?
+                    WHERE id = ?
+                    """,
+                    (at.isoformat(timespec="milliseconds"), record_id),
+                )
+            except sqlite3.IntegrityError as error:
+                if current.key is not None:
+                    raise JarvisMemoryError(
+                        "같은 key에 confirmed 기억이 이미 존재합니다.",
+                        {"key": current.key, "record_id": record_id},
+                    ) from error
+                raise JarvisMemoryError(
+                    "기억 레코드를 확정하지 못했습니다.",
+                    {"record_id": record_id},
+                ) from error
+        confirmed = self.get_record(record_id)
+        if confirmed is None:
+            raise MemoryCorrupted("확정한 기억 레코드를 다시 읽을 수 없습니다.")
+        return confirmed
+
+    def supersede(self, old_id: str, new_id: str, at: datetime) -> None:
+        _validate_time(at, "at")
+        with self._lock, self._connection() as connection, connection:
+            old_row = connection.execute(
+                "SELECT * FROM records WHERE id = ?", (old_id,)
+            ).fetchone()
+            new_row = connection.execute(
+                "SELECT * FROM records WHERE id = ?", (new_id,)
+            ).fetchone()
+            if old_row is None:
+                raise JarvisMemoryError(
+                    "supersede 대상 기억 레코드를 찾을 수 없습니다.",
+                    {"record_id": old_id},
+                )
+            if new_row is None:
+                raise JarvisMemoryError(
+                    "supersede 후보 기억 레코드를 찾을 수 없습니다.",
+                    {"record_id": new_id},
+                )
+            old = self._row_to_record(old_row)
+            assert_transition_allowed(old.status, "superseded")
+            connection.execute(
+                """
+                UPDATE records
+                SET status = 'superseded', updated_at = ?
+                WHERE id = ?
+                """,
+                (at.isoformat(timespec="milliseconds"), old_id),
+            )
+
+    def soft_delete(self, record_id: str, reason: str, at: datetime) -> None:
+        _validate_time(at, "at")
+        if not reason.strip():
+            raise ValueError("delete_reason은 비어 있을 수 없습니다")
+        with self._lock, self._connection() as connection, connection:
+            row = connection.execute(
+                "SELECT * FROM records WHERE id = ?", (record_id,)
+            ).fetchone()
+            if row is None:
+                raise JarvisMemoryError(
+                    "삭제할 기억 레코드를 찾을 수 없습니다.",
+                    {"record_id": record_id},
+                )
+            current = self._row_to_record(row)
+            assert_transition_allowed(current.status, "deleted")
+            connection.execute(
+                """
+                UPDATE records
+                SET status = 'deleted',
+                    deleted_at = ?,
+                    delete_reason = ?,
+                    updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    at.isoformat(timespec="milliseconds"),
+                    reason,
+                    at.isoformat(timespec="milliseconds"),
+                    record_id,
+                ),
+            )
+
+    def list_records(
+        self,
+        *,
+        status: RecordStatus | None = None,
+        kind: RecordKind | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[MemoryRecord]:
+        if limit < 0 or offset < 0:
+            raise ValueError("limit과 offset은 0 이상이어야 합니다")
+        clauses: list[str] = []
+        params: list[Any] = []
+        if status is not None:
+            clauses.append("status = ?")
+            params.append(status)
+        if kind is not None:
+            clauses.append("kind = ?")
+            params.append(kind)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        query = f"""
+            SELECT * FROM records
+            {where}
+            ORDER BY updated_at DESC, id DESC
+            LIMIT ? OFFSET ?
+        """
+        params.extend([limit, offset])
+        with self._connection() as connection:
+            rows = connection.execute(query, params).fetchall()
+        return [self._row_to_record(row) for row in rows]
+
+    def search(self, q: MemoryQuery) -> MemorySearchResult:
+        now = q.now if q.now is not None else datetime.now().astimezone()
+        _validate_time(now, "now")
+        settings = self._retrieval_settings
+        min_score = float(getattr(settings, "min_score", 0.15) if settings else 0.15)
+        max_candidates = int(getattr(settings, "max_candidates", 3) if settings else 3)
+        kind_weights = getattr(settings, "kind_weights", {}) if settings else {}
+        half_life_days = getattr(settings, "half_life_days", {}) if settings else {}
+
+        search_statuses: tuple[RecordStatus, ...] = tuple(
+            status for status in q.statuses if status not in {"deleted", "superseded"}
+        )
+        if not search_statuses and not q.include_candidates:
+            return MemorySearchResult((), ())
+
+        confirmed_scored: list[ScoredRecord] = []
+        candidate_scored: list[ScoredRecord] = []
+        seen: set[str] = set()
+
+        def add_scored(item: ScoredRecord) -> None:
+            if item.record.id in seen:
+                return
+            seen.add(item.record.id)
+            if item.record.status == "candidate":
+                candidate_scored.append(item)
+            else:
+                confirmed_scored.append(item)
+
+        key_candidates = extract_key_candidates(q.text, self._key_aliases)
+        if key_candidates:
+            placeholders = ", ".join("?" for _ in key_candidates)
+            status_placeholders = ", ".join("?" for _ in search_statuses)
+            kind_placeholders = ", ".join("?" for _ in q.kinds)
+            params: list[Any] = [
+                *key_candidates,
+                *search_statuses,
+                *q.kinds,
+            ]
+            query = f"""
+                SELECT * FROM records
+                WHERE key IN ({placeholders})
+                  AND status IN ({status_placeholders})
+                  AND kind IN ({kind_placeholders})
+            """
+            with self._connection() as connection:
+                rows = connection.execute(query, params).fetchall()
+            for row in rows:
+                record = self._row_to_record(row)
+                add_scored(
+                    score_record(
+                        record,
+                        relevance=1.0,
+                        matched_on="key_exact",
+                        now=now,
+                        kind_weights=kind_weights,
+                        half_life_days=half_life_days,
+                    )
+                )
+
+        if q.include_candidates and "candidate" not in search_statuses:
+            candidate_statuses: tuple[RecordStatus, ...] = ("candidate",)
+        else:
+            candidate_statuses = ()
+
+        fts_query = fts_match_query(q.text)
+        if fts_query:
+            for statuses in (search_statuses, candidate_statuses):
+                if not statuses:
+                    continue
+                status_placeholders = ", ".join("?" for _ in statuses)
+                kind_placeholders = ", ".join("?" for _ in q.kinds)
+                params = [fts_query, *statuses, *q.kinds]
+                sql = f"""
+                    SELECT r.*, bm25(records_fts) AS bm25_rank
+                    FROM records_fts
+                    JOIN records r ON r.rowid = records_fts.rowid
+                    WHERE records_fts MATCH ?
+                      AND r.status IN ({status_placeholders})
+                      AND r.kind IN ({kind_placeholders})
+                    ORDER BY bm25_rank
+                    LIMIT 40
+                """
+                with self._connection() as connection:
+                    try:
+                        rows = connection.execute(sql, params).fetchall()
+                    except sqlite3.OperationalError:
+                        sql = f"""
+                            SELECT r.*, 0.0 AS bm25_rank
+                            FROM records_fts
+                            JOIN records r ON r.rowid = records_fts.rowid
+                            WHERE records_fts MATCH ?
+                              AND r.status IN ({status_placeholders})
+                              AND r.kind IN ({kind_placeholders})
+                            LIMIT 40
+                        """
+                        rows = connection.execute(sql, params).fetchall()
+                for row in rows:
+                    record = self._row_to_record(row)
+                    raw_rank = row["bm25_rank"]
+                    try:
+                        relevance = (
+                            normalize_bm25(float(raw_rank))
+                            if raw_rank is not None
+                            else 1.0
+                        )
+                    except (TypeError, ValueError):
+                        relevance = 1.0
+                    add_scored(
+                        score_record(
+                            record,
+                            relevance=relevance,
+                            matched_on="fts",
+                            now=now,
+                            kind_weights=kind_weights,
+                            half_life_days=half_life_days,
+                        )
+                    )
+
+        return finalize_search(
+            confirmed_scored,
+            candidate_scored,
+            top_k=q.top_k,
+            min_score=min_score,
+            max_candidates=max_candidates if q.include_candidates else 0,
+        )
+
+    def export(self, dest: Path, *, include_raw: bool) -> Path:
+        target = Path(dest)
+        if target.is_dir() or not target.suffix:
+            target.mkdir(parents=True, exist_ok=True)
+            export_file = target / "records.jsonl"
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            export_file = target
+
+        records = self.list_records(limit=1_000_000, offset=0)
+        lines = [
+            json.dumps(
+                self._record_to_export_dict(record),
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+            for record in records
+            if record.status != "deleted"
+        ]
+        payload = ("\n".join(lines) + ("\n" if lines else "")).encode("utf-8")
+        write_atomic(export_file, payload)
+
+        if include_raw:
+            raw_dest = export_file.parent / "raw"
+            raw_dest.mkdir(parents=True, exist_ok=True)
+            for raw_file in self._raw_dir.glob("*.jsonl"):
+                shutil.copy2(raw_file, raw_dest / raw_file.name)
+        return export_file
+
+    def usage_bytes(self) -> int:
+        total = 0
+        if self._database_path.is_file():
+            total += self._database_path.stat().st_size
+        if self._raw_dir.is_dir():
+            for path in self._raw_dir.rglob("*"):
+                if path.is_file():
+                    total += path.stat().st_size
+        return total
+
+    def integrity_check(self) -> list[str]:
+        problems: list[str] = []
+        try:
+            with self._connection() as connection:
+                integrity = str(connection.execute("PRAGMA integrity_check").fetchone()[0])
+                if integrity != "ok":
+                    problems.append(f"pragma integrity_check: {integrity}")
+                try:
+                    connection.execute(
+                        "INSERT INTO records_fts(records_fts) VALUES('integrity-check')"
+                    )
+                except sqlite3.Error as error:
+                    problems.append(f"records_fts integrity-check: {error}")
+                try:
+                    connection.execute(
+                        "INSERT INTO doc_chunks_fts(doc_chunks_fts) VALUES('integrity-check')"
+                    )
+                except sqlite3.Error as error:
+                    problems.append(f"doc_chunks_fts integrity-check: {error}")
+        except JarvisMemoryError as error:
+            problems.append(str(error.user_message))
+        return problems
+
+    def _record_insert_values(self, rec: MemoryRecord) -> tuple[Any, ...]:
+        return (
+            rec.id,
+            rec.schema_version,
+            rec.kind,
+            rec.key,
+            rec.value,
+            rec.status,
+            rec.source_session_id,
+            rec.source_turn_id,
+            rec.source_kind,
+            rec.created_at.isoformat(timespec="milliseconds"),
+            rec.updated_at.isoformat(timespec="milliseconds"),
+            None
+            if rec.expires_at is None
+            else rec.expires_at.isoformat(timespec="milliseconds"),
+            rec.sensitivity,
+            rec.supersedes,
+            json.dumps(list(rec.tags), ensure_ascii=False),
+            None
+            if rec.deleted_at is None
+            else rec.deleted_at.isoformat(timespec="milliseconds"),
+            rec.delete_reason,
+        )
+
+    def _row_to_record(self, row: sqlite3.Row) -> MemoryRecord:
+        try:
+            tags_raw = json.loads(str(row["tags"]))
+            if not isinstance(tags_raw, list):
+                raise ValueError("tags must be a JSON array")
+            tags = tuple(str(item) for item in tags_raw)
+            source_session_id = row["source_session_id"]
+            if source_session_id is None:
+                raise MemoryCorrupted("기억 레코드 source_session_id가 없습니다.")
+            return MemoryRecord(
+                id=str(row["id"]),
+                schema_version=int(row["schema_version"]),
+                kind=cast(RecordKind, row["kind"]),
+                key=cast(str | None, row["key"]),
+                value=str(row["value"]),
+                status=cast(RecordStatus, row["status"]),
+                source_session_id=str(source_session_id),
+                source_turn_id=cast(str | None, row["source_turn_id"]),
+                source_kind=cast(
+                    Literal["user_explicit", "summarizer", "import"],
+                    row["source_kind"],
+                ),
+                created_at=datetime.fromisoformat(str(row["created_at"])),
+                updated_at=datetime.fromisoformat(str(row["updated_at"])),
+                expires_at=None
+                if row["expires_at"] is None
+                else datetime.fromisoformat(str(row["expires_at"])),
+                sensitivity=cast(Literal["normal", "sensitive", "secret"], row["sensitivity"]),
+                supersedes=cast(str | None, row["supersedes"]),
+                tags=tags,
+                deleted_at=None
+                if row["deleted_at"] is None
+                else datetime.fromisoformat(str(row["deleted_at"])),
+                delete_reason=cast(str | None, row["delete_reason"]),
+            )
+        except (ValueError, TypeError, json.JSONDecodeError) as error:
+            raise MemoryCorrupted("기억 레코드 행의 값이 손상되었습니다.") from error
+
+    def _record_to_export_dict(self, record: MemoryRecord) -> dict[str, Any]:
+        return {
+            "schema_version": record.schema_version,
+            "id": record.id,
+            "kind": record.kind,
+            "key": record.key,
+            "value": record.value,
+            "status": record.status,
+            "source": {
+                "session_id": record.source_session_id,
+                "turn_id": record.source_turn_id,
+                "kind": record.source_kind,
+            },
+            "created_at": record.created_at.isoformat(timespec="milliseconds"),
+            "updated_at": record.updated_at.isoformat(timespec="milliseconds"),
+            "expires_at": None
+            if record.expires_at is None
+            else record.expires_at.isoformat(timespec="milliseconds"),
+            "sensitivity": record.sensitivity,
+            "supersedes": record.supersedes,
+            "tags": list(record.tags),
+        }
+
     @contextmanager
     def _connection(self) -> Iterator[sqlite3.Connection]:
         try:
@@ -471,6 +939,9 @@ class SQLiteSessionStore:
         while (candidate := self._quarantine_dir / f"{session_id}.tail.{suffix}").exists():
             suffix += 1
         return candidate
+
+
+SqliteMemoryStore = SQLiteSessionStore
 
 
 def _validate_id(value: str, prefix: str) -> None:

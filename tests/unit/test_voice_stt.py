@@ -99,7 +99,7 @@ def test_streaming_recognizer_exposes_partial_and_final(tmp_path: Path) -> None:
     update = stream.feed(b"\x00\x00")
     assert update.final is True
     assert update.text == "자비스"
-    assert grammars == ['["자비스"]']
+    assert grammars == ['["자비스", "[unk]"]']
 
 
 def test_missing_model_is_reported_without_network_fallback(tmp_path: Path) -> None:

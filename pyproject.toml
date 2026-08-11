@@ -22,6 +22,9 @@ voice = [
     "vosk==0.3.45",
     "webrtcvad-wheels==2.0.14",
 ]
+search = [
+    "ddgs>=9.0.0",
+]
 dev = [
     "mypy>=1.14",
     "pytest>=8.3",
