@@ -27,6 +27,19 @@ CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 �
 `python -m app --once "대한민국의 수도는 어디인가요?"`를 실행한다. 자동 완료 게이트는
 `python scripts\gate.py --phase 1`이며 외부 네트워크를 사용하지 않는다.
 
+로컬 음성 기능은 다음과 같이 준비하고 실행한다.
+
+```powershell
+python -m pip install -e ".[voice]"
+python scripts\setup_voice.py
+python -m app --voice
+```
+
+터미널에 `[마이크 켜짐]`이 표시되면 “자비스”라고 부른다. Jarvis가
+“무엇을 도와드릴까요.”라고 말한 다음 마이크를 다시 열며, 이어서 질문하면 인식 문장을
+화면에 표시하고 Ollama 답변을 한국어 TTS로 읽는다. Ctrl+C 또는 “종료”로 끝낼 수 있다.
+음성 PCM은 메모리의 제한 버퍼에만 두며 파일이나 외부 API로 보내지 않는다.
+
 ## 2. 문서의 역할과 우선순위
 
 | 문서 | 답하는 질문 | 변경 권한 |
@@ -55,7 +68,7 @@ CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 �
 | 8 | [Phase 7 — 음성](./docs/phase-07-voice/README.md) | PTT·STT·TTS | 음성 입출력 |
 | 9 | [Phase 8 — 상주 UI](./docs/phase-08-resident-ui/README.md) | 트레이·단축키·패키징 | v1 후보 |
 | 10 | [운영과 릴리스](./docs/operations/README.md) | 백업·복원·장애 대응·7일 안정화 | v1 릴리스 |
-| 11 | [Post-v1 선택 기능](./docs/post-v1/README.md) | 로컬 LLM 고도화·임베딩·연동·웨이크워드 | 개별 후속 릴리스 |
+| 11 | [Post-v1 선택 기능](./docs/post-v1/README.md) | 로컬 LLM·임베딩·연동·웨이크워드 고도화 | 개별 후속 릴리스 |
 
 ## 4. Phase 문서 사용법
 

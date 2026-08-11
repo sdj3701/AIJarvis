@@ -2,7 +2,9 @@
 
 ## 1. 목표
 
-push-to-talk으로 한국어 음성을 텍스트 요청으로 변환하고 짧은 응답을 안전하게 낭독한다. 기존 Orchestrator를 재사용하며 음성 경로가 승인 정책을 약화시키지 않게 한다.
+명시적으로 시작한 `--voice` 모드에서 로컬 웨이크워드 “자비스”로 한국어 음성 대화를 시작하고 짧은 응답을 안전하게 낭독한다. 기존 Orchestrator를 재사용하며 음성 경로가 승인 정책을 약화시키지 않게 한다.
+
+> 사용자 요청으로 Phase 1 직후 로컬 음성 세로 기능을 먼저 구현했다. 이는 Phase 7 정식 완료를 뜻하지 않는다. Phase 2~6과 음성 승인 정책을 마친 뒤 이 문서의 전체 게이트를 다시 수행한다.
 
 이전: [Phase 6](../phase-06-security/README.md) · 다음: [Phase 8](../phase-08-resident-ui/README.md)
 
@@ -10,13 +12,15 @@ push-to-talk으로 한국어 음성을 텍스트 요청으로 변환하고 짧�
 
 - v0.5/Phase 6 릴리스 게이트 통과
 - [D009 TTS](../00-start-here/DECISIONS.md) 확정
-- GPU·CUDA·오디오 입력 장치 사전 확인
+- Vosk 한국어 모델·오디오 입력 장치 사전 확인
 - text channel에서 Phase 4~5 작업이 안정적으로 동작
 
 ## 3. 만들 파일
 
 ```text
 app/voice/{base.py,stt.py,tts.py,controller.py}
+app/voice/microphone.py
+scripts/setup_voice.py
 tests/fakes/audio.py
 tests/integration/test_voice_parity.py
 tests/data/audio/                 # 직접 제작한 짧은 테스트 음성만
@@ -25,7 +29,8 @@ tests/data/audio/                 # 직접 제작한 짧은 테스트 음성만
 ## 4. 상태 흐름
 
 ```text
-Idle → Recording → Transcribing → Orchestrator(text, channel=voice)
+Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
+→ Transcribing → Orchestrator(text, channel=voice)
 → Speaking 또는 ApprovalWaiting → Idle
 ```
 
@@ -43,19 +48,22 @@ Idle → Recording → Transcribing → Orchestrator(text, channel=voice)
 
 계약은 [DESIGN의 음성·UI 계약](../../DESIGN.md)을 따른다.
 
-### P7-02 Push-to-talk controller
+### P7-02 웨이크워드 controller와 PTT 보조 입력
 
-1. 키 누름 시작에서 녹음하고 뗄 때 중단한다.
-2. 최대 녹음 시간과 무음 제한을 적용한다.
-3. 녹음 중임을 controller 상태와 UI 이벤트로 즉시 알린다.
-4. 입력 장치 오류 시 현재 text UI는 계속 동작하게 한다.
-5. 앱 종료 시 스트림을 닫고 GPU 작업을 정리한다.
+1. `--voice`에서만 마이크를 열고 “자비스” 호출을 로컬에서 감지한다.
+2. 호출 전 PCM은 제한된 메모리 버퍼에만 두고 디스크·API에 저장하지 않는다.
+3. 호출되면 TTS로 정확히 “무엇을 도와드릴까요.”를 재생한 뒤 요청 녹음을 시작한다.
+4. PTT는 Phase 8 전역 단축키와 함께 보조 입력으로 추가한다.
+5. 최대 녹음 시간과 무음 제한을 적용한다.
+6. 녹음 중임을 controller 상태와 UI 이벤트로 즉시 알린다.
+7. 입력 장치 오류 시 현재 text UI는 계속 동작하게 한다.
+8. 앱 종료 시 스트림을 닫고 자원을 정리한다.
 
 ### P7-03 STT
 
-1. faster-whisper를 설정에 따라 lazy load한다.
-2. 모델 load 실패 시 CPU fallback 여부를 사용자에게 명시한다.
-3. Korean language hint를 주되 결과 language를 기록한다.
+1. `vosk-model-small-ko-0.22`를 고정 SHA-256 검증 후 로컬에서 lazy load한다.
+2. Vosk·sounddevice가 없으면 설치 명령을 사용자에게 명시한다.
+3. Korean language 결과와 지연시간을 기록한다.
 4. transcript를 raw에 저장하기 전에 Privacy Gate for_log/for_memory를 적용한다.
 5. p95 latency 측정 이벤트를 기록한다.
 
@@ -74,13 +82,11 @@ Idle → Recording → Transcribing → Orchestrator(text, channel=voice)
 3. secret/pii_high는 화면 전용 fallback 문장으로 대체한다.
 4. 최대 글자 수를 넘으면 첫 요약만 읽고 전체는 화면에 표시한다.
 5. 사용자가 말하기 시작하면 현재 TTS를 취소한다.
-6. edge-tts 선택 시 요청 전 online_tts 예산을 확인하고 성공 비용을 기록한다.
-7. edge-tts 선택 시 네트워크 전송 사실과 실패를 명확히 표시한다.
+6. Windows SAPI `Microsoft Heami Desktop`만 사용하며 온라인 TTS로 폴백하지 않는다.
 
 ### P7-06 자원 관리
 
-- STT 모델과 향후 로컬 LLM이 GPU를 동시에 점유하지 않도록 lazy load/unload 정책 적용
-- 메모리 부족 시 작은 STT 모델 또는 CPU fallback
+- Vosk STT는 CPU에서 실행해 Ollama GPU 적재와 분리
 - 녹음 buffer 상한 적용
 - 장시간 idle이면 선택적으로 모델 unload
 
@@ -94,6 +100,14 @@ Idle → Recording → Transcribing → Orchestrator(text, channel=voice)
 - 긴 답변 TTS 길이 제한
 - TTS 중 PTT 시작 시 TTS 취소
 - GPU 없는 환경은 명확한 skip 또는 CPU fallback
+
+현재 선행 세로 기능 검증:
+
+- [x] USB 마이크 PCM 입력, 오버플로 0 확인
+- [x] 로컬 한국어 TTS “무엇을 도와드릴까요.” 실제 재생
+- [x] “자비스” 호출→음성 질문→`channel=voice` Ollama→답변 TTS 조립 테스트
+- [x] secret/pii_high 실제 문장 낭독 0건
+- [x] 호출 전 PCM 파일·외부 전송 0건
 
 ## 7. 완료 게이트
 
@@ -110,7 +124,7 @@ python scripts\gate.py --phase 7
 
 ## 8. 이 Phase에서 하지 않는 것
 
-- 웨이크워드·상시 녹음
+- OS 로그인 자동 시작과 사용자 모르게 마이크 열기
 - 음성 생체 인증
 - 음성만으로 High 작업 승인
 - 긴 문서 전체 낭독

@@ -92,3 +92,14 @@ def test_missing_model_is_reported_without_network_fallback(tmp_path: Path) -> N
     with pytest.raises(JarvisError) as captured:
         validate_model_directory(tmp_path / "missing")
     assert "setup_voice.py" in captured.value.user_message
+
+
+def test_model_archive_hash_must_match_configuration(tmp_path: Path) -> None:
+    from app.core.errors import JarvisError
+
+    model = _model_directory(tmp_path)
+    model.with_suffix(".zip").write_bytes(b"not-the-pinned-model")
+
+    with pytest.raises(JarvisError) as captured:
+        validate_model_directory(model, expected_archive_sha256="0" * 64)
+    assert "SHA-256" in captured.value.user_message

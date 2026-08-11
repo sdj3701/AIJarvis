@@ -38,12 +38,12 @@
 - 쓰기·전송·초대·메일 발송은 별도 High 위험 기능으로 분리
 - 최소 scope와 revoke 절차 문서화
 
-### Wakeword
+### Wakeword 고도화
 
-- 상시 녹음 여부, 로컬 처리, buffer 보존을 별도 privacy 결정으로 기록
-- wakeword 전 오디오는 디스크·API에 저장하지 않음
-- 명확한 마이크 indicator와 즉시 끄기 제공
-- false activation·background TV 음성 테스트
+- 현재 `--voice` opt-in 로컬 “자비스” 호출을 사용자별 호출어로 확장
+- 호출 전 오디오는 계속 디스크·API에 저장하지 않음
+- 트레이 마이크 indicator와 즉시 끄기 제공
+- false activation·background TV 음성 장기 테스트와 임계값 조정
 
 ### 피드백 통계
 

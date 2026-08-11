@@ -133,7 +133,7 @@ D:\Ai\Jarvis\
 │   │   └── recovery.py         # 시작 시 미완료 세션·task 탐지·복구
 │   ├── voice\                  # Phase 7
 │   │   ├── base.py             # AudioFrame, Transcript, STTEngine, TTSEngine
-│   │   ├── stt.py              # faster-whisper, push-to-talk
+│   │   ├── stt.py              # Vosk 로컬 한국어 STT·웨이크워드
 │   │   ├── tts.py
 │   │   └── controller.py       # Idle/Recording/Transcribing/Speaking 상태
 │   └── ui\                     # Phase 8
@@ -939,7 +939,7 @@ class TaskStep:
 | 3 | `httpx`, `selectolax` 또는 `beautifulsoup4` | 웹 fetch·본문 추출 |
 | 3 | 검색 API SDK 또는 직접 HTTP | 웹 검색 |
 | 3(후) | `sentence-transformers` 또는 API 임베딩 | 임베딩 검색 |
-| 7 | `faster-whisper`, `sounddevice`, `edge-tts` | 음성 |
+| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, Windows SAPI | 로컬 음성 |
 | 8 | `pystray`, `pillow`, `keyboard` 또는 `pynput` | 트레이·단축키 |
 
 개발 의존성: `pytest`, `pytest-cov`, `pytest-timeout`, `ruff`, `mypy`.

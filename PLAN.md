@@ -5,7 +5,7 @@
 > 전략: **하이브리드** — 두뇌(LLM)는 API, 손발·기억·음성은 로컬  
 > 기억 저장: **D 드라이브** (`D:\Jarvis\memory`)
 > 개발 진입점: [`README.md`](./README.md) · Phase별 구현서: [`docs/`](./docs/README.md)
-> 문서 버전: **v0.3** — 개발 흐름별 문서 분할과 기준 문서 정합성 보강
+> 문서 버전: **v0.4** — 사용자 요청에 따른 opt-in 로컬 웨이크워드 음성 경로 반영
 
 ---
 
@@ -82,6 +82,7 @@
 **v1 — Phase 7~8 필수**
 
 - STT + TTS
+- `--voice`에서만 동작하는 로컬 웨이크워드 “자비스”
 - 트레이/전역 단축키 UI
 - 승인 요청·작업 완료 알림
 - 설치/재시작 후에도 설정·기억·복구가 정상 동작
@@ -89,7 +90,6 @@
 **Could (이후)**
 
 - 로컬 7B~14B 오프라인 모드
-- 웨이크워드(“자비스”)
 - 캘린더/메일 연동
 - 피드백 통계로 규칙 자동 조정
 
@@ -638,9 +638,9 @@ Summarizer(LLM) → summary + candidate facts
 
 **작업**
 
-- faster-whisper로 STT
-- 초기 UX: **단축키/버튼(push-to-talk)** (웨이크워드는 나중)
-- TTS로 짧은 응답 낭독 (긴 요약은 화면 우선)
+- Vosk 한국어 소형 모델로 오프라인 STT
+- `--voice` opt-in 실행에서 “자비스” 웨이크워드, PTT는 후속 보조 입력
+- Windows SAPI 한국어 로컬 TTS로 짧은 응답 낭독 (긴 요약은 화면 우선)
 - 기존 Orchestrator는 그대로 재사용 (입력만 음성으로)
 
 **완료 기준**
@@ -686,7 +686,7 @@ Summarizer(LLM) → summary + candidate facts
 - 임베딩 검색 고도화, fact 중복 병합 UI
 - 외부 서비스 연동 (캘린더 등, 읽기 우선)
 - 피드백 통계로 검색 우선순위·프롬프트 미세조정
-- 웨이크워드
+- 웨이크워드 오탐률 고도화와 사용자별 호출어
 - (훨씬 나중에) 데이터 충분 시 파인튜닝 검토
 
 ---
@@ -888,7 +888,7 @@ Summarizer(LLM) → summary + candidate facts
 |------|-----------|---------|
 | LLM | Ollama + `qwen3.5:9b` 하나만 고정 | ☑ |
 | UI | CLI → 트레이 | ☐ |
-| 음성 호출 | 단축키/PTT (웨이크워드 나중) | ☐ |
+| 음성 호출 | `--voice` opt-in 로컬 웨이크워드 “자비스” | ☑ |
 | 기억 경로 | `D:\Jarvis\memory` | ☐ |
 | 로컬 LLM | Phase 1부터 사용, 클라우드 폴백 없음 | ☑ |
 | 웹 검색 제공자 | Phase 3에서 검색 API 1개만 선택 | ☐ |
@@ -949,7 +949,8 @@ Summarizer(LLM) → summary + candidate facts
 | 2026-08-10 | 초안 작성 (하이브리드 자비스 v1 플랜) |
 | 2026-08-10 | v0.2: 릴리스 경계, Privacy/Safety Gate, 기억 lifecycle, 장애 복구, 보안·정량 테스트 보강 |
 | 2026-08-10 | v0.3: README 개발 허브·Phase별 실행 문서 추가, SQLite 저장 구조로 기준 통일 |
+| 2026-08-11 | v0.4: Vosk·Windows SAPI 기반 opt-in “자비스” 음성 세로 기능 반영 |
 
 ---
 
-**다음 액션:** [착수 안내](./docs/00-start-here/README.md)를 확인한 뒤 [Phase 0 구현서](./docs/phase-00-foundation/README.md)의 P0-01부터 순서대로 착수한다.
+**다음 액션:** Phase 1 완료 증거를 유지한 채 [Phase 2 구현서](./docs/phase-02-memory/README.md)의 기억 lifecycle을 순서대로 착수한다.

@@ -201,6 +201,7 @@ def run_application(
                 model_path,
                 sample_rate=voice_settings.stt.sample_rate_hz,
                 language=voice_settings.stt.language,
+                expected_archive_sha256=voice_settings.stt.model_archive_sha256,
             )
             listener = LocalVoiceListener(
                 stt=stt,

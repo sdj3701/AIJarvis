@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -62,7 +63,19 @@ def _recognizer_factory(model: object, sample_rate: int, grammar: str | None) ->
     return cast(VoskRecognizer, recognizer)
 
 
-def validate_model_directory(path: Path) -> Path:
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        while chunk := source.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def validate_model_directory(
+    path: Path,
+    *,
+    expected_archive_sha256: str | None = None,
+) -> Path:
     resolved = Path(path).resolve(strict=False)
     missing = [
         str(relative)
@@ -74,6 +87,13 @@ def validate_model_directory(path: Path) -> Path:
             "한국어 음성 인식 모델이 없습니다. python scripts\\setup_voice.py를 실행하세요.",
             {"model": resolved.name, "missing": missing},
         )
+    if expected_archive_sha256 is not None:
+        archive = resolved.parent / f"{resolved.name}.zip"
+        if not archive.is_file() or _sha256(archive) != expected_archive_sha256:
+            raise JarvisError(
+                "한국어 음성 인식 모델의 SHA-256 검증에 실패했습니다.",
+                {"model": resolved.name},
+            )
     return resolved
 
 
@@ -112,12 +132,16 @@ class VoskSTTEngine:
         *,
         sample_rate: int = 16_000,
         language: str = "ko",
+        expected_archive_sha256: str | None = None,
         model_loader: Callable[[Path], object] = _load_vosk_model,
         recognizer_factory: RecognizerFactory = _recognizer_factory,
     ) -> None:
         if sample_rate <= 0:
             raise ValueError("sample_rate must be positive")
-        self._model_path = validate_model_directory(model_path)
+        self._model_path = validate_model_directory(
+            model_path,
+            expected_archive_sha256=expected_archive_sha256,
+        )
         self._sample_rate = sample_rate
         self._language = language
         self._model = model_loader(self._model_path)

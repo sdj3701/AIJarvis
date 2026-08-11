@@ -3,7 +3,7 @@
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
 > 마지막 문서 정리: 2026-08-11 (Phase 1 게이트 증거 반영)
-> 현재 상태: Phase 1 P1-01~P1-07 완료, Ollama 한국어 대화·저장·예산·크래시 내구성 검증 성공
+> 현재 상태: Phase 1 완료, opt-in “자비스” 로컬 음성 세로 기능 추가·실장치 TTS/마이크 스모크 성공
 > 현재 Phase: Phase 2 기억 개발 진입 가능
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
@@ -26,7 +26,7 @@
 | 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
 | 5 에이전트 | not_started | [Phase 5](./phase-05-agent/README.md) | — | — |
 | 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
-| 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | D009 필요 |
+| 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 선행 음성 세로 기능 구현, 정식 게이트는 Phase 2~6 이후 |
 | 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
 | v1 안정화 | not_started | [운영](./operations/README.md) | — | 7일 기록 필요 |
 
@@ -54,9 +54,9 @@ Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력
 | D006 검색 API | Phase 3 웹 검색 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D012 PDF parser | Phase 3 PDF | pending, `.pdf` 비활성 | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D007~D008 백업 | Phase 6 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D009 TTS | Phase 7 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
+| D009 TTS | Phase 7 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D013~D015 패키징/UI | Phase 8 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-D006~D015는 완료된 Phase 0에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`로 해소되었다.
+D006~D015는 완료된 Phase 0~1에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`, D009는 Windows SAPI 로컬 한국어 TTS로 해소되었다.
 
 ## 5. Phase 게이트 증거 로그
 
