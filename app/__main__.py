@@ -11,9 +11,15 @@ from app.wiring import run_application
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Jarvis Phase 1 local Ollama CLI")
+    parser = argparse.ArgumentParser(description="Jarvis local Ollama assistant")
     parser.add_argument("--config-dir", type=Path, default=DEFAULT_CONFIG_DIR)
-    parser.add_argument("--once", help="한 번 질문하고 답변한 뒤 종료합니다.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--once", help="한 번 질문하고 답변한 뒤 종료합니다.")
+    mode.add_argument(
+        "--voice",
+        action="store_true",
+        help="마이크를 열고 '자비스' 로컬 웨이크워드를 기다립니다.",
+    )
     return parser
 
 
@@ -25,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
         output_stream=sys.stdout,
         error_stream=sys.stderr,
         once=args.once,
+        voice=args.voice,
     )
 
 

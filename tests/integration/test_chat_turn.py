@@ -233,6 +233,21 @@ def test_clear_drops_prompt_history_but_keeps_raw_audit(config_dir: Path) -> Non
     ]
 
 
+def test_voice_channel_is_preserved_in_raw_context_and_metrics(config_dir: Path) -> None:
+    llm = EventingFakeLLM().reply("음성 답변")
+    runtime = _runtime(config_dir, llm)
+    chat = _chat(runtime)
+
+    outcome = chat.handle_turn("음성 질문", channel="voice")
+
+    assert outcome.text == "음성 답변"
+    assert chat.session_id is not None
+    raw = runtime.sessions.read_raw(chat.session_id).records
+    assert [record.channel for record in raw] == ["voice", "voice"]
+    user_event = next(record for record in _events(runtime) if record["event_type"] == "user.input")
+    assert user_event["payload"]["channel"] == "voice"
+
+
 def test_llm_error_becomes_user_message_raw_note_and_error_event(config_dir: Path) -> None:
     from app.core.errors import LLMTimeout
 

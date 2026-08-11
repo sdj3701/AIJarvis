@@ -15,7 +15,7 @@ from app.core.errors import JarvisError, LLMBadResponse
 from app.core.ids import PrefixedIdFactory
 from app.core.test_hooks import CrashTestHook
 from app.llm.base import LLMClient, Message
-from app.memory.store import EndReason, RawRecord, SQLiteSessionStore
+from app.memory.store import Channel, EndReason, RawRecord, SQLiteSessionStore
 from app.orchestrator.prompt import PromptAssembler
 from app.telemetry.events import EventIdentity
 from app.telemetry.masking import LogMasker
@@ -137,9 +137,11 @@ class ChatOrchestrator:
         if self._active_cancel is not None:
             self._active_cancel.cancel()
 
-    def handle_turn(self, text: str) -> TurnOutcome:
+    def handle_turn(self, text: str, *, channel: Channel = "text") -> TurnOutcome:
         if not isinstance(text, str) or not text.strip():
             raise ValueError("사용자 입력은 비어 있을 수 없습니다")
+        if channel not in {"text", "voice"}:
+            raise ValueError("channel must be text or voice")
         session_id = self.start()
         turn_started_ms = self._clock.monotonic_ms()
         request_id = self._ids.new("req")
@@ -170,7 +172,7 @@ class ChatOrchestrator:
             audit=NullAuditWriter(),
             cancel=cancel,
             interactive=True,
-            channel="text",
+            channel=channel,
         )
         masked_input = self._masker.for_log(text)
         self._sessions.append_raw(
@@ -180,13 +182,13 @@ class ChatOrchestrator:
                 turn_id=turn_id,
                 role="user",
                 content=masked_input,
-                channel="text",
+                channel=channel,
                 request_id=request_id,
             )
         )
         bound_events.emit(
             "user.input",
-            {"text_len": len(text), "channel": "text", "text": text},
+            {"text_len": len(text), "channel": channel, "text": text},
         )
 
         self._active_cancel = cancel
@@ -237,7 +239,7 @@ class ChatOrchestrator:
                     turn_id=turn_id,
                     role="assistant",
                     content=masked_response,
-                    channel="text",
+                    channel=channel,
                     request_id=request_id,
                     meta={
                         "model": response.model,
@@ -278,7 +280,7 @@ class ChatOrchestrator:
                     "turn.latency",
                     max(0, self._clock.monotonic_ms() - turn_started_ms),
                     at=self._clock.now(),
-                    labels={"channel": "text", "used_tools": False},
+                    labels={"channel": channel, "used_tools": False},
                 )
             return TurnOutcome(
                 ok=True,
@@ -305,7 +307,7 @@ class ChatOrchestrator:
                     turn_id=turn_id,
                     role="system_note",
                     content=self._masker.for_log(user_message),
-                    channel="text",
+                    channel=channel,
                     request_id=request_id,
                     meta={"status": "error", "error_type": type(error).__name__},
                 )

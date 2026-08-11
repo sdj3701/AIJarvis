@@ -23,7 +23,7 @@ from app.core.clock import (
     SystemRandom,
     SystemSleeper,
 )
-from app.core.errors import ExitCode, JarvisError, exit_code_for
+from app.core.errors import ConfigError, ExitCode, JarvisError, exit_code_for
 from app.core.ids import PrefixedIdFactory, SystemIdFactory
 from app.core.test_hooks import CrashTestHook, CrashTestLLMClient
 from app.llm.base import LLMClient
@@ -36,6 +36,9 @@ from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
 from app.telemetry.metrics import SQLiteMetrics
 from app.ui.single_instance import SingleInstanceLock
+from app.voice.controller import LocalVoiceListener, VoiceController, microphone_factory
+from app.voice.stt import VoskSTTEngine
+from app.voice.tts import WindowsSapiTTS
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +149,7 @@ def run_application(
     output_stream: TextIO,
     error_stream: TextIO,
     once: str | None = None,
+    voice: bool = False,
     llm: LLMClient | None = None,
 ) -> int:
     """Run startup, CLI, and cleanup with production-safe exception reporting."""
@@ -185,12 +189,51 @@ def run_application(
             test_hook=runtime.test_hook,
             metrics=runtime.metrics,
         )
-        exit_code = run_cli(
-            input_stream=input_stream,
-            output_stream=output_stream,
-            once=once,
-            chat=chat,
-        )
+        if voice:
+            voice_settings = runtime.config.settings.voice
+            if not voice_settings.enabled:
+                raise ConfigError("설정에서 음성 모드가 비활성화되어 있습니다.")
+            model_path = (
+                _data_path(runtime.config, runtime.config.settings.paths.models_dir)
+                / voice_settings.stt.model
+            )
+            stt = VoskSTTEngine(
+                model_path,
+                sample_rate=voice_settings.stt.sample_rate_hz,
+                language=voice_settings.stt.language,
+            )
+            listener = LocalVoiceListener(
+                stt=stt,
+                microphone_factory=microphone_factory(
+                    voice_settings.stt.device,
+                    sample_rate=voice_settings.stt.sample_rate_hz,
+                ),
+                wake_word=voice_settings.wake_word,
+                command_timeout_s=voice_settings.stt.max_command_seconds,
+                device_label=voice_settings.stt.device,
+                events=runtime.events,
+                clock=runtime.clock,
+                output_stream=output_stream,
+            )
+            controller = VoiceController(
+                listener=listener,
+                tts=WindowsSapiTTS(voice_settings.tts.voice),
+                chat=chat,
+                masker=runtime.masker,
+                acknowledgement=voice_settings.acknowledgement,
+                max_tts_chars=voice_settings.tts.max_chars,
+                events=runtime.events,
+                clock=runtime.clock,
+                output_stream=output_stream,
+            )
+            exit_code = controller.run()
+        else:
+            exit_code = run_cli(
+                input_stream=input_stream,
+                output_stream=output_stream,
+                once=once,
+                chat=chat,
+            )
     except KeyboardInterrupt as error:
         exit_code = int(ExitCode.INTERRUPTED)
         output_stream.write("\n입력을 중단하고 안전하게 종료합니다.\n")
