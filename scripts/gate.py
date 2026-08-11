@@ -10,10 +10,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from app.core.atomic import write_atomic
-from app.core.clock import KST
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from app.core.atomic import write_atomic  # noqa: E402
+from app.core.clock import KST  # noqa: E402
+
 ARTIFACTS_DIR = REPOSITORY_ROOT / "artifacts" / "gates"
 
 

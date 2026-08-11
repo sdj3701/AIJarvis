@@ -10,11 +10,14 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.core.errors import ConfigError, JarvisError, exit_code_for
-from app.memory.migrations import initialize_database
-
 DEFAULT_DATA_ROOT = Path(r"D:\Jarvis")
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from app.core.errors import ConfigError, JarvisError, exit_code_for  # noqa: E402
+from app.memory.migrations import initialize_database  # noqa: E402
+
 DEFAULT_CONFIG_SOURCE = REPOSITORY_ROOT / "config"
 DEFAULT_MIN_FREE_BYTES = 5 * 1024**3
 

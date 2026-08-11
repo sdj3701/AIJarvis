@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sqlite3
+import subprocess
+import sys
 from contextlib import closing
 from pathlib import Path
 
@@ -66,6 +68,29 @@ def test_bootstrap_cli_prints_korean_summary(
     assert exit_code == 0
     assert "[완료] directory" in output
     assert "남은 공간:" in output
+
+
+def test_bootstrap_script_runs_directly_from_documented_command(tmp_path: Path) -> None:
+    root = tmp_path / "Jarvis"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/bootstrap.py",
+            "--data-root",
+            str(root),
+            "--min-free-gb",
+            "0",
+        ],
+        cwd=Path(__file__).resolve().parents[2],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "[완료] directory" in result.stdout
+    assert (root / "memory" / "jarvis.sqlite3").is_file()
 
 
 def test_database_has_documented_schema_and_pragmas(tmp_path: Path) -> None:
