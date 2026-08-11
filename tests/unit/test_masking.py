@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-import pytest
+from pathlib import Path
 
-from app.config.models import DetectorPolicy, MaskPolicy
+import pytest
+import yaml
+
+from app.config.models import DetectorPolicy, MaskPolicy, PrivacyPolicy
 from app.telemetry.masking import LogMasker
 
 pytestmark = pytest.mark.phase0
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _masker() -> LogMasker:
@@ -69,6 +73,18 @@ def test_sensitive_patterns_and_registered_secret_never_remain() -> None:
         "registered_secret",
     }
     assert all(value not in repr(findings) for value in sensitive_values)
+
+
+def test_korean_suffix_after_phone_number_is_still_masked() -> None:
+    document = yaml.safe_load(
+        (REPOSITORY_ROOT / "config" / "privacy.example.yaml").read_text(encoding="utf-8")
+    )
+    masker = LogMasker.from_policy(PrivacyPolicy.model_validate(document))
+
+    masked, findings = masker.mask_text("연락처는 010-1234-5678입니다")
+
+    assert "010-1234-5678" not in masked
+    assert [finding.detector_id for finding in findings] == ["kr_phone"]
 
 
 def test_longest_overlapping_detector_wins() -> None:

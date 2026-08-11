@@ -11,9 +11,9 @@ from app.wiring import run_application
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Jarvis Phase 0 CLI")
+    parser = argparse.ArgumentParser(description="Jarvis Phase 1 local Ollama CLI")
     parser.add_argument("--config-dir", type=Path, default=DEFAULT_CONFIG_DIR)
-    parser.add_argument("--once", help="한 번 echo한 뒤 종료합니다.")
+    parser.add_argument("--once", help="한 번 질문하고 답변한 뒤 종료합니다.")
     return parser
 
 

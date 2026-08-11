@@ -14,6 +14,7 @@ import yaml
 
 from app.budget import BudgetGuard
 from app.core.errors import ExitCode
+from app.llm.fake import FakeLLMClient
 from app.llm.ollama_client import OllamaClient
 from app.memory.store import SQLiteSessionStore
 from app.ui.single_instance import SingleInstanceLock
@@ -80,13 +81,22 @@ def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) 
         input_stream=StringIO("확인\n/bye\n"),
         output_stream=output,
         error_stream=errors,
+        llm=FakeLLMClient().reply("확인 응답"),
     )
 
     assert exit_code == 0
-    assert "확인" in output.getvalue()
+    assert "확인 응답" in output.getvalue()
     assert errors.getvalue() == ""
     event_types = [record["event_type"] for record in _events(runtime_config)]
-    assert event_types == ["app.start", "recovery.start", "recovery.result", "app.stop"]
+    assert event_types == [
+        "app.start",
+        "recovery.start",
+        "recovery.result",
+        "session.start",
+        "user.input",
+        "session.end",
+        "app.stop",
+    ]
     runtime = build(runtime_config)
     with runtime.lock:
         assert runtime.lock.acquired
@@ -101,7 +111,7 @@ def test_python_module_entrypoint_runs_once(runtime_config: Path) -> None:
             "--config-dir",
             str(runtime_config),
             "--once",
-            "조립 확인",
+            "/help",
         ],
         cwd=REPOSITORY_ROOT,
         capture_output=True,
@@ -110,7 +120,7 @@ def test_python_module_entrypoint_runs_once(runtime_config: Path) -> None:
     )
 
     assert result.returncode == 0
-    assert result.stdout == "조립 확인\n"
+    assert "사용 가능한 명령" in result.stdout
     assert result.stderr == ""
     assert _events(runtime_config)[-1]["event_type"] == "app.stop"
 

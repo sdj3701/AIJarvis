@@ -15,13 +15,21 @@ from app.cli import run_cli
 from app.config.loader import DEFAULT_CONFIG_DIR, load_config
 from app.config.models import LoadedConfig
 from app.config.secrets import SecretLoader
-from app.core.clock import Clock, SystemClock
+from app.core.clock import (
+    Clock,
+    RandomSource,
+    Sleeper,
+    SystemClock,
+    SystemRandom,
+    SystemSleeper,
+)
 from app.core.errors import ExitCode, JarvisError, exit_code_for
 from app.core.ids import PrefixedIdFactory, SystemIdFactory
 from app.llm.base import LLMClient
 from app.llm.ollama_client import OllamaClient
 from app.memory.migrations import initialize_database
 from app.memory.store import SQLiteSessionStore
+from app.orchestrator.loop import ChatOrchestrator
 from app.orchestrator.recovery import recover_startup
 from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
@@ -41,6 +49,8 @@ class Runtime:
     llm: LLMClient
     sessions: SQLiteSessionStore
     budget: BudgetGuard
+    sleeper: Sleeper
+    random: RandomSource
 
 
 def _data_path(config: LoadedConfig, configured: Path) -> Path:
@@ -54,6 +64,7 @@ def build(
     *,
     clock: Clock | None = None,
     ids: PrefixedIdFactory | None = None,
+    llm: LLMClient | None = None,
 ) -> Runtime:
     """Load configuration and construct every Phase 0 service in one place."""
     loaded = load_config(config_dir)
@@ -83,7 +94,7 @@ def build(
         secrets=secrets,
         lock=SingleInstanceLock(state_dir / "jarvis.lock"),
         memory_db=memory_db,
-        llm=OllamaClient(loaded.settings.llm),
+        llm=llm or OllamaClient(loaded.settings.llm),
         sessions=SQLiteSessionStore(
             memory_db,
             data_root=loaded.settings.paths.data_root,
@@ -92,6 +103,8 @@ def build(
             fsync_raw=loaded.settings.logging.fsync_events,
         ),
         budget=BudgetGuard(SQLiteBudgetLedger(memory_db), loaded.settings.budget),
+        sleeper=SystemSleeper(),
+        random=SystemRandom(),
     )
 
 
@@ -122,6 +135,7 @@ def run_application(
     output_stream: TextIO,
     error_stream: TextIO,
     once: str | None = None,
+    llm: LLMClient | None = None,
 ) -> int:
     """Run startup, CLI, and cleanup with production-safe exception reporting."""
     runtime: Runtime | None = None
@@ -129,7 +143,7 @@ def run_application(
     started_ms = 0
     exit_code = int(ExitCode.UNHANDLED_ERROR)
     try:
-        runtime = build(config_dir)
+        runtime = build(config_dir, llm=llm)
         runtime.lock.acquire()
         initialize_database(runtime.memory_db)
         started_ms = runtime.clock.monotonic_ms()
@@ -144,10 +158,25 @@ def run_application(
         )
         started = True
         recover_startup(runtime.config.settings.paths.data_root, runtime.events)
+        verifier = getattr(runtime.llm, "verify_model", None)
+        chat = ChatOrchestrator(
+            settings=runtime.config.settings,
+            llm=runtime.llm,
+            sessions=runtime.sessions,
+            budget=runtime.budget,
+            masker=runtime.masker,
+            events=runtime.events,
+            clock=runtime.clock,
+            sleeper=runtime.sleeper,
+            random=runtime.random,
+            ids=runtime.ids,
+            verify_model=verifier if callable(verifier) else None,
+        )
         exit_code = run_cli(
             input_stream=input_stream,
             output_stream=output_stream,
             once=once,
+            chat=chat,
         )
     except KeyboardInterrupt as error:
         exit_code = int(ExitCode.INTERRUPTED)

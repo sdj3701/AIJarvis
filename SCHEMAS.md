@@ -832,6 +832,10 @@ PLAN 12.1절의 정량 기준을 실제로 측정하기 위한 최소 집합이�
 | `tools.yaml` | `default`가 `deny`가 아님 / `sandbox`의 `write_roots`·`read_roots`·`roots`에 절대 경로가 있음 / 해석된 경로가 `data_root` 밖 / `risk`·`execution_mode`가 정의되지 않은 도구 / `run_skill`이 managed가 아님 / 앱 실행 도구가 detached allowlisted가 아님 / `app_map`의 실행 파일이 존재하지 않음 |
 | `privacy.yaml` | `api_transmission.default`가 `deny`가 아님 / `detectors`에 시크릿 패턴이 하나도 없음 / `outputs.memory_write.refuse_kinds`가 빈 배열 / 외부 service 설정이 없음 |
 
+한국어 문장에서는 숫자 뒤의 조사도 정규식 `\w`로 취급될 수 있다. 전화번호처럼 숫자로 끝나는
+detector는 `\b`에 의존하지 않고 `(?<!\d)`·`(?!\d)` 경계를 사용해 `010-1234-5678입니다`도
+반드시 탐지해야 한다.
+
 `tools.yaml`의 `default: deny`, `privacy.api_transmission.default: deny`, `settings.budget.on_exceed: block_new_requests`는 설정으로 완화할 수 없다. 로더가 `ConfigError`를 던진다. **PLAN 12.1의 정량 기준을 끌 수 있는 스위치는 설정 항목으로 만들지 않는다** — 끌 수 있으면 기준이 아니다.
 
 세 파일을 개별 검증한 뒤 교차 검증한다.

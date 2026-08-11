@@ -3,8 +3,8 @@
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
 > 마지막 문서 정리: 2026-08-11 (Phase 0 게이트 증거 반영)
-> 현재 상태: Phase 1 P1-01~P1-05 완료, 로컬 비용 0 포함 일·월 예산 장부 확보
-> 현재 Phase: Phase 1 (다음 P1-06 대화 오케스트레이터·CLI)
+> 현재 상태: Phase 1 P1-01~P1-06 완료, 실제 Ollama CLI 한 턴·raw·이벤트·예산 기록 성공
+> 현재 Phase: Phase 1 (다음 P1-07 크래시·재시도·게이트)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -20,7 +20,7 @@
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
 | 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
-| 1 대화 | in_progress | [Phase 1](./phase-01-chat/README.md) | — | P1-01~P1-05 완료, P1-06 대기 |
+| 1 대화 | in_progress | [Phase 1](./phase-01-chat/README.md) | — | P1-01~P1-06 완료, P1-07 대기 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
 | 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
@@ -41,7 +41,7 @@ Phase 1 문서의 작업 ID와 동일하게 유지한다.
 | P1-03 세션·raw 로그 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 234 passed, raw append+flush/fsync·깨진 꼬리 격리·중간 손상 거부·SQLite 누적 검증 |
 | P1-04 프롬프트·컨텍스트 예산 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 246 passed, prompt 95% coverage, 최근 3턴 보호·오래된 구간 압축·초과 선차단 |
 | P1-05 비용 예산 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 259 passed, budget 90% coverage, Decimal 원자 누적·80% 1회 경고·100% 신규 요청 차단 |
-| P1-06 대화 오케스트레이터·CLI | not_started | — | — | — | — |
+| P1-06 대화 오케스트레이터·CLI | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 267 passed, loop 94% coverage, 실제 `python -m app --once` 성공·raw 2줄·비용 0·이벤트 순서 확인 |
 | P1-07 크래시·재시도 테스트 | not_started | — | — | — | — |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
