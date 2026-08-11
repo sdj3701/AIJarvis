@@ -28,6 +28,9 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.setuptools.package-data]
+"app.memory" = ["schema.sql"]
+
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --timeout=60"
 timeout_func_only = false
