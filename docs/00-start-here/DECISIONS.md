@@ -58,6 +58,7 @@ ID:
 - 결정 날짜: 2026-08-11
 - 호출어 감지: 기존 `vosk-model-small-ko-0.22`를 CPU에서 제한 문법으로 실행
 - 질문 인식: `Systran/faster-whisper-small` revision `536b0662742c02347bc0e980a01041f333bce120`
+- `model.bin` SHA-256: `3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671`
 - 추론: RTX 4070 Ti에서 CUDA `int8_float16`, CUDA 초기화 실패 시 CPU `int8`로 명시적 폴백
 - 언어·탐색: `language="ko"`, `task="transcribe"`, `beam_size=5`, VAD 사용
 - 녹음 종료: 음성 시작 후 연속 무음과 최대 녹음 시간을 함께 적용하며, 처음 음절 보호용 pre-roll을 유지

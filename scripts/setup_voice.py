@@ -1,4 +1,4 @@
-"""Download and verify the pinned offline Korean Vosk model."""
+"""Download the pinned offline Korean wake-word and question STT models."""
 
 from __future__ import annotations
 
@@ -15,11 +15,25 @@ MODEL_URL = f"https://alphacephei.com/vosk/models/{MODEL_NAME}.zip"
 MODEL_SHA256 = "eea36124087fed26c59996a4761519458e3bd185e8ea9d9865ad8760c4a1d989"
 DEFAULT_MODELS_DIR = Path(r"D:\Jarvis\models")
 REQUIRED_FILES = (Path("am/final.mdl"), Path("conf/model.conf"), Path("graph/HCLr.fst"))
+WHISPER_REPO_ID = "Systran/faster-whisper-small"
+WHISPER_REVISION = "536b0662742c02347bc0e980a01041f333bce120"
+WHISPER_MODEL_NAME = "faster-whisper-small"
+WHISPER_MODEL_SHA256 = "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+WHISPER_REQUIRED_FILES = (
+    Path("config.json"),
+    Path("model.bin"),
+    Path("tokenizer.json"),
+    Path("vocabulary.txt"),
+)
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Jarvis 로컬 한국어 음성 모델 설치")
     parser.add_argument("--models-dir", type=Path, default=DEFAULT_MODELS_DIR)
+    parser.add_argument("--skip-vosk", action="store_true", help="Vosk 호출어 모델 설치 생략")
+    parser.add_argument(
+        "--skip-whisper", action="store_true", help="faster-whisper 질문 모델 설치 생략"
+    )
     return parser
 
 
@@ -77,9 +91,44 @@ def install(models_dir: Path) -> Path:
     return target
 
 
+def install_whisper(models_dir: Path) -> Path:
+    """Install the exact faster-whisper snapshot without using a floating model name."""
+    root = models_dir.resolve(strict=False)
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / WHISPER_MODEL_NAME
+    if all((target / relative).is_file() for relative in WHISPER_REQUIRED_FILES):
+        if _sha256(target / "model.bin") != WHISPER_MODEL_SHA256:
+            raise RuntimeError("Whisper model.bin의 SHA-256이 고정값과 다릅니다.")
+        return target
+
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError as error:
+        raise RuntimeError(
+            'Whisper 설치 도구가 없습니다. python -m pip install -e ".[voice]"를 실행하세요.'
+        ) from error
+
+    snapshot_download(
+        repo_id=WHISPER_REPO_ID,
+        revision=WHISPER_REVISION,
+        local_dir=target,
+        ignore_patterns=["*.md", ".gitattributes"],
+    )
+    if not all((target / relative).is_file() for relative in WHISPER_REQUIRED_FILES):
+        raise RuntimeError("Whisper 모델 필수 파일이 누락되었습니다.")
+    if _sha256(target / "model.bin") != WHISPER_MODEL_SHA256:
+        raise RuntimeError("Whisper model.bin의 SHA-256이 고정값과 다릅니다.")
+    return target
+
+
 def main(argv: list[str] | None = None) -> int:
-    target = install(_parser().parse_args(argv).models_dir)
-    print(f"음성 모델 준비 완료: {target}")
+    arguments = _parser().parse_args(argv)
+    if not arguments.skip_vosk:
+        target = install(arguments.models_dir)
+        print(f"호출어 모델 준비 완료: {target}")
+    if not arguments.skip_whisper:
+        target = install_whisper(arguments.models_dir)
+        print(f"질문 인식 모델 준비 완료: {target}")
     return 0
 
 

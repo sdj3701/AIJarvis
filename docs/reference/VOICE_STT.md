@@ -35,6 +35,7 @@ USB 마이크의 PCM 수신과 Vosk 부분 결과 출력은 정상 동작하지�
 | 질문 엔진 | `faster-whisper==1.2.1` |
 | 질문 모델 | `Systran/faster-whisper-small` |
 | 모델 revision | `536b0662742c02347bc0e980a01041f333bce120` |
+| `model.bin` SHA-256 | `3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671` |
 | 언어·작업 | `ko`, `transcribe` |
 | 탐색 | `beam_size=5` |
 | GPU | CUDA `int8_float16` |
