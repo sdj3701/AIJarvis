@@ -20,6 +20,7 @@ from app.core.ids import PrefixedIdFactory, SystemIdFactory
 from app.llm.base import LLMClient
 from app.llm.ollama_client import OllamaClient
 from app.memory.migrations import initialize_database
+from app.memory.store import SQLiteSessionStore
 from app.orchestrator.recovery import recover_startup
 from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
@@ -37,6 +38,7 @@ class Runtime:
     lock: SingleInstanceLock
     memory_db: Path
     llm: LLMClient
+    sessions: SQLiteSessionStore
 
 
 def _data_path(config: LoadedConfig, configured: Path) -> Path:
@@ -69,6 +71,7 @@ def build(
         masker=masker,
         events=events,
     )
+    memory_db = _data_path(loaded, loaded.settings.paths.memory_db)
     return Runtime(
         config=loaded,
         clock=runtime_clock,
@@ -77,8 +80,15 @@ def build(
         events=events,
         secrets=secrets,
         lock=SingleInstanceLock(state_dir / "jarvis.lock"),
-        memory_db=_data_path(loaded, loaded.settings.paths.memory_db),
+        memory_db=memory_db,
         llm=OllamaClient(loaded.settings.llm),
+        sessions=SQLiteSessionStore(
+            memory_db,
+            data_root=loaded.settings.paths.data_root,
+            raw_dir=_data_path(loaded, loaded.settings.paths.raw_dir),
+            quarantine_dir=state_dir / "quarantine",
+            fsync_raw=loaded.settings.logging.fsync_events,
+        ),
     )
 
 

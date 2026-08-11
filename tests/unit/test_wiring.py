@@ -14,6 +14,7 @@ import yaml
 
 from app.core.errors import ExitCode
 from app.llm.ollama_client import OllamaClient
+from app.memory.store import SQLiteSessionStore
 from app.ui.single_instance import SingleInstanceLock
 from app.wiring import build, run_application
 from scripts.bootstrap import create_tree
@@ -65,6 +66,7 @@ def test_build_assembles_config_clock_ids_events_and_secrets(runtime_config: Pat
     assert runtime.memory_db.name == "jarvis.sqlite3"
     assert runtime.lock.acquired is False
     assert isinstance(runtime.llm, OllamaClient)
+    assert isinstance(runtime.sessions, SQLiteSessionStore)
 
 
 def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) -> None:
