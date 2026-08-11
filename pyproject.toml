@@ -30,6 +30,7 @@ include = ["app*"]
 
 [tool.setuptools.package-data]
 "app.memory" = ["schema.sql"]
+"app.orchestrator" = ["prompts/*.md"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --timeout=60"

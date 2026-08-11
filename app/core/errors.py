@@ -58,6 +58,10 @@ class BudgetExceeded(JarvisError):
     """The configured daily or monthly external-service budget is exhausted."""
 
 
+class PromptTooLong(JarvisError):
+    """The protected prompt content cannot fit the configured context budget."""
+
+
 class LLMError(JarvisError):
     """Base class for model-provider failures."""
 
