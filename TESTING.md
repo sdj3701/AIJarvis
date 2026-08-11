@@ -736,6 +736,11 @@ def p95(values: list[int]) -> int:
 **Phase 7**
 - [ ] `--phase 7` 통과 (GPU 없으면 `needs_gpu` skip 기록)
 - [ ] `test_voice_cannot_approve_high_risk` 통과
+- [ ] `test_steady_loud_tts_echo_never_opens_gate` 통과
+- [ ] `test_loud_non_voice_noise_does_not_open_gate` 통과
+- [ ] `test_barge_in_closed_gate_does_not_feed_vosk` 통과
+- [ ] 스피커 답변 30초 동안 침묵 시 잘못된 끼어들기 0회 수동 확인
+- [ ] 근거리 “자비스” 10회 중 성공 횟수를 D017 S2 증거에 기록
 - [ ] 온라인 TTS 선택 시 `for_tts`와 외부 전송 정책을 모두 통과함
 - [ ] 마이크 사용 표시가 항상 켜지는지 수동 확인
 

@@ -89,6 +89,18 @@ def test_loud_non_voice_noise_does_not_open_gate() -> None:
     assert decision.frames == ()
 
 
+def test_startup_guard_ignores_delayed_sapi_attack() -> None:
+    gate = BargeInGate(_policy(), SequenceVAD([False, True]))
+
+    gate.feed(_frame(300))
+    attack = gate.feed(_frame(10_000))
+
+    assert attack.level_dbfs - attack.baseline_dbfs >= 8
+    assert attack.voice is True
+    assert attack.onset is False
+    assert attack.frames == ()
+
+
 def test_gate_closure_requests_recognizer_reset() -> None:
     gate = BargeInGate(_policy(), SequenceVAD([False, False, True, True, True, True, True]))
     gate.feed(_frame(300))

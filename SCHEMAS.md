@@ -107,7 +107,7 @@
 | `budget.warn` | 80% 도달 | `period_kind`, `used`, `limit`, `ratio`, `service_breakdown` |
 | `budget.stop` | 100% 도달 | `period_kind`, `used`, `limit`, `service_breakdown` |
 | `voice.recording` | 녹음 시작/종료 | `state`(started/stopped), `device`, `duration_ms` |
-| `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms` |
+| `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms`, `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames` |
 | `stt.result` | 음성 인식 완료 | `language`, `duration_ms`, `latency_ms`, `text_len` |
 | `tts.result` | 낭독 완료/취소/끼어들기/거부 | `state`(completed/cancelled/interrupted/refused), `engine`, `chars`, `latency_ms` |
 | `ui.state` | 상주 UI 상태 전이 | `from`, `to`, `cause` |
@@ -840,6 +840,12 @@ detector는 `\b`에 의존하지 않고 `(?<!\d)`·`(?!\d)` 경계를 사용해 
 `tools.yaml`의 `default: deny`, `privacy.api_transmission.default: deny`, `settings.budget.on_exceed: block_new_requests`는 설정으로 완화할 수 없다. 로더가 `ConfigError`를 던진다. **PLAN 12.1의 정량 기준을 끌 수 있는 스위치는 설정 항목으로 만들지 않는다** — 끌 수 있으면 기준이 아니다.
 
 세 파일을 개별 검증한 뒤 교차 검증한다.
+
+`settings.voice.barge_in`은 `enabled`, `speech_threshold_dbfs`,
+`min_onset_rise_db`, `baseline_window_ms`, `startup_guard_ms`, `recent_speech_ms`,
+`pre_roll_ms`, `vad_mode`, `vad_frame_ms`, `vad_min_voiced_ratio`를 모두 요구한다. dBFS는
+`-96..0`, onset 상승은 `0..96`, VAD mode는 `0..3`, frame은 `10/20/30ms`, 음성 비율은
+`0 초과 1 이하`가 아니면 설정을 거부한다.
 
 - `settings.voice.tts.engine=edge-tts`인데 `privacy.api_transmission.services.online_tts=false`면 실행을 거부하거나 TTS를 disabled로 유지한다. 조용히 전송하지 않는다.
 - `settings.rag.supported_extensions`에 `.pdf`가 있는데 parser 구현·설정이 없으면 거부한다.

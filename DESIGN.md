@@ -133,6 +133,7 @@ D:\Ai\Jarvis\
 │   │   └── recovery.py         # 시작 시 미완료 세션·task 탐지·복구
 │   ├── voice\                  # Phase 7
 │   │   ├── base.py             # AudioFrame, Transcript, STTEngine, TTSEngine
+│   │   ├── barge_in_gate.py    # TTS 기준선·onset·WebRTC VAD·pre-roll
 │   │   ├── stt.py              # Vosk 호출어 + faster-whisper 질문 인식
 │   │   ├── tts.py
 │   │   └── controller.py       # Idle/Recording/Transcribing/Speaking 상태
@@ -939,7 +940,7 @@ class TaskStep:
 | 3 | `httpx`, `selectolax` 또는 `beautifulsoup4` | 웹 fetch·본문 추출 |
 | 3 | 검색 API SDK 또는 직접 HTTP | 웹 검색 |
 | 3(후) | `sentence-transformers` 또는 API 임베딩 | 임베딩 검색 |
-| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, `faster-whisper==1.2.1`, Windows SAPI | 로컬 호출어·한국어 질문 인식·음성 합성 |
+| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, `faster-whisper==1.2.1`, `webrtcvad-wheels==2.0.14`, Windows SAPI | 로컬 호출어·한국어 질문 인식·사람 음성 VAD·음성 합성 |
 | 8 | `pystray`, `pillow`, `keyboard` 또는 `pynput` | 트레이·단축키 |
 
 개발 의존성: `pytest`, `pytest-cov`, `pytest-timeout`, `ruff`, `mypy`.
@@ -1099,10 +1100,16 @@ class TTSEngine(Protocol):
 가드를 통과하지 못한 결과는 `handle_turn`으로 넘기지 않는다. 구체적인 모델·임계값·
 폴백 정책은 [한국어 STT 운영 가이드](./docs/reference/VOICE_STT.md)를 단일 기준으로 삼는다.
 
-답변 TTS는 별도 작업에서 실행하고 같은 시간에 마이크의 전체 Vosk 결과를 감시한다.
-최종 정규화 결과가 호출어와 정확히 같을 때만 `TTSEngine.cancel()`을 호출한다. 중단에
-사용한 호출은 소비된 것으로 보고 다시 웨이크워드를 기다리지 않은 채 확인 음성 후 새
-질문을 녹음한다. TTS 속도는 설정의 SAPI `rate`(-10~10)로만 제어한다.
+답변 TTS는 별도 작업에서 실행한다. 동시에 마이크 입력의 TTS 기준선을 학습하고,
+Speaking 전용 임계값 이상이면서 기준선보다 급상승하고 WebRTC VAD가 사람 음성으로
+판정한 구간만 pre-roll과 함께 Vosk에 전달한다. 호출어 부분·최종 결과가 확인되면
+`TTSEngine.cancel()`을 호출한다. 읽는 답변 자체에 호출어가 있으면 정확한 최종 호출만
+인정한다. 중단에 사용한 호출은 소비된 것으로 보고 다시 웨이크워드를 기다리지 않은 채
+확인 음성 후 새 질문을 녹음한다. TTS 속도는 설정의 SAPI `rate`(-10~10)로만 제어한다.
+
+WebRTC VAD는 비음성 소음만 거르며 화자 신원을 인증하지 않는다. 현재 SAPI는 에코 제거용
+reverse PCM을 노출하지 않고 마이크도 단일 채널이므로 AEC와 빔포밍은 기본 경로에 넣지
+않는다. 실장치 목표 미달 시 D017의 후속 조건으로 재검토한다.
 
 오디오 형식은 mono, 16-bit PCM으로 고정하고 sample rate는 설정값을 사용한다. 온라인 TTS는 `for_tts` 후 다시 `for_external_text(..., purpose="online_tts")`를 통과한 문자열만 전송한다.
 

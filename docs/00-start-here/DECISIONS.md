@@ -22,6 +22,7 @@
 | D014 | pending | 트레이·전역 단축키 라이브러리 | 미정 | Phase 8 진입 전 | 권한·충돌·종료 동작 검증 |
 | D015 | pending | 자동 시작 설치 방식 | 시작프로그램 바로가기 또는 설치 옵션 | Phase 8 진입 전 | 레지스트리 직접 수정 없이 opt-in 구현 |
 | D016 | decided | 한국어 STT | Vosk 호출어 + `faster-whisper small` 질문 인식 | 음성 세로 기능 | 로컬 처리·한국어 실장치 인식·낮은 신뢰도 재요청 확인 |
+| D017 | decided | 답변 중 끼어들기 마이크 게이트 | Gate A+B+WebRTC VAD, AEC·빔포밍 후순위 | 음성 세로 기능 | 스피커 에코 오발동 0·근거리 “자비스” 중단 성공률·설정 키 확정 |
 
 ## 결정 작성 양식
 
@@ -71,6 +72,22 @@ ID:
 - 상세 운영 기준: [한국어 STT 운영 가이드](../reference/VOICE_STT.md)
 - 재검토 조건: 한국어 실장치 문장 세트 실패, 명령 p95 지연 목표 초과, VRAM 경합 또는 모델 revision 변경
 
+## D017 상세 — 답변 중 마이크 게이트 (decided)
+
+- 문제: 스피커 TTS가 마이크로 들어가 끼어들기(“자비스”)가 실패하거나 불안정함
+- 설계·운영 문서: [답변 중 마이크 게이트와 사람 목소리 통과](../reference/VOICE_BARGE_IN_GATE.md)
+- 결정: Speaking 전용 임계값 + 적응형 onset + 메모리 pre-roll + WebRTC VAD를 먼저
+  적용하고, 이 게이트가 통과시킨 PCM만 Vosk에 전달한다.
+- 기본값: `-32 dBFS`, 기준창 `500ms`, onset 상승 `8dB`, 시작 보호 `750ms`,
+  통과창 `800ms`, pre-roll `500ms`, WebRTC VAD mode 2/20ms/비율 0.3
+- AEC 보류 이유: 현재 Windows SAPI가 스피커로 직접 재생해 reverse PCM 기준 신호를
+  제공하지 않는다. 실장치 S2에서 목표 미달일 때 메모리 PCM 재생 구조와 loopback을
+  별도 실험한다.
+- 빔포밍 보류 이유: 현재 USB Condenser Microphone은 단일 입력 채널로 열리며 마이크
+  배열의 채널·위치 정보가 없다. 다채널 장치 도입 뒤 재검토한다.
+- 주의: WebRTC VAD는 비음성 소음을 거르는 장치이며 등록 사용자 화자 인증은 아니다.
+- 재검토 조건: 스피커 실장치에서 S1 게이트로 목표 미달, 또는 AEC 없이 운영 불가능 판정
+
 ## Phase 차단 규칙
 
 - D005가 `pending`이면 Phase 1 구현을 시작하지 않는다. 현재는 위 로컬 LLM 결정으로 해소되었다.
@@ -78,5 +95,7 @@ ID:
 - D007·D008이 `pending`이면 Phase 6 릴리스 게이트를 통과시킬 수 없다.
 - D009는 외부 전송 없는 Windows SAPI 한국어 음성으로 확정되었다. 다른 TTS 엔진은 별도 결정 없이는 추가하지 않는다.
 - D016은 Vosk 단독 자유 발화를 대체한다. 호출어는 Vosk, 질문은 고정 revision의 faster-whisper small만 사용하며 온라인 STT 폴백은 추가하지 않는다.
+- D017은 Gate A+B+WebRTC VAD로 해소되었다. AEC는 S2 실장치 결과가 목표에 미달할
+  때만 별도 결정으로 추가한다.
 - D012가 `pending`이면 Phase 3에서 PDF 지원을 비활성화하고 `.md`·`.txt`만 제공한다.
 - D013~D015가 `pending`이면 Phase 8 패키징·전역 단축키·자동 시작 구현을 시작하지 않는다.

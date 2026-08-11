@@ -2,8 +2,8 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-11 (답변 중 부분 인식 끼어들기·약 1.5배 TTS 반영)
-> 현재 상태: Phase 1 완료, Vosk 호출어 + Whisper 질문 + 중단 가능한 고속 SAPI 응답 로컬 음성 세로 기능 구현
+> 마지막 문서 정리: 2026-08-11 (Speaking 적응형 게이트·WebRTC VAD 반영)
+> 현재 상태: Phase 1 완료, Vosk+Whisper+적응형 VAD 게이트+중단 가능한 고속 SAPI 음성 세로 기능 구현
 > 현재 Phase: Phase 2 기억 개발 진입 가능
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
@@ -26,7 +26,7 @@
 | 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
 | 5 에이전트 | not_started | [Phase 5](./phase-05-agent/README.md) | — | — |
 | 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
-| 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 하이브리드 STT·답변 끼어들기·1.55배 TTS 선행 구현, 사람 발화 스모크와 정식 게이트는 별도 |
+| 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 하이브리드 STT·적응형 VAD 끼어들기·1.55배 TTS 선행 구현, 사람 발화 스모크와 정식 게이트는 별도 |
 | 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
 | v1 안정화 | not_started | [운영](./operations/README.md) | — | 7일 기록 필요 |
 
@@ -52,11 +52,15 @@ Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력
 |-----------|------|------|-----------|
 | D005 LLM 런타임·모델 | Phase 1 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D006 검색 API | Phase 3 웹 검색 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
+| D017 끼어들기 게이트 | Speaking 중 적응형 게이트·VAD | decided, S1 구현 | [VOICE_BARGE_IN_GATE](./reference/VOICE_BARGE_IN_GATE.md) |
 | D012 PDF parser | Phase 3 PDF | pending, `.pdf` 비활성 | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D007~D008 백업 | Phase 6 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D009 TTS·D016 STT | Phase 7 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D013~D015 패키징/UI | Phase 8 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-D006~D016은 완료된 Phase 0~1에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`, D009는 Windows SAPI 로컬 한국어 TTS, D016은 Vosk 호출어 + faster-whisper small 질문 인식으로 해소되었다.
+D006~D017은 완료된 Phase 0~1에 영향을 주지 않는다. D005는 Ollama + `qwen3.5:9b`,
+D009는 Windows SAPI 로컬 한국어 TTS, D016은 Vosk 호출어 + faster-whisper small 질문
+인식으로 해소되었다. D017은 Gate A+B+WebRTC VAD S1 구현으로 해소되었고 스피커
+실장치 S2 검증은 남아 있다.
 
 ## 5. Phase 게이트 증거 로그
 
