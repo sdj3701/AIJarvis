@@ -1,6 +1,6 @@
 # Jarvis 개발 문서 허브
 
-이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 저장소는 설계 단계이며 애플리케이션 코드는 아직 작성되지 않았다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 문서만으로 개발을 이어갈 수 있다.
+이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 Phase 0 기반 구현과 완료 게이트를 통과했으며, 설정 검증·SQLite·민감정보 마스킹·복구·단일 인스턴스 잠금을 갖춘 안전한 echo CLI를 실행할 수 있다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
 
 ## 1. 처음 시작하는 순서
 
@@ -10,9 +10,20 @@
 4. 각 작업마다 테스트를 먼저 연결하고 구현한다.
 5. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
 
-현재 바로 시작할 문서: [Phase 0 — 기반 구축](./docs/phase-00-foundation/README.md)
+현재 구현 결과: [Phase 0 — 기반 구축](./docs/phase-00-foundation/README.md) 완료
+다음 개발 문서: [Phase 1 — 대화](./docs/phase-01-chat/README.md) (D005 결정 후 착수)
 
 현재 진행 상태: [개발 진행 현황](./docs/PROGRESS.md)
+
+Phase 0 실행 명령:
+
+```powershell
+python scripts\bootstrap.py
+python scripts\gate.py --phase 0
+python -m app
+```
+
+CLI에서는 `/help`, `/bye`를 사용할 수 있고, 그 밖의 입력은 외부 API 호출 없이 그대로 echo한다.
 
 ## 2. 문서의 역할과 우선순위
 

@@ -2,9 +2,9 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-10 (기준 문서 v0.3 정합성 검토 반영)  
-> 현재 상태: Phase 0 기반 구현 진행 중  
-> 현재 Phase: Phase 0  
+> 마지막 문서 정리: 2026-08-11 (Phase 0 게이트 증거 반영)
+> 현재 상태: Phase 0 기반 구현 및 완료 게이트 통과
+> 다음 Phase: Phase 1 (D005 LLM 제공자·모델 결정 대기)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -19,7 +19,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-08 구현 완료, Phase 게이트 대기 |
+| 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 필요 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
@@ -43,7 +43,7 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | P0-05 데이터 트리·SQLite | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 106 passed, SQLite v1·WAL·FTS 무결성·멱등 초기화 검증 |
 | P0-06 이벤트·마스킹 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 118 passed, 이벤트 봉투·flush/fsync·민감정보 비기록 검증 |
 | P0-07 원자적 쓰기·복구·락 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 126 passed, 원자적 교체·JSONL 꼬리 격리·Windows 락 검증 |
-| P0-08 CLI·조립 | completed | Codex | 2026-08-11 | 2026-08-11 | Phase 0 마커 136 passed, 모듈 실행·Ctrl+C 130·오류 표시 정책 검증 |
+| P0-08 CLI·조립 | completed | Codex | 2026-08-11 | 2026-08-11 | Phase 0 게이트 137 passed, 모듈 실행·Ctrl+C 130·오류 표시 정책 검증 |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 
@@ -57,7 +57,7 @@ Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력
 | D007~D008 백업 | Phase 6 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D009 TTS | Phase 7 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
 | D013~D015 패키징/UI | Phase 8 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-D005~D015는 Phase 0 착수를 막지 않는다. 현재 Phase 0 진입을 막는 환경 조건은 없다.
+D005~D015는 완료된 Phase 0에 영향을 주지 않는다. Phase 1 착수 전에는 D005 결정이 필요하다.
 
 ## 5. Phase 게이트 증거 로그
 
@@ -65,7 +65,7 @@ Phase를 완료할 때 행을 추가한다.
 
 | 날짜 | Phase | commit/build | 명령 | 종료 코드 | 핵심 지표 | 증거 경로 |
 |------|-------|--------------|------|-----------|-----------|-----------|
-| — | — | — | — | — | — | — |
+| 2026-08-11 | Phase 0 | 298f093 | `python scripts\gate.py --phase 0` | 0 | 137 passed, failed 0, skipped 0 | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) |
 
 기록 예:
 
