@@ -1,6 +1,6 @@
 # Jarvis 개발 문서 허브
 
-이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 Phase 0 기반 구현과 완료 게이트를 통과했으며, 설정 검증·SQLite·민감정보 마스킹·복구·단일 인스턴스 잠금을 갖춘 안전한 echo CLI를 실행할 수 있다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
+이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 Phase 0 기반과 Phase 1 로컬 대화 게이트를 통과했으며, Ollama `qwen3.5:9b`로 한국어 멀티턴 대화, raw 선저장, 재시도, 컨텍스트·비용 통제를 수행하는 CLI를 실행할 수 있다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
 
 ## 1. 처음 시작하는 순서
 
@@ -10,20 +10,22 @@
 4. 각 작업마다 테스트를 먼저 연결하고 구현한다.
 5. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
 
-현재 구현 결과: [Phase 0 — 기반 구축](./docs/phase-00-foundation/README.md) 완료
-현재 개발 문서: [Phase 1 — 대화](./docs/phase-01-chat/README.md) (`Ollama` + `qwen3.5:9b`)
+현재 구현 결과: [Phase 1 — 대화](./docs/phase-01-chat/README.md) 완료 (`Ollama` + `qwen3.5:9b`)
+다음 개발 문서: [Phase 2 — 기억](./docs/phase-02-memory/README.md)
 
 현재 진행 상태: [개발 진행 현황](./docs/PROGRESS.md)
 
-Phase 0 실행 명령:
+Phase 1 실행 명령:
 
 ```powershell
 python scripts\bootstrap.py
-python scripts\gate.py --phase 0
+ollama list
 python -m app
 ```
 
-CLI에서는 `/help`, `/bye`를 사용할 수 있고, 그 밖의 입력은 외부 API 호출 없이 그대로 echo한다.
+CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 번만 질문하려면
+`python -m app --once "대한민국의 수도는 어디인가요?"`를 실행한다. 자동 완료 게이트는
+`python scripts\gate.py --phase 1`이며 외부 네트워크를 사용하지 않는다.
 
 ## 2. 문서의 역할과 우선순위
 
