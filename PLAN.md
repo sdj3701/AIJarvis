@@ -638,7 +638,7 @@ Summarizer(LLM) → summary + candidate facts
 
 **작업**
 
-- Vosk 한국어 소형 모델로 오프라인 STT
+- Vosk 제한 문법으로 “자비스” 호출어를 감지하고 faster-whisper small로 한국어 질문을 로컬 인식
 - `--voice` opt-in 실행에서 “자비스” 웨이크워드, PTT는 후속 보조 입력
 - Windows SAPI 한국어 로컬 TTS로 짧은 응답 낭독 (긴 요약은 화면 우선)
 - 기존 Orchestrator는 그대로 재사용 (입력만 음성으로)
@@ -950,6 +950,7 @@ Summarizer(LLM) → summary + candidate facts
 | 2026-08-10 | v0.2: 릴리스 경계, Privacy/Safety Gate, 기억 lifecycle, 장애 복구, 보안·정량 테스트 보강 |
 | 2026-08-10 | v0.3: README 개발 허브·Phase별 실행 문서 추가, SQLite 저장 구조로 기준 통일 |
 | 2026-08-11 | v0.4: Vosk·Windows SAPI 기반 opt-in “자비스” 음성 세로 기능 반영 |
+| 2026-08-11 | v0.5: Vosk 호출어 + faster-whisper small 질문 인식 하이브리드 STT 결정 반영 |
 
 ---
 

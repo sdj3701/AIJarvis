@@ -133,7 +133,7 @@ D:\Ai\Jarvis\
 │   │   └── recovery.py         # 시작 시 미완료 세션·task 탐지·복구
 │   ├── voice\                  # Phase 7
 │   │   ├── base.py             # AudioFrame, Transcript, STTEngine, TTSEngine
-│   │   ├── stt.py              # Vosk 로컬 한국어 STT·웨이크워드
+│   │   ├── stt.py              # Vosk 호출어 + faster-whisper 질문 인식
 │   │   ├── tts.py
 │   │   └── controller.py       # Idle/Recording/Transcribing/Speaking 상태
 │   └── ui\                     # Phase 8
@@ -939,7 +939,7 @@ class TaskStep:
 | 3 | `httpx`, `selectolax` 또는 `beautifulsoup4` | 웹 fetch·본문 추출 |
 | 3 | 검색 API SDK 또는 직접 HTTP | 웹 검색 |
 | 3(후) | `sentence-transformers` 또는 API 임베딩 | 임베딩 검색 |
-| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, Windows SAPI | 로컬 음성 |
+| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, `faster-whisper==1.2.1`, Windows SAPI | 로컬 호출어·한국어 질문 인식·음성 합성 |
 | 8 | `pystray`, `pillow`, `keyboard` 또는 `pynput` | 트레이·단축키 |
 
 개발 의존성: `pytest`, `pytest-cov`, `pytest-timeout`, `ruff`, `mypy`.
@@ -1081,6 +1081,7 @@ class Transcript:
     language: str
     duration_ms: int
     confidence: float | None
+    no_speech_probability: float | None
 
 class STTEngine(Protocol):
     def transcribe(self, frames: Sequence[AudioFrame], *,
@@ -1091,6 +1092,11 @@ class TTSEngine(Protocol):
     def cancel(self) -> None: ...
     def close(self) -> None: ...
 ```
+
+호출 전 스트림은 CPU Vosk 제한 문법으로만 처리한다. 호출 후 질문은 무음 기반으로
+메모리 PCM을 완성한 뒤 고정 revision의 faster-whisper small에 전달한다. STT 품질
+가드를 통과하지 못한 결과는 `handle_turn`으로 넘기지 않는다. 구체적인 모델·임계값·
+폴백 정책은 [한국어 STT 운영 가이드](./docs/reference/VOICE_STT.md)를 단일 기준으로 삼는다.
 
 오디오 형식은 mono, 16-bit PCM으로 고정하고 sample rate는 설정값을 사용한다. 온라인 TTS는 `for_tts` 후 다시 `for_external_text(..., purpose="online_tts")`를 통과한 문자열만 전송한다.
 

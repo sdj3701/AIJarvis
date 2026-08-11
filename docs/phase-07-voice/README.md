@@ -12,7 +12,7 @@
 
 - v0.5/Phase 6 릴리스 게이트 통과
 - [D009 TTS](../00-start-here/DECISIONS.md) 확정
-- Vosk 한국어 모델·오디오 입력 장치 사전 확인
+- [D016 한국어 STT](../00-start-here/DECISIONS.md) 모델·오디오 입력 장치 사전 확인
 - text channel에서 Phase 4~5 작업이 안정적으로 동작
 
 ## 3. 만들 파일
@@ -61,11 +61,17 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 
 ### P7-03 STT
 
-1. `vosk-model-small-ko-0.22`를 고정 SHA-256 검증 후 로컬에서 lazy load한다.
-2. Vosk·sounddevice가 없으면 설치 명령을 사용자에게 명시한다.
-3. Korean language 결과와 지연시간을 기록한다.
-4. transcript를 raw에 저장하기 전에 Privacy Gate for_log/for_memory를 적용한다.
-5. p95 latency 측정 이벤트를 기록한다.
+1. 호출어는 `vosk-model-small-ko-0.22`를 고정 SHA-256 검증 후 로컬에서 lazy load하고 `자비스` 변형만 제한 문법으로 감지한다.
+2. 호출 뒤 질문 PCM은 처음 음절 pre-roll, 음성 시작, 연속 무음 종료, 최대 녹음 시간을 적용해 메모리에서만 모은다.
+3. 질문은 고정 revision의 `Systran/faster-whisper-small`로 `language="ko"`, `beam_size=5`, VAD를 적용해 재인식한다.
+4. CUDA `int8_float16`을 우선하고 초기화할 수 없으면 CPU `int8`로 폴백한 사실을 화면에 명시한다.
+5. 빈 결과·낮은 평균 log probability·높은 no-speech probability를 정상적인 인식 실패로 분류하고 LLM에 전달하지 않는다.
+6. sounddevice·Vosk·faster-whisper 또는 모델이 없으면 설치 명령을 사용자에게 명시한다.
+7. 장치명·입력 dBFS·한국어 최종 결과·품질·지연시간을 콘솔에 표시한다.
+8. transcript를 raw에 저장하기 전에 Privacy Gate for_log/for_memory를 적용한다.
+9. p95 latency 측정 이벤트를 기록한다.
+
+세부 임계값과 실장치 점검 방법은 [한국어 STT 운영 가이드](../reference/VOICE_STT.md)를 따른다.
 
 ### P7-04 Orchestrator 연결
 
@@ -86,7 +92,8 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 
 ### P7-06 자원 관리
 
-- Vosk STT는 CPU에서 실행해 Ollama GPU 적재와 분리
+- Vosk 호출어 감지는 CPU에서 실행하고 Whisper small은 질문을 받은 동안에만 GPU 추론
+- Whisper는 `int8_float16`로 실행하고 CUDA 실패 시 CPU `int8` 폴백
 - 녹음 buffer 상한 적용
 - 장시간 idle이면 선택적으로 모델 unload
 
@@ -100,6 +107,8 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 - 긴 답변 TTS 길이 제한
 - TTS 중 PTT 시작 시 TTS 취소
 - GPU 없는 환경은 명확한 skip 또는 CPU fallback
+- 무음·잡음·낮은 신뢰도 결과가 Ollama에 전달되지 않음
+- 질문 첫 음절이 pre-roll에 포함되고 연속 무음 뒤 자동 종료
 
 현재 선행 세로 기능 검증:
 
@@ -108,6 +117,7 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 - [x] “자비스” 호출→음성 질문→`channel=voice` Ollama→답변 TTS 조립 테스트
 - [x] secret/pii_high 실제 문장 낭독 0건
 - [x] 호출 전 PCM 파일·외부 전송 0건
+- [ ] Vosk 호출어 + Whisper 질문 하이브리드 실장치 스모크
 
 ## 7. 완료 게이트
 
