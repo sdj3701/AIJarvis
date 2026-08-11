@@ -12,6 +12,7 @@ import pytest
 
 from app.orchestrator.loop import TurnOutcome
 from app.telemetry.masking import LogMasker
+from app.voice.barge_in_gate import BargeInGateDecision
 from app.voice.base import AudioFrame, Transcript
 from app.voice.controller import LocalVoiceListener, VoiceController
 from app.voice.microphone import SpeechCapturePolicy
@@ -136,6 +137,28 @@ class CompletingPartialSTT:
         return CompletingPartialRecognizer(self._speech_done)
 
 
+class CompletingSelfFinalRecognizer:
+    def __init__(self, speech_done: Event) -> None:
+        self._speech_done = speech_done
+
+    def feed(self, pcm: bytes) -> RecognitionUpdate:
+        del pcm
+        self._speech_done.set()
+        return RecognitionUpdate("자비스 프로젝트", True)
+
+    def finish(self) -> RecognitionUpdate:
+        return RecognitionUpdate("", True)
+
+
+class CompletingSelfFinalSTT:
+    def __init__(self, speech_done: Event) -> None:
+        self._speech_done = speech_done
+
+    def stream(self, *, phrases: Any = None) -> CompletingSelfFinalRecognizer:
+        del phrases
+        return CompletingSelfFinalRecognizer(self._speech_done)
+
+
 class FakeCommandSTT:
     active_device = "cuda"
     fallback_reason: str | None = None
@@ -168,6 +191,55 @@ class FakeMicrophone:
 
     def __exit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
         del exc_type, exc_value, traceback
+
+
+class OpenBargeInGate:
+    def feed(self, frame: AudioFrame) -> BargeInGateDecision:
+        return BargeInGateDecision(
+            frames=(frame,),
+            level_dbfs=frame.rms_dbfs,
+            baseline_dbfs=-60,
+            voice=True,
+            onset=True,
+            open=True,
+            reset_recognizer=False,
+        )
+
+
+def _open_barge_in_gate() -> OpenBargeInGate:
+    return OpenBargeInGate()
+
+
+class CompletingClosedBargeInGate:
+    def __init__(self, speech_done: Event) -> None:
+        self._speech_done = speech_done
+
+    def feed(self, frame: AudioFrame) -> BargeInGateDecision:
+        self._speech_done.set()
+        return BargeInGateDecision(
+            frames=(),
+            level_dbfs=frame.rms_dbfs,
+            baseline_dbfs=-30,
+            voice=False,
+            onset=False,
+            open=False,
+            reset_recognizer=False,
+        )
+
+
+class FailOnFeedRecognizer:
+    def feed(self, pcm: bytes) -> RecognitionUpdate:
+        del pcm
+        raise AssertionError("closed gate must not feed the recognizer")
+
+    def finish(self) -> RecognitionUpdate:
+        return RecognitionUpdate("", True)
+
+
+class FailOnFeedSTT:
+    def stream(self, *, phrases: Any = None) -> FailOnFeedRecognizer:
+        del phrases
+        return FailOnFeedRecognizer()
 
 
 def _masker() -> LogMasker:
@@ -277,6 +349,7 @@ def test_local_listener_accepts_spaced_wake_word_and_emits_mic_state() -> None:
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
         capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
         min_avg_logprob=-1.0,
         max_no_speech_probability=0.6,
         device_label="테스트 마이크",
@@ -384,6 +457,7 @@ def test_local_listener_detects_final_wake_word_during_tts() -> None:
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
         capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
         min_avg_logprob=-1.0,
         max_no_speech_probability=0.6,
         device_label="테스트 마이크",
@@ -400,6 +474,30 @@ def test_local_listener_detects_final_wake_word_during_tts() -> None:
     assert "[말 끼어들기] '자비스'를 감지했습니다." in output.getvalue()
 
 
+def test_barge_in_closed_gate_does_not_feed_vosk() -> None:
+    speech_done = Event()
+    events = FakeEvents()
+    listener = LocalVoiceListener(
+        wake_stt=FailOnFeedSTT(),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=lambda: CompletingClosedBargeInGate(  # type: ignore[arg-type]
+            speech_done
+        ),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=StringIO(),
+    )
+
+    assert listener.wait_for_barge_in(speech_done) is False
+    assert events.records[-1][1]["gate_frames"] == 0
+
+
 def test_local_listener_detects_partial_wake_word_during_tts() -> None:
     events = FakeEvents()
     output = StringIO()
@@ -409,6 +507,7 @@ def test_local_listener_detects_partial_wake_word_during_tts() -> None:
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
         capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
         min_avg_logprob=-1.0,
         max_no_speech_probability=0.6,
         device_label="테스트 마이크",
@@ -430,6 +529,32 @@ def test_barge_in_does_not_trigger_on_answer_sentence_containing_jarvis() -> Non
         microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
         wake_word="자비스",
         capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=FakeEvents(),
+        clock=FrozenClock(NOW),
+        output_stream=StringIO(),
+    )
+
+    assert (
+        listener.wait_for_barge_in(
+            speech_done,
+            spoken_text="자비스 프로젝트의 현재 상태를 설명합니다.",
+        )
+        is False
+    )
+
+
+def test_barge_in_does_not_trigger_on_final_tts_sentence_containing_jarvis() -> None:
+    speech_done = Event()
+    listener = LocalVoiceListener(
+        wake_stt=CompletingSelfFinalSTT(speech_done),  # type: ignore[arg-type]
+        command_stt=FakeCommandSTT(),  # type: ignore[arg-type]
+        microphone_factory=FakeMicrophone,  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 750, 500, 15_000),
+        barge_in_gate_factory=_open_barge_in_gate,  # type: ignore[arg-type]
         min_avg_logprob=-1.0,
         max_no_speech_probability=0.6,
         device_label="테스트 마이크",

@@ -263,12 +263,26 @@ class TTSSettings(StrictModel):
     cost_per_1k_chars: NonNegativeDecimal
 
 
+class BargeInSettings(StrictModel):
+    enabled: bool
+    speech_threshold_dbfs: Annotated[float, Field(ge=-96, le=0)]
+    min_onset_rise_db: Annotated[float, Field(ge=0, le=96)]
+    baseline_window_ms: PositiveInt
+    startup_guard_ms: PositiveInt
+    recent_speech_ms: PositiveInt
+    pre_roll_ms: PositiveInt
+    vad_mode: Literal[0, 1, 2, 3]
+    vad_frame_ms: Literal[10, 20, 30]
+    vad_min_voiced_ratio: Annotated[float, Field(gt=0, le=1)]
+
+
 class VoiceSettings(StrictModel):
     enabled: bool
     mode: Literal["wake_word"]
     wake_word: NonEmptyString
     acknowledgement: NonEmptyString
     stt: STTSettings
+    barge_in: BargeInSettings
     tts: TTSSettings
     push_to_talk_hotkey: NonEmptyString
 

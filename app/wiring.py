@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import traceback
+from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,11 @@ from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
 from app.telemetry.metrics import SQLiteMetrics
 from app.ui.single_instance import SingleInstanceLock
+from app.voice.barge_in_gate import (
+    BargeInGate,
+    BargeInGatePolicy,
+    WebRtcVoiceActivityDetector,
+)
 from app.voice.controller import LocalVoiceListener, VoiceController, microphone_factory
 from app.voice.microphone import SpeechCapturePolicy
 from app.voice.stt import FasterWhisperSTTEngine, VoskSTTEngine
@@ -221,6 +227,29 @@ def run_application(
                 vad_filter=command_settings.vad_filter,
                 initial_prompt=command_settings.initial_prompt,
             )
+            barge_in_settings = voice_settings.barge_in
+            barge_in_policy = BargeInGatePolicy(
+                speech_threshold_dbfs=barge_in_settings.speech_threshold_dbfs,
+                min_onset_rise_db=barge_in_settings.min_onset_rise_db,
+                baseline_window_ms=barge_in_settings.baseline_window_ms,
+                startup_guard_ms=barge_in_settings.startup_guard_ms,
+                recent_speech_ms=barge_in_settings.recent_speech_ms,
+                pre_roll_ms=barge_in_settings.pre_roll_ms,
+            )
+            barge_in_gate_factory: Callable[[], BargeInGate] | None = None
+            if barge_in_settings.enabled:
+
+                def create_barge_in_gate() -> BargeInGate:
+                    return BargeInGate(
+                        barge_in_policy,
+                        WebRtcVoiceActivityDetector(
+                            mode=barge_in_settings.vad_mode,
+                            frame_ms=barge_in_settings.vad_frame_ms,
+                            min_voiced_ratio=barge_in_settings.vad_min_voiced_ratio,
+                        ),
+                    )
+
+                barge_in_gate_factory = create_barge_in_gate
             listener = LocalVoiceListener(
                 wake_stt=wake_stt,
                 command_stt=command_stt,
@@ -236,6 +265,7 @@ def run_application(
                     min_speech_ms=command_settings.min_speech_ms,
                     max_duration_ms=int(voice_settings.stt.max_command_seconds * 1000),
                 ),
+                barge_in_gate_factory=barge_in_gate_factory,
                 min_avg_logprob=command_settings.min_avg_logprob,
                 max_no_speech_probability=command_settings.max_no_speech_probability,
                 device_label=voice_settings.stt.device,

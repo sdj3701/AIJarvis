@@ -11,6 +11,7 @@ from app.core.clock import Clock
 from app.core.errors import JarvisError
 from app.orchestrator.loop import ChatOrchestrator
 from app.telemetry.masking import LogMasker
+from app.voice.barge_in_gate import BargeInGate
 from app.voice.base import Transcript, TTSEngine
 from app.voice.microphone import MicrophoneStream, SpeechCapture, SpeechCapturePolicy
 from app.voice.stt import (
@@ -25,7 +26,6 @@ MISHEARD_TEXT = "잘 듣지 못했습니다. 다시 자비스라고 불러 주�
 EXIT_TEXT = "안전하게 종료합니다."
 INPUT_STATUS_INTERVAL_MS = 2_000
 LEVEL_STATUS_INTERVAL_MS = 500
-BARGE_IN_RECENT_SPEECH_MS = 1_000
 MAX_PREVIEW_CHARS = 160
 
 
@@ -48,6 +48,7 @@ class LocalVoiceListener:
         microphone_factory: Callable[[], MicrophoneStream],
         wake_word: str,
         capture_policy: SpeechCapturePolicy,
+        barge_in_gate_factory: Callable[[], BargeInGate] | None = None,
         min_avg_logprob: float,
         max_no_speech_probability: float,
         device_label: str,
@@ -60,6 +61,7 @@ class LocalVoiceListener:
         self._microphone_factory = microphone_factory
         self._wake_word = normalize_spoken_command(wake_word)
         self._capture_policy = capture_policy
+        self._barge_in_gate_factory = barge_in_gate_factory
         self._min_avg_logprob = min_avg_logprob
         self._max_no_speech_probability = max_no_speech_probability
         self._device_label = device_label
@@ -75,22 +77,30 @@ class LocalVoiceListener:
 
     def wait_for_barge_in(self, speech_done: Event, *, spoken_text: str = "") -> bool:
         """Watch partial and final wake-word results while TTS is speaking."""
-        if speech_done.is_set():
+        if speech_done.is_set() or self._barge_in_gate_factory is None:
             return False
+        gate = self._barge_in_gate_factory()
         recognizer = self._wake_stt.stream()
         spoken_text_contains_wake = self._wake_word in normalize_spoken_command(spoken_text)
         detected = False
         duration_ms = 0
-        last_loud_input_ms: int | None = None
         last_preview = ""
         next_level_status_ms = LEVEL_STATUS_INTERVAL_MS
         partial_updates = 0
         final_updates = 0
+        gate_frames = 0
+        onset_count = 0
+        voice_frames = 0
         peak_dbfs = -96.0
         microphone: MicrophoneStream | None = None
         self._events.emit(
             "voice.barge_in",
-            {"state": "started", "device": self._device_label, "duration_ms": 0},
+            {
+                "state": "started",
+                "device": self._device_label,
+                "duration_ms": 0,
+                "gate": "adaptive_vad",
+            },
         )
         _write(self._output, "[끼어들기 감시] 답변 중 '자비스'라고 부르면 중단합니다.")
         try:
@@ -100,52 +110,75 @@ class LocalVoiceListener:
                     if frame is None:
                         continue
                     duration_ms += frame.duration_ms
-                    level_dbfs = frame.rms_dbfs
+                    decision = gate.feed(frame)
+                    level_dbfs = decision.level_dbfs
                     peak_dbfs = max(peak_dbfs, level_dbfs)
-                    if level_dbfs >= self._capture_policy.speech_threshold_dbfs:
-                        last_loud_input_ms = duration_ms
+                    voice_frames += int(decision.voice)
+                    onset_count += int(decision.onset)
                     if duration_ms >= next_level_status_ms:
+                        state = (
+                            "onset"
+                            if decision.onset
+                            else "통과"
+                            if decision.open
+                            else "감시 중"
+                        )
+                        voice_state = "음성" if decision.voice else "비음성"
                         _write(
                             self._output,
-                            f"[끼어들기 마이크] {level_dbfs:.1f} dBFS · 감시 중",
+                            f"[끼어들기 마이크] {level_dbfs:.1f} dBFS · "
+                            f"기준 {decision.baseline_dbfs:.1f} dBFS · "
+                            f"VAD {voice_state} · {state}",
                         )
                         next_level_status_ms += LEVEL_STATUS_INTERVAL_MS
-
-                    update = recognizer.feed(frame.pcm)
-                    if update.final:
-                        final_updates += 1
-                    else:
-                        partial_updates += 1
-                    preview = _preview_text(update.text)
-                    if preview and preview != last_preview:
-                        label = "끼어들기 STT 확정" if update.final else "끼어들기 STT 부분"
-                        _write(self._output, f"[{label}] {preview}")
-                        last_preview = preview
-
-                    normalized = normalize_spoken_command(update.text)
-                    wake_seen = self._wake_word in normalized
-                    recent_loud_input = (
-                        last_loud_input_ms is not None
-                        and duration_ms - last_loud_input_ms <= BARGE_IN_RECENT_SPEECH_MS
-                    )
-                    partial_allowed = not spoken_text_contains_wake
-                    wake_recognized = wake_seen and (update.final or partial_allowed)
-                    if wake_recognized and recent_loud_input:
-                        detected = True
-                        self._events.emit(
-                            "voice.barge_in",
-                            {
-                                "state": "detected",
-                                "device": self._device_label,
-                                "duration_ms": duration_ms,
-                                "recognition_state": "final" if update.final else "partial",
-                                "level_dbfs": round(level_dbfs, 1),
-                            },
-                        )
-                        _write(self._output, "[말 끼어들기] '자비스'를 감지했습니다.")
-                        break
-                    if update.final:
+                    if decision.reset_recognizer:
                         recognizer = self._wake_stt.stream()
+                        last_preview = ""
+
+                    for gated_frame in decision.frames:
+                        gate_frames += 1
+                        update = recognizer.feed(gated_frame.pcm)
+                        if update.final:
+                            final_updates += 1
+                        else:
+                            partial_updates += 1
+                        preview = _preview_text(update.text)
+                        if preview and preview != last_preview:
+                            label = (
+                                "끼어들기 STT 확정" if update.final else "끼어들기 STT 부분"
+                            )
+                            _write(self._output, f"[{label}] {preview}")
+                            last_preview = preview
+
+                        normalized = normalize_spoken_command(update.text)
+                        if spoken_text_contains_wake:
+                            wake_recognized = update.final and normalized == self._wake_word
+                        else:
+                            wake_recognized = self._wake_word in normalized
+                        if wake_recognized:
+                            detected = True
+                            self._events.emit(
+                                "voice.barge_in",
+                                {
+                                    "state": "detected",
+                                    "device": self._device_label,
+                                    "duration_ms": duration_ms,
+                                    "recognition_state": (
+                                        "final" if update.final else "partial"
+                                    ),
+                                    "level_dbfs": round(level_dbfs, 1),
+                                    "baseline_dbfs": round(decision.baseline_dbfs, 1),
+                                    "gate": "open",
+                                    "onset": decision.onset,
+                                },
+                            )
+                            _write(self._output, "[말 끼어들기] '자비스'를 감지했습니다.")
+                            break
+                        if update.final:
+                            recognizer = self._wake_stt.stream()
+                            last_preview = ""
+                    if detected:
+                        break
         finally:
             self._events.emit(
                 "voice.barge_in",
@@ -157,6 +190,9 @@ class LocalVoiceListener:
                     "overflows": 0 if microphone is None else microphone.overflows,
                     "partial_updates": partial_updates,
                     "final_updates": final_updates,
+                    "gate_frames": gate_frames,
+                    "onset_count": onset_count,
+                    "voice_frames": voice_frames,
                     "peak_dbfs": round(peak_dbfs, 1),
                 },
             )

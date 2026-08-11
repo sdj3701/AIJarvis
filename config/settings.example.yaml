@@ -182,6 +182,17 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
       min_speech_ms: 400
       min_avg_logprob: -1.0
       max_no_speech_probability: 0.6
+  barge_in:
+    enabled: true
+    speech_threshold_dbfs: -32  # 질문 녹음보다 강한 근거리 발화만 후보로 본다.
+    min_onset_rise_db: 8        # TTS 에코 기준선보다 갑자기 커진 정도
+    baseline_window_ms: 500
+    startup_guard_ms: 750       # SAPI 재생 시작 어택을 사용자 발화로 보지 않는다.
+    recent_speech_ms: 800
+    pre_roll_ms: 500            # 호출 첫 음절이 잘리지 않도록 메모리에만 유지
+    vad_mode: 2                 # WebRTC VAD 0(관대)~3(엄격)
+    vad_frame_ms: 20
+    vad_min_voiced_ratio: 0.3
   tts:
     engine: local
     voice: "Microsoft Heami Desktop"
