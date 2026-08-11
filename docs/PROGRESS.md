@@ -3,8 +3,8 @@
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
 > 마지막 문서 정리: 2026-08-11 (Phase 0 게이트 증거 반영)
-> 현재 상태: Phase 0 기반 구현 및 완료 게이트 통과
-> 다음 Phase: Phase 1 (D005 LLM 제공자·모델 결정 대기)
+> 현재 상태: Phase 1 P1-01 완료, 실제 제공자 연결 대기
+> 현재 Phase: Phase 1 (P1-02 착수 전 D005 결정 필요)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -20,7 +20,7 @@
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
 | 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
-| 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 필요 |
+| 1 대화 | in_progress | [Phase 1](./phase-01-chat/README.md) | — | P1-01 완료, P1-02 D005 대기 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
 | 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
@@ -32,18 +32,17 @@
 
 ## 3. 현재 작업 큐
 
-Phase 0 문서의 작업 ID와 동일하게 유지한다.
+Phase 1 문서의 작업 ID와 동일하게 유지한다.
 
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
-| P0-01 프로젝트·품질 도구 | completed | Codex | 2026-08-10 | 2026-08-10 | pytest collect·Ruff·mypy·pip check 통과, phase0 smoke 1 passed |
-| P0-02 설정 모델·로더 | completed | Codex | 2026-08-10 | 2026-08-10 | 설정 테스트 31 passed, 전체 32 passed, 설정 코드 커버리지 95% |
-| P0-03 시크릿 로더 | completed | Codex | 2026-08-11 | 2026-08-11 | 시크릿 테스트 30 passed, 전체 62 passed, 시크릿 코드 커버리지 98% |
-| P0-04 공통 타입 | completed | Codex | 2026-08-11 | 2026-08-11 | 공통 타입 테스트 35 passed, 전체 97 passed, 대상 커버리지 96% |
-| P0-05 데이터 트리·SQLite | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 106 passed, SQLite v1·WAL·FTS 무결성·멱등 초기화 검증 |
-| P0-06 이벤트·마스킹 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 118 passed, 이벤트 봉투·flush/fsync·민감정보 비기록 검증 |
-| P0-07 원자적 쓰기·복구·락 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 126 passed, 원자적 교체·JSONL 꼬리 격리·Windows 락 검증 |
-| P0-08 CLI·조립 | completed | Codex | 2026-08-11 | 2026-08-11 | Phase 0 게이트 137 passed, 모듈 실행·Ctrl+C 130·오류 표시 정책 검증 |
+| P1-01 LLM 계약·가짜 클라이언트 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 177 passed, LLM 계약·가짜 클라이언트 커버리지 100% |
+| P1-02 제공자 클라이언트 | blocked | Codex | 2026-08-11 | — | D005 제공자·모델 ID·단가 결정 필요 |
+| P1-03 세션·raw 로그 | not_started | — | — | — | — |
+| P1-04 프롬프트·컨텍스트 예산 | not_started | — | — | — | — |
+| P1-05 비용 예산 | not_started | — | — | — | — |
+| P1-06 대화 오케스트레이터·CLI | not_started | — | — | — | — |
+| P1-07 크래시·재시도 테스트 | not_started | — | — | — | — |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 
