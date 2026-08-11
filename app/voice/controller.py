@@ -17,6 +17,8 @@ from app.voice.tts import prepare_speech
 EXIT_PHRASES = frozenset({"종료", "자비스종료", "그만", "그만해"})
 MISHEARD_TEXT = "잘 듣지 못했습니다. 다시 자비스라고 불러 주세요."
 EXIT_TEXT = "안전하게 종료합니다."
+INPUT_STATUS_INTERVAL_MS = 2_000
+MAX_PREVIEW_CHARS = 160
 
 
 class VoiceEventSink(Protocol):
@@ -66,8 +68,13 @@ class LocalVoiceListener:
             "voice.recording",
             {"state": "started", "device": self._device_label, "duration_ms": 0},
         )
-        _write(self._output, f"[마이크 켜짐] {mode}을(를) 듣고 있습니다.")
+        _write(
+            self._output,
+            f"[마이크 켜짐] {mode}을(를) 듣고 있습니다. (장치: {self._device_label})",
+        )
         transcript = ""
+        last_preview = ""
+        next_input_status_ms = INPUT_STATUS_INTERVAL_MS
         microphone: MicrophoneStream | None = None
         try:
             with self._microphone_factory() as microphone:
@@ -81,6 +88,18 @@ class LocalVoiceListener:
                         continue
                     duration_ms += frame.duration_ms
                     update = recognizer.feed(frame.pcm)
+                    preview = _preview_text(update.text)
+                    if preview and preview != last_preview:
+                        label = "STT 확정" if update.final else "STT 부분"
+                        _write(self._output, f"[{label}] {preview}")
+                        last_preview = preview
+                    elif duration_ms >= next_input_status_ms:
+                        _write(
+                            self._output,
+                            f"[마이크 입력] {duration_ms / 1000:.1f}초 수신 중, "
+                            "새로 인식된 텍스트 없음",
+                        )
+                        next_input_status_ms += INPUT_STATUS_INTERVAL_MS
                     normalized = normalize_spoken_command(update.text)
                     if wake and self._wake_word in normalized:
                         transcript = update.text
@@ -190,6 +209,10 @@ class VoiceController:
 def _write(stream: TextIO, text: str) -> None:
     stream.write(text + "\n")
     stream.flush()
+
+
+def _preview_text(text: str) -> str:
+    return " ".join(text.split())[:MAX_PREVIEW_CHARS]
 
 
 def microphone_factory(

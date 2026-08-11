@@ -191,4 +191,6 @@ def test_local_listener_accepts_spaced_wake_word_and_emits_mic_state() -> None:
     assert events.records[0][1]["state"] == "started"
     assert events.records[1][1]["state"] == "stopped"
     assert "[마이크 켜짐]" in output.getvalue()
+    assert "(장치: 테스트 마이크)" in output.getvalue()
+    assert "[STT 부분] 자 비스" in output.getvalue()
     assert "[마이크 꺼짐]" in output.getvalue()
