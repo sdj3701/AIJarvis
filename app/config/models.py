@@ -258,6 +258,7 @@ class STTSettings(StrictModel):
 class TTSSettings(StrictModel):
     engine: Literal["disabled", "edge-tts", "local"]
     voice: str
+    rate: Annotated[int, Field(ge=-10, le=10)]
     max_chars: PositiveInt
     cost_per_1k_chars: NonNegativeDecimal
 

@@ -245,7 +245,10 @@ def run_application(
             )
             controller = VoiceController(
                 listener=listener,
-                tts=WindowsSapiTTS(voice_settings.tts.voice),
+                tts=WindowsSapiTTS(
+                    voice_settings.tts.voice,
+                    rate=voice_settings.tts.rate,
+                ),
                 chat=chat,
                 masker=runtime.masker,
                 acknowledgement=voice_settings.acknowledgement,

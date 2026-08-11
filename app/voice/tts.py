@@ -22,6 +22,7 @@ $text = $reader.ReadToEnd()
 $speaker = [System.Speech.Synthesis.SpeechSynthesizer]::new()
 try {
     $speaker.SelectVoice($env:JARVIS_TTS_VOICE)
+    $speaker.Rate = [int]$env:JARVIS_TTS_RATE
     $speaker.Speak($text)
 }
 finally {
@@ -81,6 +82,7 @@ class WindowsSapiTTS:
         self,
         voice: str,
         *,
+        rate: int = 6,
         timeout_s: float = 60,
         process_factory: SpeechProcessFactory = subprocess.Popen,
     ) -> None:
@@ -88,7 +90,10 @@ class WindowsSapiTTS:
             raise ValueError("SAPI voice must not be empty")
         if timeout_s <= 0:
             raise ValueError("TTS timeout must be positive")
+        if not -10 <= rate <= 10:
+            raise ValueError("SAPI rate must be between -10 and 10")
         self._voice = voice
+        self._rate = rate
         self._timeout_s = timeout_s
         self._process_factory = process_factory
         self._process: SpeechProcess | None = None
@@ -101,6 +106,7 @@ class WindowsSapiTTS:
             ctx.cancel.raise_if_cancelled()
         environment = os.environ.copy()
         environment["JARVIS_TTS_VOICE"] = self._voice
+        environment["JARVIS_TTS_RATE"] = str(self._rate)
         creation_flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         process = self._process_factory(
             [

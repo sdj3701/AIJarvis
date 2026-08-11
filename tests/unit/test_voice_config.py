@@ -48,6 +48,7 @@ def test_local_wake_word_configuration_loads(config_dir: Path) -> None:
     assert settings.voice.stt.command.model == "faster-whisper-small"
     assert settings.voice.stt.command.device == "cuda"
     assert settings.voice.tts.voice == "Microsoft Heami Desktop"
+    assert settings.voice.tts.rate == 6
 
 
 def test_enabled_voice_rejects_non_local_tts(config_dir: Path) -> None:

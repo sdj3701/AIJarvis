@@ -96,6 +96,13 @@ def test_sapi_receives_utf8_text_via_stdin_not_command_line() -> None:
     assert process.input.decode("utf-8") == "무엇을 도와드릴까요."
     assert all("무엇을" not in argument for argument in factory.args)
     assert factory.environment["JARVIS_TTS_VOICE"] == "Microsoft Heami Desktop"
+    assert factory.environment["JARVIS_TTS_RATE"] == "6"
+
+
+@pytest.mark.parametrize("rate", [-11, 11])
+def test_sapi_rejects_rate_outside_windows_range(rate: int) -> None:
+    with pytest.raises(ValueError, match="rate"):
+        WindowsSapiTTS("Microsoft Heami Desktop", rate=rate)
 
 
 def test_high_risk_private_text_is_never_spoken(masker: LogMasker) -> None:

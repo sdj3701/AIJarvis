@@ -185,6 +185,7 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
   tts:
     engine: local
     voice: "Microsoft Heami Desktop"
+    rate: 6                     # Heami 실측 기준 기본 속도의 약 1.92배
     max_chars: 400
     cost_per_1k_chars: "0.00"
   push_to_talk_hotkey: "ctrl+alt+j"
