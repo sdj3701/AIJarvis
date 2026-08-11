@@ -160,7 +160,7 @@ D017 결정에 따라 아래 항목을 함께 동기화했다.
 
 1. `config/settings.example.yaml`의 `voice.barge_in.*`
 2. 설정 모델·로더 검증
-3. [SCHEMAS.md](../../SCHEMAS.md)의 `voice.barge_in` payload 확장  
+3. [SCHEMAS.md](../../SCHEMAS.md)의 `voice.barge_in` payload 확장
    필드: `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames`
 4. [TESTING.md](../../TESTING.md) / Phase 7 게이트 항목
 5. [VOICE_STT.md 9절](./VOICE_STT.md) 운영 문구
