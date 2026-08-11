@@ -169,9 +169,9 @@ cd D:\Ai\Jarvis
 “자비스 잠깐”, “자비스 프로젝트”처럼 다른 단어를 붙이면 오인 방지를 위해 호출로
 처리하지 않는다. 답변을 읽는 중이 아닐 때는 기존처럼 “자비스” 호출 후 질문한다.
 
-TTS는 `D:\Jarvis\config\settings.yaml`의 `voice.tts.rate=6`을 사용한다. Heami 동일
-문장의 WAV 길이를 비교했을 때 rate 0은 645,968 bytes, rate 6은 336,282 bytes로
-rate 6이 약 1.92배 빨랐다. SAPI 허용 범위는 -10~10이며 더 빠르게 바꾸면 발음이
+TTS는 `D:\Jarvis\config\settings.yaml`의 `voice.tts.rate=4`를 사용한다. Heami 동일
+문장의 WAV 길이를 비교했을 때 rate 0은 645,968 bytes, rate 4는 417,944 bytes로
+rate 4가 약 1.55배 빨랐다. SAPI 허용 범위는 -10~10이며 더 빠르게 바꾸면 발음이
 부자연스러워질 수 있다.
 
 ## 10. 현재 검증 증거
@@ -181,7 +181,7 @@ rate 6이 약 1.92배 빨랐다. SAPI 허용 범위는 -10~10이며 더 빠르�
 - 해당 문장 품질: 평균 log probability `-0.362`, no-speech probability `0.018`
 - USB Condenser Microphone에서 10초 무음 대기 중 잘못된 최종 호출 0회
 - 전체 PCM·Whisper 배열 디스크 저장 0건, 임시 SAPI 스모크 파일은 검증 직후 제거
-- Heami `rate=6` 실제 스피커 재생 성공, 동일 문장 기준 기본 대비 약 1.92배
+- Heami `rate=4` 실제 스피커 재생 성공, 동일 문장 기준 기본 대비 약 1.55배
 - 답변 중 `자비스` 최종 호출 시 SAPI cancel과 새 질문 전환 자동 테스트 통과
 - `자비스 프로젝트`를 끼어들기로 오인하지 않는 회귀 테스트 통과
 

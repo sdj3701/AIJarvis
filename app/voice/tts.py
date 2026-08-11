@@ -82,7 +82,7 @@ class WindowsSapiTTS:
         self,
         voice: str,
         *,
-        rate: int = 6,
+        rate: int = 4,
         timeout_s: float = 60,
         process_factory: SpeechProcessFactory = subprocess.Popen,
     ) -> None:

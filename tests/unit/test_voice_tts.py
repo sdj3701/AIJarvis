@@ -116,7 +116,7 @@ def test_sapi_receives_utf8_text_via_stdin_not_command_line() -> None:
     assert process.input.decode("utf-8") == "무엇을 도와드릴까요."
     assert all("무엇을" not in argument for argument in factory.args)
     assert factory.environment["JARVIS_TTS_VOICE"] == "Microsoft Heami Desktop"
-    assert factory.environment["JARVIS_TTS_RATE"] == "6"
+    assert factory.environment["JARVIS_TTS_RATE"] == "4"
 
 
 @pytest.mark.parametrize("rate", [-11, 11])
