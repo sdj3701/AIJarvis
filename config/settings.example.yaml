@@ -149,21 +149,24 @@ metrics:
   enabled: true
   p95_window: 200
 
-voice:                       # Phase 7
-  enabled: false
+voice:                       # 명시적으로 --voice를 지정할 때만 마이크를 연다.
+  enabled: true
+  mode: wake_word
+  wake_word: "자비스"
+  acknowledgement: "무엇을 도와드릴까요."
   stt:
-    engine: faster-whisper
-    model: medium
-    device: cuda
-    compute_type: float16
+    engine: vosk
+    model: vosk-model-small-ko-0.22
+    model_archive_sha256: "eea36124087fed26c59996a4761519458e3bd185e8ea9d9865ad8760c4a1d989"
+    device: "USB Condenser Microphone"
+    sample_rate_hz: 16000
     language: ko
+    max_command_seconds: 15
   tts:
-    # D009 결정 후 edge-tts 또는 local로 변경한다.
-    engine: disabled           # disabled | edge-tts | local
-    voice: ""
+    engine: local
+    voice: "Microsoft Heami Desktop"
     max_chars: 400
-    cost_per_1k_chars: "0.00"     # 온라인 엔진 비용. 로컬/무료도 명시
-    # 긴 요약은 낭독하지 않고 화면에만 표시한다.
+    cost_per_1k_chars: "0.00"
   push_to_talk_hotkey: "ctrl+alt+j"
 
 ui:                          # Phase 8

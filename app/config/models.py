@@ -220,11 +220,13 @@ class MetricsSettings(StrictModel):
 
 
 class STTSettings(StrictModel):
-    engine: NonEmptyString
-    model: NonEmptyString
+    engine: Literal["vosk"]
+    model: Literal["vosk-model-small-ko-0.22"]
+    model_archive_sha256: Sha256Hex
     device: NonEmptyString
-    compute_type: NonEmptyString
-    language: NonEmptyString
+    sample_rate_hz: Literal[16000]
+    language: Literal["ko"]
+    max_command_seconds: PositiveFloat
 
 
 class TTSSettings(StrictModel):
@@ -236,9 +238,18 @@ class TTSSettings(StrictModel):
 
 class VoiceSettings(StrictModel):
     enabled: bool
+    mode: Literal["wake_word"]
+    wake_word: NonEmptyString
+    acknowledgement: NonEmptyString
     stt: STTSettings
     tts: TTSSettings
     push_to_talk_hotkey: NonEmptyString
+
+    @model_validator(mode="after")
+    def enabled_voice_is_fully_local(self) -> Self:
+        if self.enabled and self.tts.engine != "local":
+            raise ValueError("활성화된 음성 모드는 로컬 TTS만 사용할 수 있습니다")
+        return self
 
 
 class UISettings(StrictModel):
