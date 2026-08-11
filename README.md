@@ -11,7 +11,7 @@
 5. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
 
 현재 구현 결과: [Phase 0 — 기반 구축](./docs/phase-00-foundation/README.md) 완료
-다음 개발 문서: [Phase 1 — 대화](./docs/phase-01-chat/README.md) (D005 결정 후 착수)
+현재 개발 문서: [Phase 1 — 대화](./docs/phase-01-chat/README.md) (`Ollama` + `qwen3.5:9b`)
 
 현재 진행 상태: [개발 진행 현황](./docs/PROGRESS.md)
 
@@ -53,7 +53,7 @@ CLI에서는 `/help`, `/bye`를 사용할 수 있고, 그 밖의 입력은 외�
 | 8 | [Phase 7 — 음성](./docs/phase-07-voice/README.md) | PTT·STT·TTS | 음성 입출력 |
 | 9 | [Phase 8 — 상주 UI](./docs/phase-08-resident-ui/README.md) | 트레이·단축키·패키징 | v1 후보 |
 | 10 | [운영과 릴리스](./docs/operations/README.md) | 백업·복원·장애 대응·7일 안정화 | v1 릴리스 |
-| 11 | [Post-v1 선택 기능](./docs/post-v1/README.md) | 로컬 LLM·임베딩·연동·웨이크워드 | 개별 후속 릴리스 |
+| 11 | [Post-v1 선택 기능](./docs/post-v1/README.md) | 로컬 LLM 고도화·임베딩·연동·웨이크워드 | 개별 후속 릴리스 |
 
 ## 4. Phase 문서 사용법
 
@@ -88,7 +88,7 @@ CLI에서는 `/help`, `/bye`를 사용할 수 있고, 그 밖의 입력은 외�
 
 다음 값은 문서에서 임의로 추측하지 않는다.
 
-- Phase 1: LLM 제공자, 정확한 모델 ID, 실제 단가
+- Phase 1: D005 결정 완료 — Ollama, `qwen3.5:9b`, 외부 단가 USD 0.00
 - Phase 3: 검색 API 제공자와 인증 방식
 - Phase 3: PDF 지원 여부와 parser
 - Phase 6: 운영 백업 대상 경로와 암호화 도구

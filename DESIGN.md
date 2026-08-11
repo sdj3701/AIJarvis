@@ -92,7 +92,7 @@ D:\Ai\Jarvis\
 │   │   └── metrics.py          # 지연시간·토큰·비용 집계, p95 계산
 │   ├── llm\
 │   │   ├── base.py             # LLMClient 프로토콜, Message, ToolCall, LLMResponse
-│   │   ├── openai_client.py    # (또는 anthropic_client.py) 제공자 1개만
+│   │   ├── ollama_client.py    # D005 고정 로컬 클라이언트
 │   │   └── fake.py             # 결정론적 스텁 (테스트 전용)
 │   ├── memory\
 │   │   ├── models.py           # MemoryRecord, SessionSummary, MemoryQuery
@@ -281,7 +281,9 @@ class LLMClient(Protocol):
     def count_tokens(self, messages: Sequence[Message]) -> int: ...
 ```
 
-재시도는 **클라이언트 구현 내부**에서 처리한다(지수 backoff + jitter, `settings.llm.max_retries`). 재시도 대상은 timeout·429·5xx뿐이고, 4xx(인증·잘못된 요청)는 즉시 실패다. 각 시도는 `llm.request` / `llm.response` 이벤트를 남긴다. `finish_reason="error"`를 리턴하지 않고 예외를 던진다 — 오케스트레이터가 성공/실패를 헷갈리지 않게 한다.
+재시도는 **클라이언트 구현 내부**에서 처리한다(지수 backoff + jitter, `settings.llm.max_retries`). D005 Ollama의 재시도 대상은 연결 실패·timeout·5xx뿐이고, 4xx(잘못된 요청·모델 누락)는 즉시 실패다. 각 시도는 `llm.request`, 재시도 직전에는 `llm.retry`, 성공 시 `llm.response` 이벤트를 남긴다. `finish_reason="error"`를 리턴하지 않고 예외를 던진다 — 오케스트레이터가 성공/실패를 헷갈리지 않게 한다.
+
+Ollama 전송은 `http://127.0.0.1:11434`로 고정한다. URL의 스킴·호스트·포트·자격 증명·경로를 시작 시 검증하며, 다른 호스트와 클라우드 폴백은 허용하지 않는다. `qwen3.5:9b`의 manifest digest도 D005와 일치해야 한다. 모델 자체 최대 문맥과 별개로 `num_ctx=16384`, `think=false`를 Phase 1 운영값으로 사용한다.
 
 ### 5.2 기억
 
@@ -931,8 +933,7 @@ class TaskStep:
 |-------|--------|------|
 | 0 | `pydantic`, `pyyaml`, `keyring`, `python-ulid` | 설정 검증, 시크릿, ID |
 | 0 | `rich` (선택) | CLI 출력 |
-| 1 | `openai` **또는** `anthropic` (하나만) | LLM. `httpx`는 전이 의존 |
-| 1 | `tiktoken` (OpenAI 계열) | 토큰 카운트 |
+| 1 | 추가 Python 패키지 없음 | Ollama loopback JSON API를 표준 `urllib`로 호출 |
 | 2 | (없음 — 표준 `sqlite3`) | 기억 저장 |
 | 3 | `jsonschema` | 도구 인자 검증(JSON Schema draft 2020-12). pydantic 모델로 대체하지 않는다 — LLM에 노출하는 스키마와 검증에 쓰는 스키마가 **같은 문서**여야 한다 |
 | 3 | `httpx`, `selectolax` 또는 `beautifulsoup4` | 웹 fetch·본문 추출 |
@@ -962,7 +963,7 @@ PLAN 8장의 Phase를 이 문서의 모듈로 옮긴 표다. 각 Phase에서 **�
 | Phase | 새로 만드는 모듈 | 계약 확정 대상 |
 |-------|------------------|----------------|
 | 0 | `config\*`, `core\*`, `telemetry\{events,masking}`, `cli`(에코만), `wiring`, `ui\single_instance`, `memory\{schema.sql,migrations}`, `scripts\bootstrap` | `Settings`, `RequestContext`, 이벤트 봉투, SQLite v1, 원자적 쓰기 |
-| 1 | `budget.py`, `llm\{base,openai_client,fake}`, `orchestrator\{prompt,loop}`(도구 없음), `memory\store`(세션·raw만), `telemetry\metrics` | `LLMClient`, `Message`, 외부 서비스 통합 예산, 프롬프트 조립 |
+| 1 | `budget.py`, `llm\{base,ollama_client,fake}`, `orchestrator\{prompt,loop}`(도구 없음), `memory\store`(세션·raw만), `telemetry\metrics` | `LLMClient`, `Message`, 로컬 LLM 비용 0 기록, 프롬프트 조립 |
 | 2 | `memory\{models,retrieval,summarizer,commands,migrations}`, `orchestrator\recovery` | `MemoryStore`, `MemoryRecord`, 랭킹 공식 |
 | 3 | `rag\*`, `tools\{base,registry}`, `tools\impl\{web_search,doc_search}`, `privacy\*` | `SearchProvider`, `DocumentIndex`, `ToolSpec`, `ToolResult`, `PrivacyGate`, 신뢰 경계 봉투 |
 | 4 | `safety\*`, `tools\runner`, `tools\impl\{open_app,open_folder,open_url,create_file}` | `Verdict`, `ApprovalTicket`, `args_hash` |

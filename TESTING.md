@@ -688,6 +688,8 @@ def p95(values: list[int]) -> int:
 - [ ] `test_retry_gives_up_after_max` 통과 (무한 재시도 없음)
 - [ ] `test_history_compacted_keeping_recent_turns` 통과
 - [ ] 예산 초과 차단 테스트 통과
+- [ ] Ollama 실제 3턴 한국어 응답, `qwen3.5:9b` digest, GPU 적재 확인
+- [ ] loopback Ollama 외 외부 HTTP 호출 0건
 
 **Phase 2**
 - [ ] `--phase 2` 통과

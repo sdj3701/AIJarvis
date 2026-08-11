@@ -10,7 +10,7 @@
 | D002 | decided | 운영 데이터 경로 | `D:\Jarvis` | Phase 0 | 고정 |
 | D003 | decided | 상태 저장 | JSONL + SQLite WAL/FULL | Phase 0 | DESIGN 9장 준수 |
 | D004 | decided | 패키지 관리 | `venv`, `pip`, hash lockfile | Phase 0 | bootstrap 문서화 |
-| D005 | pending | LLM 제공자 | `openai` 또는 `anthropic` | Phase 1 진입 전 | 제공자·모델 ID·단가 입력 |
+| D005 | decided | LLM 런타임·모델 | `Ollama` + `qwen3.5:9b` | Phase 1 | 로컬 스모크·모델 식별자 검증 |
 | D006 | pending | 검색 제공자 | 미정 | Phase 3 진입 전 | API·비용·결과 스키마 확정 |
 | D007 | pending | 백업 대상 | 미정 | Phase 6 진입 전 | 별도 장치/보안 위치 경로 확정 |
 | D008 | pending | 백업 암호화 도구 | 7-Zip AES-256 또는 age | Phase 6 진입 전 | 설치·복원 자동화 방식 확정 |
@@ -38,9 +38,23 @@ ID:
 결정 날짜:
 ```
 
+## D005 상세 — 로컬 LLM
+
+- 결정 날짜: 2026-08-11
+- 런타임: Ollama 0.32.6, `http://127.0.0.1:11434` 고정
+- 모델: `qwen3.5:9b`, GGUF `Q4_K_M`, 9.7B, 6,594,474,711 bytes
+- manifest digest: `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7`
+- 출처: [Ollama 공식 qwen3.5:9b 모델 페이지](https://ollama.com/library/qwen3.5:9b)
+- 라이선스: Apache License 2.0
+- 런타임 문맥: 모델 최대치는 262,144 토큰이지만 RTX 4070 Ti 12GB 운영값은 16,384 토큰으로 제한
+- 추론 모드: Phase 1 기본 `think=false`
+- 라우팅: loopback Ollama만 허용하며 클라우드 LLM 폴백은 만들지 않음
+- 비용: 입력·출력 단가 모두 USD 0.00. 전력비는 애플리케이션 외부 비용 예산에 포함하지 않음
+- 재검토 조건: 한국어 평가 실패, 12GB VRAM 초과, 라이선스·모델 digest 변경
+
 ## Phase 차단 규칙
 
-- D005가 `pending`이면 Phase 1 구현을 시작하지 않는다.
+- D005가 `pending`이면 Phase 1 구현을 시작하지 않는다. 현재는 위 로컬 LLM 결정으로 해소되었다.
 - D006이 `pending`이면 Phase 3의 웹 검색 구현만 차단한다. 로컬 문서 RAG는 먼저 개발할 수 있다.
 - D007·D008이 `pending`이면 Phase 6 릴리스 게이트를 통과시킬 수 없다.
 - D009가 `pending`이면 Phase 7 TTS 구현을 시작하지 않는다. STT 사전 실험은 가능하다.

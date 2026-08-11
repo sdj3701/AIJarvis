@@ -78,8 +78,8 @@
 | `session.checkpoint` | N턴마다 | `turn_count`, `last_turn_id`, `usage_total` |
 | `session.end` | `/bye` 또는 정상 종료 | `turn_count`, `summary_record_id`, `candidate_count` |
 | `session.summary_failed` | 요약 구조 위반·LLM 실패 | `reason`, `attempt`, `raw_valid_lines` |
-| `user.input` | **API 호출 전** | `text_len`, `channel`, `text` |
-| `llm.request` | 각 API 시도 | `model`, `attempt`, `prompt_tokens_est`, `prompt_version`, `tool_count`, `memory_record_ids` |
+| `user.input` | **모델 호출 전** | `text_len`, `channel`, `text` |
+| `llm.request` | 각 모델 호출 시도 | `model`, `attempt`, `prompt_tokens_est`, `prompt_version`, `tool_count`, `memory_record_ids` |
 | `llm.response` | 응답 수신 | `model`, `finish_reason`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `latency_ms`, `tool_call_names` |
 | `llm.retry` | 재시도 직전 | `attempt`, `reason`, `wait_ms` |
 | `privacy.redact` | 마스킹 발생 | `channel`(api/log/tts/memory), `findings` |
@@ -115,7 +115,7 @@
 | `recovery.result` | 복구 완료 | `action`, `session_id`, `quarantined`, `restored_turns` |
 | `error` | 처리된 예외 | `error_type`, `user_message`, `detail`, `handled` |
 
-`user.input` payload의 `text`는 마스킹 후 원문을 담는다. 이 이벤트는 **API 호출 전에 flush**되어야 하며, 그것이 PLAN Phase 1의 입력 유실 방지 기준이다.
+`user.input` payload의 `text`는 마스킹 후 원문을 담는다. 이 이벤트는 **모델 호출 전에 flush**되어야 하며, 그것이 PLAN Phase 1의 입력 유실 방지 기준이다.
 
 ---
 
@@ -828,7 +828,7 @@ PLAN 12.1절의 정량 기준을 실제로 측정하기 위한 최소 집합이�
 
 | 파일 | 반드시 거부해야 하는 상태 |
 |------|---------------------------|
-| `settings.yaml` | `paths.data_root`가 존재하지 않거나 쓰기 불가 / 예산 한도 누락 / `budget.on_exceed`가 `block_new_requests`가 아님 / `llm.pricing`에 `llm.model` 키가 없음 / `context` 비율 합이 1.0 초과 / 미결정 parser의 확장자가 활성화됨 |
+| `settings.yaml` | `paths.data_root`가 존재하지 않거나 쓰기 불가 / 예산 한도 누락 / `budget.on_exceed`가 `block_new_requests`가 아님 / `llm.provider`가 `ollama`가 아님 / `llm.base_url`이 고정 loopback 주소가 아님 / `local_only`가 true가 아님 / model·digest가 D005와 다름 / `llm.pricing`에 `llm.model` 키가 없음 / 입력+출력 한도가 런타임 문맥을 초과 / `context` 비율 합이 1.0 초과 / 미결정 parser의 확장자가 활성화됨 |
 | `tools.yaml` | `default`가 `deny`가 아님 / `sandbox`의 `write_roots`·`read_roots`·`roots`에 절대 경로가 있음 / 해석된 경로가 `data_root` 밖 / `risk`·`execution_mode`가 정의되지 않은 도구 / `run_skill`이 managed가 아님 / 앱 실행 도구가 detached allowlisted가 아님 / `app_map`의 실행 파일이 존재하지 않음 |
 | `privacy.yaml` | `api_transmission.default`가 `deny`가 아님 / `detectors`에 시크릿 패턴이 하나도 없음 / `outputs.memory_write.refuse_kinds`가 빈 배열 / 외부 service 설정이 없음 |
 
