@@ -204,6 +204,44 @@ def test_pricing_must_contain_selected_model(config_dir: Path) -> None:
         load_config(config_dir)
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("provider", "openai"),
+        ("base_url", "http://localhost:11434"),
+        ("local_only", False),
+        ("model", "qwen2.5:7b-instruct"),
+        ("model_digest", "0" * 64),
+        ("runtime_context_tokens", 32768),
+        ("think", True),
+    ],
+)
+def test_local_ollama_decision_cannot_be_weakened(
+    config_dir: Path,
+    field: str,
+    value: Any,
+) -> None:
+    _mutate_yaml(
+        config_dir / "settings.yaml",
+        lambda document: document["llm"].__setitem__(field, value),
+    )
+
+    with pytest.raises(ConfigError):
+        load_config(config_dir)
+
+
+def test_ollama_context_limits_must_fit_runtime_window(config_dir: Path) -> None:
+    _mutate_yaml(
+        config_dir / "settings.yaml",
+        lambda document: document["llm"]["context"].__setitem__(
+            "max_input_tokens", 15000
+        ),
+    )
+
+    with pytest.raises(ConfigError):
+        load_config(config_dir)
+
+
 def test_pdf_cannot_be_enabled_without_parser(config_dir: Path) -> None:
     _mutate_yaml(
         config_dir / "settings.yaml",
@@ -319,15 +357,12 @@ def test_documented_settings_overrides(config_dir: Path) -> None:
         config_dir / "settings.yaml",
         overrides={
             "dev_mode": True,
-            "llm.model": "fake-model",
-            "llm.pricing": {
-                "fake-model": {"input_per_1k": "0.001", "output_per_1k": "0.002"}
-            },
+            "llm.temperature": 0.1,
         },
     )
 
     assert settings.dev_mode is True
-    assert settings.llm.model == "fake-model"
+    assert settings.llm.temperature == 0.1
 
 
 def test_documented_app_map_override(config_dir: Path) -> None:

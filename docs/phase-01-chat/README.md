@@ -27,6 +27,18 @@ tests/unit/test_{prompt_budget,budget_guard}.py
 tests/slow/test_crash_loop.py
 ```
 
+### 로컬 런타임 준비
+
+```powershell
+winget install --exact --id Ollama.Ollama
+ollama pull qwen3.5:9b
+ollama list
+```
+
+`ollama list`의 ID가 D005 digest 앞 12자리 `6488c96fa5fa`와 일치해야 한다.
+`OllamaClient.verify_model()`은 `/api/tags`의 전체 digest를 검사한다. 16K 문맥으로 호출한 뒤 `ollama ps`에서
+`PROCESSOR 100% GPU`, `CONTEXT 16384`를 확인할 수 있다.
+
 ## 4. 한 턴의 고정 흐름
 
 ```text

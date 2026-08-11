@@ -3,8 +3,8 @@
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
 > 마지막 문서 정리: 2026-08-11 (Phase 0 게이트 증거 반영)
-> 현재 상태: Phase 1 P1-01 완료, D005 로컬 LLM 결정·설치 검증 완료
-> 현재 Phase: Phase 1 (P1-02 Ollama 클라이언트 구현)
+> 현재 상태: Phase 1 P1-01~P1-02 완료, 로컬 Ollama 3턴 스모크 성공
+> 현재 Phase: Phase 1 (다음 P1-03 세션·raw 로그)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -20,7 +20,7 @@
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
 | 0 기반 | completed | [Phase 0](./phase-00-foundation/README.md) | [phase0-20260811.json](../artifacts/gates/phase0-20260811.json) | P0-01~P0-08 완료, 137 passed |
-| 1 대화 | in_progress | [Phase 1](./phase-01-chat/README.md) | — | P1-01 완료, P1-02 진행 중 |
+| 1 대화 | in_progress | [Phase 1](./phase-01-chat/README.md) | — | P1-01~P1-02 완료, P1-03 대기 |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | — |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006, PDF는 D012 |
 | 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | — |
@@ -37,7 +37,7 @@ Phase 1 문서의 작업 ID와 동일하게 유지한다.
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
 | P1-01 LLM 계약·가짜 클라이언트 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 177 passed, LLM 계약·가짜 클라이언트 커버리지 100% |
-| P1-02 Ollama 클라이언트 | in_progress | Codex | 2026-08-11 | — | Ollama 설치·모델 pull·한국어/GPU 스모크 완료 |
+| P1-02 Ollama 클라이언트 | completed | Codex | 2026-08-11 | 2026-08-11 | 전체 220 passed, 클라이언트 99% coverage, 실제 한국어 멀티턴 3회·16K·GPU 100%·비용 0 확인 |
 | P1-03 세션·raw 로그 | not_started | — | — | — | — |
 | P1-04 프롬프트·컨텍스트 예산 | not_started | — | — | — | — |
 | P1-05 비용 예산 | not_started | — | — | — | — |

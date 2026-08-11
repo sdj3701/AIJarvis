@@ -1,7 +1,7 @@
 # 자비스 기본 설정 템플릿
 # 사본 위치: D:\Jarvis\config\settings.yaml
 # 스키마 규칙: SCHEMAS.md 11장 / 값의 의미: DESIGN.md
-# 이 파일에 API 키를 적지 않는다. 시크릿은 Windows 자격 증명 관리자에 저장한다.
+# 로컬 Ollama에는 API 키가 필요하지 않다. 다른 시크릿도 이 파일에 적지 않는다.
 
 schema_version: 1
 
@@ -27,20 +27,25 @@ paths:
   backups_dir: "backups"
 
 llm:
-  # PLAN 15장 결정 항목. Phase 1에서 제공자 1개, 모델 1개만 고정한다.
-  provider: openai            # openai | anthropic
-  model: "<사용할 모델 ID>"    # 예: 제공자 문서의 모델 식별자를 그대로 적는다
+  # D005 고정값. 클라우드 폴백이나 다른 호스트는 허용하지 않는다.
+  provider: ollama
+  base_url: "http://127.0.0.1:11434"
+  local_only: true
+  model: "qwen3.5:9b"
+  model_digest: "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+  runtime_context_tokens: 16384
+  think: false
   temperature: 0.3
   max_output_tokens: 2000
-  timeout_s: 60
+  timeout_s: 120
   max_retries: 3
   backoff_base_s: 0.5
   backoff_max_s: 8.0
-  # 재시도 대상 이외(4xx 인증·잘못된 요청)는 즉시 실패시킨다.
-  retry_on: [timeout, rate_limit, server_error]
+  # 재시도 대상 이외(4xx·모델 누락·digest 불일치)는 즉시 실패시킨다.
+  retry_on: [timeout, connection_error, server_error]
 
   context:
-    max_input_tokens: 24000
+    max_input_tokens: 12288
     reserve_output_tokens: 2000
     memory_share: 0.20        # 기억 블록 상한 비율
     history_share: 0.50       # 대화 히스토리 상한 비율
@@ -50,7 +55,7 @@ llm:
   pricing:
     # 1000 토큰당 USD. 문자열로 적는다(Decimal 파싱).
     # 모델명을 키로 쓰고, 모델을 바꾸면 여기도 바꾼다.
-    "<사용할 모델 ID>":
+    "qwen3.5:9b":
       input_per_1k: "0.00"
       output_per_1k: "0.00"
 

@@ -66,6 +66,10 @@ class LLMTimeout(LLMError):
     """The model provider did not respond before its deadline."""
 
 
+class LLMUnavailable(LLMError):
+    """The configured local model runtime is unavailable."""
+
+
 class LLMRateLimited(LLMError):
     """The model provider rejected the request due to rate limits."""
 

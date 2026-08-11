@@ -18,7 +18,7 @@ api_transmission:
 
   # 외부 서비스별 활성 여부. online_tts는 D009 결정 전 false를 유지한다.
   services:
-    llm: true
+    llm: false                   # Ollama loopback은 외부 API 전송이 아니다.
     search_query: true
     online_tts: false
 

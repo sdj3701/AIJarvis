@@ -18,6 +18,12 @@ Ratio = Annotated[float, Field(ge=0, le=1)]
 PositiveDecimal = Annotated[Decimal, Field(gt=0)]
 NonNegativeDecimal = Annotated[Decimal, Field(ge=0)]
 NonEmptyString = Annotated[str, Field(min_length=1)]
+Sha256Hex = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+
+OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+OLLAMA_MODEL = "qwen3.5:9b"
+OLLAMA_MODEL_DIGEST = "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+OLLAMA_CONTEXT_TOKENS = 16_384
 
 Risk = Literal["low", "medium", "high"]
 ExecutionMode = Literal["in_process", "detached_allowlisted", "managed_process"]
@@ -81,24 +87,43 @@ class ModelPricing(StrictModel):
 
 
 class LLMSettings(StrictModel):
-    provider: Literal["openai", "anthropic"]
-    model: NonEmptyString
+    provider: Literal["ollama"]
+    base_url: Literal["http://127.0.0.1:11434"]
+    local_only: Literal[True]
+    model: Literal["qwen3.5:9b"]
+    model_digest: Sha256Hex
+    runtime_context_tokens: Literal[16384]
+    think: Literal[False]
     temperature: Annotated[float, Field(ge=0, le=2)]
     max_output_tokens: PositiveInt
     timeout_s: PositiveFloat
     max_retries: NonNegativeInt
     backoff_base_s: PositiveFloat
     backoff_max_s: PositiveFloat
-    retry_on: list[Literal["timeout", "rate_limit", "server_error"]]
+    retry_on: list[Literal["timeout", "connection_error", "server_error"]]
     context: ContextSettings
     pricing: dict[str, ModelPricing]
 
     @model_validator(mode="after")
     def selected_model_has_pricing(self) -> Self:
+        if self.model_digest != OLLAMA_MODEL_DIGEST:
+            raise ValueError("llm.model_digest가 D005 결정과 일치해야 합니다")
         if self.model not in self.pricing:
             raise ValueError("선택한 llm.model의 pricing 항목이 필요합니다")
+        selected_pricing = self.pricing[self.model]
+        if selected_pricing.input_per_1k != 0 or selected_pricing.output_per_1k != 0:
+            raise ValueError("로컬 Ollama 모델의 외부 호출 단가는 0이어야 합니다")
         if self.backoff_max_s < self.backoff_base_s:
             raise ValueError("backoff_max_s는 backoff_base_s 이상이어야 합니다")
+        if self.max_output_tokens > self.context.reserve_output_tokens:
+            raise ValueError("max_output_tokens는 reserve_output_tokens 이하여야 합니다")
+        if (
+            self.context.max_input_tokens + self.context.reserve_output_tokens
+            > self.runtime_context_tokens
+        ):
+            raise ValueError("입력·출력 토큰 한도가 Ollama 런타임 문맥을 초과합니다")
+        if len(self.retry_on) != len(set(self.retry_on)):
+            raise ValueError("llm.retry_on 값은 중복될 수 없습니다")
         return self
 
 

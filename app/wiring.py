@@ -17,6 +17,8 @@ from app.config.secrets import SecretLoader
 from app.core.clock import Clock, SystemClock
 from app.core.errors import ExitCode, JarvisError, exit_code_for
 from app.core.ids import PrefixedIdFactory, SystemIdFactory
+from app.llm.base import LLMClient
+from app.llm.ollama_client import OllamaClient
 from app.memory.migrations import initialize_database
 from app.orchestrator.recovery import recover_startup
 from app.telemetry.events import JsonlEventWriter
@@ -34,6 +36,7 @@ class Runtime:
     secrets: SecretLoader
     lock: SingleInstanceLock
     memory_db: Path
+    llm: LLMClient
 
 
 def _data_path(config: LoadedConfig, configured: Path) -> Path:
@@ -75,6 +78,7 @@ def build(
         secrets=secrets,
         lock=SingleInstanceLock(state_dir / "jarvis.lock"),
         memory_db=_data_path(loaded, loaded.settings.paths.memory_db),
+        llm=OllamaClient(loaded.settings.llm),
     )
 
 
