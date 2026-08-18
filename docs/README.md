@@ -2,7 +2,7 @@
 
 이 디렉터리는 실제 구현 순서대로 정렬된 실행 문서다. 루트의 [README.md](../README.md)가 전체 진입점이고, 이 파일은 세부 탐색용 색인이다.
 
-현재 상태와 다음 작업은 [PROGRESS.md](./PROGRESS.md)에서 관리한다.
+현재 상태와 다음 작업은 [PROGRESS.md](./PROGRESS.md)에서 관리한다. `rebuild/v2`의 다음 작업은 [Phase 0](./phase-00-foundation/README.md)이다.
 
 ## 개발 순서
 

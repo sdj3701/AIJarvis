@@ -1,10 +1,10 @@
 # Jarvis 개발 문서 허브
 
-이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 Phase 0 기반과 Phase 1 로컬 대화 게이트를 통과했으며, Ollama `qwen3.5:9b`로 한국어 멀티턴 대화, raw 선저장, 재시도, 컨텍스트·비용 통제를 수행하는 CLI를 실행할 수 있다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
+이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
 
-> 현재 브랜치는 `rebuild/v2`다. 기존 프로토타입은 `main`과
-> `D:\Ai\Jarvis-prototype`에 동결되어 있으며, v2의 개발 데이터는
-> `D:\Jarvis-v2-dev`만 사용한다. 작업 규칙은
+> 현재 브랜치는 `rebuild/v2`다. 착수는 끝났고, Phase 0 기반을 다시 만드는 단계다.
+> 기존 프로토타입은 `main`과 `D:\Ai\Jarvis-prototype`에 동결되어 있다.
+> v2 개발 데이터는 `D:\Jarvis-v2-dev`만 사용한다. 작업 규칙은
 > [v2 재구축 안내](./docs/00-start-here/REBUILD.md)를 먼저 확인한다.
 
 ## 1. 처음 시작하는 순서
@@ -15,48 +15,21 @@
 4. 각 작업마다 테스트를 먼저 연결하고 구현한다.
 5. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
 
-현재 구현 결과: [Phase 1 — 대화](./docs/phase-01-chat/README.md) 완료 (`Ollama` + `qwen3.5:9b`)
-다음 개발 문서: [Phase 2 — 기억](./docs/phase-02-memory/README.md)
+현재 구현 결과: 착수 완료, [Phase 0 — 기반](./docs/phase-00-foundation/README.md) 재구축 미착수
+다음 개발 문서: [Phase 0 — 기반](./docs/phase-00-foundation/README.md)
 
 현재 진행 상태: [개발 진행 현황](./docs/PROGRESS.md)
 
-Phase 1 실행 명령:
+프로토타입과 동작을 비교할 때는 `D:\Ai\Jarvis-prototype`만 실행한다. v2 코드와 `D:\Jarvis`를 섞지 않는다.
+
+Phase 0 준비·실행 명령:
 
 ```powershell
 python scripts\bootstrap.py
-ollama list
 python -m app
 ```
 
-CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 번만 질문하려면
-`python -m app --once "대한민국의 수도는 어디인가요?"`를 실행한다. 자동 완료 게이트는
-`python scripts\gate.py --phase 1`이며 외부 네트워크를 사용하지 않는다.
-
-로컬 음성 기능은 다음과 같이 준비하고 실행한다.
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[voice]"
-.\.venv\Scripts\python.exe scripts\setup_voice.py
-.\.venv\Scripts\python.exe -m app --voice
-```
-
-PowerShell 실행 정책 때문에 `Activate.ps1`을 실행할 수 없어도 위 명령은 그대로 동작한다.
-첫 준비에서는 고정 SHA의 Vosk 호출어 모델과 faster-whisper small 질문 모델을
-`D:\Jarvis-v2-dev\models`에 설치한다.
-
-터미널에 `[마이크 켜짐]`이 표시되면 “자비스”만 부르거나,
-“자비스 수돗물의 성분에 대해서 알려줘”처럼 **호출과 질문을 한 문장으로** 이어서 말한다.
-호출만 하면 안내(“무엇을 도와드릴까요.”) 후 질문을 받고, 한 문장에 질문이 있으면 안내 없이
-바로 인식·답변한다. Ctrl+C 또는 “종료”로 끝낼 수 있다. 음성 PCM은 메모리의 제한 버퍼에만
-두며 파일이나 외부 API로 보내지 않는다. 호출 대기에는 `[STT 부분]`·`[STT 확정]`,
-인식 뒤에는 `[Whisper 확정]`과 품질값이 표시된다. 질문은 연속 무음에서 자동으로 끝난다.
-품질이 낮으면 Ollama에 보내지 않고 다시 말해 달라고 안내한다. 정확도 조정은
-[한국어 STT 운영 가이드](./docs/reference/VOICE_STT.md)와
-[호출·한 문장 UX](./docs/reference/VOICE_WAKE_COMMAND_UX.md)를 따른다.
-
-답변을 읽는 중에는 `[끼어들기 감시]`가 표시된다. 중간에 멈추려면 마이크 가까이에서
-“자비스”라고 말하거나 **`Ctrl+Alt+J`**를 누른다. 음성 끊기는 D017 게이트(근거리 onset +
-WebRTC VAD)를 통과한 구간만 STT에 넣는다. `[답변 중단]` 뒤 새 질문을 받으면 된다.
+Phase 0 완료 시 CLI는 설정을 검증하고 단일 인스턴스 락을 잡은 뒤 입력을 그대로 돌려준다. LLM 호출은 아직 없다. 자동 완료 게이트는 `python scripts\gate.py --phase 0`이다.
 
 ## 2. 문서의 역할과 우선순위
 
@@ -121,14 +94,14 @@ WebRTC VAD)를 통과한 구간만 STT에 넣는다. `[답변 중단]` 뒤 새 �
 
 ## 6. 구현을 시작하기 전에 남은 결정
 
-다음 값은 문서에서 임의로 추측하지 않는다.
+다음 값은 문서에서 임의로 추측하지 않는다. Phase 0을 막는 항목은 없다.
 
 - Phase 1: D005 결정 완료 — Ollama, `qwen3.5:9b`, 외부 단가 USD 0.00
-- Phase 3: 검색 API 제공자와 인증 방식
-- Phase 3: PDF 지원 여부와 parser
-- Phase 6: 운영 백업 대상 경로와 암호화 도구
+- Phase 3: D006 결정 완료 — DuckDuckGo (`ddgs`)
+- Phase 3: PDF 지원 여부와 parser (D012 pending)
+- Phase 6: 운영 백업 대상 경로와 암호화 도구 (D007~D008 pending)
 - Phase 7: D009 로컬 TTS, D010 호출 방식, D016 하이브리드 한국어 STT 결정 완료
-- Phase 8: 패키징·전역 단축키·자동 시작 방식
+- Phase 8: 패키징·전역 단축키·자동 시작 방식 (D013~D015 pending)
 
 결정 상태와 선택 기준은 [DECISIONS.md](./docs/00-start-here/DECISIONS.md)에 기록한다.
 
