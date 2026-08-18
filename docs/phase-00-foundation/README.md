@@ -51,15 +51,23 @@ tests/unit/test_{config_loader,atomic,canonical_hash,masking,single_instance}.py
 
 1. `pyproject.toml`에 패키지 정보, Python 하한, pytest 마커, ruff, mypy 설정을 작성한다.
 2. `.venv`를 만들고 Phase 0 런타임·개발 의존성만 설치한다.
-3. exact version과 hash를 가진 `requirements.lock`을 생성한다.
+3. exact version과 hash를 가진 `requirements.lock`을 생성한다. 생성 extra는 `dev`만 사용한다.
 4. `.gitignore`에 `.venv`, `.env`, 캐시, 빌드 결과와 운영 데이터 사본을 등록한다. `artifacts\gates\`는 게이트 증거이므로 **제외하지 않는다**.
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -U pip pip-tools
+.\.venv\Scripts\python.exe -m piptools compile --allow-unsafe --extra=dev --generate-hashes --output-file=requirements.lock --strip-extras pyproject.toml
+.\.venv\Scripts\python.exe -m pip install --require-hashes -r requirements.lock
+.\.venv\Scripts\python.exe -m pip install -e . --no-deps
+```
 
 검증:
 
 ```powershell
-python -m pytest --collect-only
-ruff check .
-mypy app
+.\.venv\Scripts\python.exe -m pytest --collect-only
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m mypy app
 ```
 
 ### P0-02 설정 모델과 로더

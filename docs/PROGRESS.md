@@ -2,8 +2,8 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-18 (v2 재구축 현황 리셋)
-> 현재 상태: 착수 완료, `rebuild/v2` Phase 0 재구축 미착수
+> 마지막 문서 정리: 2026-08-18 (P0-01 완료)
+> 현재 상태: `rebuild/v2` Phase 0 재구축 진행 중, P0-01 완료
 > 현재 Phase: Phase 0
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 > 브랜치: `rebuild/v2`. 프로토타입 게이트 기록은 비교용이며 v2 완료가 아니다.
@@ -22,7 +22,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | not_started | [Phase 0](./phase-00-foundation/README.md) | — | 착수·경로 분리 완료. P0-01부터 재구축 |
+| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01 완료. 다음은 P0-02 |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 decided |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006 decided, D012 pending |
@@ -39,7 +39,7 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
-| P0-01 프로젝트와 품질 도구 | not_started | — | — | — | |
+| P0-01 프로젝트와 품질 도구 | completed | Cursor | 2026-08-18 | 2026-08-18 | collect-only 453, ruff/mypy 통과, lock은 `--extra=dev` |
 | P0-02 설정 모델과 로더 | not_started | — | — | — | |
 | P0-03 시크릿 로더 | not_started | — | — | — | |
 | P0-04 공통 타입 | not_started | — | — | — | |

@@ -16,6 +16,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Phase 3/7 extras stay declared so later phases can opt in.
+# The Phase 0 lock is compiled with --extra=dev only.
 voice = [
     "faster-whisper==1.2.1",
     "sounddevice==0.5.5",
@@ -75,3 +77,18 @@ python_version = "3.11"
 strict = true
 warn_unreachable = true
 files = ["app"]
+
+# Later-phase libraries are optional extras. Leftover prototype modules import
+# them lazily; mypy must not require those packages in the Phase 0 environment.
+[[tool.mypy.overrides]]
+module = [
+    "ddgs",
+    "faster_whisper",
+    "faster_whisper.*",
+    "numpy",
+    "numpy.*",
+    "sounddevice",
+    "vosk",
+    "webrtcvad",
+]
+ignore_missing_imports = true

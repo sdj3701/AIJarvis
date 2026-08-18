@@ -69,7 +69,7 @@ class RecognitionUpdate:
 
 def _load_vosk_model(path: Path) -> object:
     try:
-        from vosk import Model, SetLogLevel  # type: ignore[import-untyped]
+        from vosk import Model, SetLogLevel
     except ImportError as error:
         raise JarvisError(
             "음성 인식 패키지가 없습니다. pip install -e .[voice]를 실행하세요."

@@ -2,10 +2,11 @@
 
 from pathlib import Path
 
-import huggingface_hub
 import pytest
 
 from scripts import setup_voice
+
+huggingface_hub = pytest.importorskip("huggingface_hub")
 
 
 def _write_required_model_files(target: Path) -> None:
