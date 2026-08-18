@@ -155,6 +155,16 @@ python scripts\gate.py --phase 7
 ## 8. 이 Phase에서 하지 않는 것
 
 - OS 로그인 자동 시작과 사용자 모르게 마이크 열기
-- 음성 생체 인증
+- 음성 생체 인증(신원 증명·High 승인 대체). Soft UX 소스 필터(D019)는 예외로 허용
 - 음성만으로 High 작업 승인
 - 긴 문서 전체 낭독
+
+## 9. Soft 소스 필터 (D019)
+
+배경 음악과 등록되지 않은 타인의 호출을 조용히 무시한다. 상세는
+[VOICE_SOURCE_FILTER.md](../reference/VOICE_SOURCE_FILTER.md).
+
+- [x] 단위: 음악 reject / 본인 accept / 타인 reject / unknown pass
+- [x] 프로필 없이 Gate E skip, 모델 실패 fail-open
+- [x] enrollment 후 PCM 잔존 0 (프로필 roundtrip 테스트)
+- [ ] 실장치 S3 측정표 기록 후 임계값 재조정 (초기 기본값은 설정에 고정)

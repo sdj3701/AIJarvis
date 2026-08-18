@@ -129,6 +129,21 @@ class PrivacyGate:
     ) -> ExternalTextDecision:
         return self.for_api(text, purpose=purpose)
 
+    def for_llm_local(self, text: str) -> str:
+        """Mask secrets before local LLM prompts. Never send raw block findings."""
+        if self.masker is None:
+            return text
+        masked, findings = self.masker.mask_text(text)
+        if findings and self.events is not None:
+            self.events.emit(
+                "privacy.redact",
+                {
+                    "path": "llm_local",
+                    "detector_ids": sorted({finding.detector_id for finding in findings}),
+                },
+            )
+        return masked
+
     def for_memory_write(
         self,
         rec: MemoryRecord,
@@ -136,9 +151,6 @@ class PrivacyGate:
         source_kind: SourceKind | None = None,
     ) -> tuple[MemoryRecord | None, tuple[Finding, ...]]:
         effective_source = source_kind or rec.source_kind
-        if effective_source == "user_explicit":
-            return rec, ()
-
         text = rec.value
         if self.masker is None:
             return rec, ()
@@ -162,6 +174,10 @@ class PrivacyGate:
                         },
                     )
                 return None, tuple(blocked)
+
+        # Explicit user memories may keep non-secret masked text, but never raw secrets.
+        if effective_source == "user_explicit" and not findings:
+            return rec, ()
 
         sensitivity: Literal["normal", "sensitive", "secret"] = rec.sensitivity
         if any(finding.kind in self.mark_sensitive_kinds for finding in findings):

@@ -16,7 +16,9 @@ from app.voice.barge_in_gate import BargeInGateDecision
 from app.voice.base import AudioFrame, Transcript
 from app.voice.controller import LocalVoiceListener, VoiceController
 from app.voice.microphone import SpeechCapturePolicy
+from app.voice.source_filter import MusicSpeechScores, SourceFilter, SourceFilterPolicy
 from app.voice.stt import RecognitionUpdate
+from tests.fakes.audio_source import FixedMusicClassifier
 from tests.fakes.clock import FrozenClock
 
 pytestmark = pytest.mark.phase7
@@ -704,3 +706,50 @@ def test_barge_in_does_not_trigger_on_final_tts_sentence_containing_jarvis() -> 
         )
         is False
     )
+
+
+def test_command_path_source_filter_skips_whisper_for_music() -> None:
+    frames = [_audio_frame(value) for value in (4_000, 4_000, 4_000, 0, 0, 0)]
+    command_stt = FakeCommandSTT(Transcript("이 질문은 호출되면 안 됩니다", "ko", 1_000, 0.9))
+    events = FakeEvents()
+    output = StringIO()
+    source_filter = SourceFilter(
+        SourceFilterPolicy(
+            enabled=True,
+            music_enabled=True,
+            speaker_enabled=False,
+            music_reject_threshold=0.45,
+            speech_margin=0.05,
+            owner_accept_threshold=0.75,
+            other_reject_threshold=0.55,
+            analysis_window_ms=1_200,
+        ),
+        music_classifier=FixedMusicClassifier(
+            MusicSpeechScores(music=0.9, speech=0.1, singing=0.8)
+        ),
+    )
+    listener = LocalVoiceListener(
+        wake_stt=FakeStreamingSTT(),  # type: ignore[arg-type]
+        command_stt=command_stt,  # type: ignore[arg-type]
+        microphone_factory=lambda: SequenceMicrophone(frames),  # type: ignore[arg-type]
+        wake_word="자비스",
+        capture_policy=SpeechCapturePolicy(500, -42, 250, 250, 15_000),
+        source_filter=source_filter,
+        min_avg_logprob=-1.0,
+        max_no_speech_probability=0.6,
+        device_label="테스트 마이크",
+        events=events,
+        clock=FrozenClock(NOW),
+        output_stream=output,
+    )
+
+    transcript = listener.listen_for_command()
+
+    assert transcript.text == ""
+    assert command_stt.frames == ()
+    assert "voice.source_filter" in events.types
+    filter_events = [payload for kind, payload in events.records if kind == "voice.source_filter"]
+    assert filter_events[-1]["label"] == "music"
+    assert filter_events[-1]["accept"] is False
+    assert filter_events[-1]["path"] == "command"
+    assert "소스 필터" in output.getvalue()

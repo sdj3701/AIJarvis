@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections import deque
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from threading import Event, Thread
 from typing import Any, Literal, Protocol, TextIO
@@ -15,6 +16,7 @@ from app.voice.barge_in_gate import BargeInGate
 from app.voice.base import AudioFrame, Transcript, TTSEngine
 from app.voice.interrupt_hotkey import InterruptHotkeyFactory, NullInterruptHotkey
 from app.voice.microphone import MicrophoneStream, SpeechCapture, SpeechCapturePolicy
+from app.voice.source_filter import SourceDecision, SourceFilter, SourcePath
 from app.voice.stt import (
     FasterWhisperSTTEngine,
     VoskSTTEngine,
@@ -60,6 +62,7 @@ class LocalVoiceListener:
         capture_policy: SpeechCapturePolicy,
         barge_in_gate_factory: Callable[[], BargeInGate] | None = None,
         interrupt_hotkey_factory: InterruptHotkeyFactory | None = None,
+        source_filter: SourceFilter | None = None,
         min_avg_logprob: float,
         max_no_speech_probability: float,
         device_label: str,
@@ -75,6 +78,7 @@ class LocalVoiceListener:
         self._capture_policy = capture_policy
         self._barge_in_gate_factory = barge_in_gate_factory
         self._interrupt_hotkey_factory = interrupt_hotkey_factory
+        self._source_filter = source_filter
         self._min_avg_logprob = min_avg_logprob
         self._max_no_speech_probability = max_no_speech_probability
         self._device_label = device_label
@@ -123,6 +127,8 @@ class LocalVoiceListener:
         onset_count = 0
         voice_frames = 0
         peak_dbfs = -96.0
+        recent_frames: deque[AudioFrame] = deque()
+        recent_ms = 0
         microphone: MicrophoneStream | None = None
         self._events.emit(
             "voice.barge_in",
@@ -186,6 +192,12 @@ class LocalVoiceListener:
 
                     for gated_frame in decision.frames:
                         gate_frames += 1
+                        recent_ms = _push_recent_frame(
+                            recent_frames,
+                            gated_frame,
+                            recent_ms,
+                            window_ms=self._source_window_ms(),
+                        )
                         update = recognizer.feed(gated_frame.pcm)
                         if update.final:
                             final_updates += 1
@@ -207,6 +219,10 @@ class LocalVoiceListener:
                                 update.final or kind == "standalone"
                             )
                         if wake_recognized:
+                            if not self._source_accepts(tuple(recent_frames), path="barge_in"):
+                                recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
+                                last_preview = ""
+                                continue
                             detected = True
                             interrupt_source = "wake_word"
                             self._events.emit(
@@ -261,6 +277,8 @@ class LocalVoiceListener:
         wake_detected = False
         last_preview = ""
         next_input_status_ms = INPUT_STATUS_INTERVAL_MS
+        recent_frames: deque[AudioFrame] = deque()
+        recent_ms = 0
         microphone: MicrophoneStream | None = None
         self._events.emit(
             "voice.recording",
@@ -288,6 +306,13 @@ class LocalVoiceListener:
                             break
                         continue
                     duration_ms += frame.duration_ms
+                    if not wake_detected:
+                        recent_ms = _push_recent_frame(
+                            recent_frames,
+                            frame,
+                            recent_ms,
+                            window_ms=self._source_window_ms(),
+                        )
                     if not capture.finished:
                         capture.feed(frame)
                     if wake_detected:
@@ -323,11 +348,17 @@ class LocalVoiceListener:
                     if update.final:
                         kind = wake_match_kind(update.text, self._wake_word_text)
                         if kind in {"standalone", "prefix"}:
-                            wake_detected = True
-                            _write(
-                                self._output,
-                                "[호출 확정] 이어서 같은 발화를 듣고 Whisper로 인식합니다.",
-                            )
+                            if self._source_accepts(tuple(recent_frames), path="wake"):
+                                wake_detected = True
+                                _write(
+                                    self._output,
+                                    "[호출 확정] 이어서 같은 발화를 듣고 "
+                                    "Whisper로 인식합니다.",
+                                )
+                            else:
+                                recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
+                                capture.clear()
+                                last_preview = ""
                         else:
                             recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
                             capture.clear()
@@ -375,6 +406,10 @@ class LocalVoiceListener:
             _write(self._output, "[녹음 종료] 최대 녹음 시간에 도달했습니다.")
         if not capture.acceptable or not capture.frames:
             _write(self._output, "[한 문장 명령] 추가 질문이 없어 안내 후 질문을 듣습니다.")
+            return TurnStart("standalone", None)
+
+        if not self._source_accepts(capture.frames, path="command"):
+            _write(self._output, "[한 문장 명령] 소스 필터가 질문을 무시했습니다.")
             return TurnStart("standalone", None)
 
         _write(self._output, "[Whisper 처리] 호출과 질문을 한 문장으로 인식합니다.")
@@ -468,6 +503,14 @@ class LocalVoiceListener:
             )
             return Transcript("", "ko", capture.input_duration_ms, None)
 
+        if not self._source_accepts(capture.frames, path="command"):
+            self._emit_command_result(
+                Transcript("", "ko", capture.input_duration_ms, None),
+                started_ms=started_ms,
+                state="source_filtered",
+            )
+            return Transcript("", "ko", capture.input_duration_ms, None)
+
         _write(self._output, "[Whisper 처리] 한국어 질문을 로컬에서 인식하고 있습니다.")
         transcript = self._command_stt.transcribe(capture.frames)
         fallback_reason = self._command_stt.fallback_reason
@@ -520,6 +563,82 @@ class LocalVoiceListener:
                 "no_speech_probability": transcript.no_speech_probability,
             },
         )
+
+    def _source_window_ms(self) -> int:
+        if self._source_filter is None:
+            return 1_200
+        return self._source_filter.policy.analysis_window_ms
+
+    def _source_accepts(self, frames: Sequence[AudioFrame], *, path: SourcePath) -> bool:
+        if self._source_filter is None:
+            return True
+        decision = self._source_filter.classify(frames, path=path)
+        self._emit_source_decision(decision, path=path)
+        if self._source_filter.consume_music_warning():
+            _write(
+                self._output,
+                "[소스 필터] 음악 분류기를 쓸 수 없어 기존 동작으로 통과합니다.",
+            )
+        if self._source_filter.consume_speaker_warning():
+            _write(
+                self._output,
+                "[소스 필터] 화자 필터를 쓸 수 없어 기존 동작으로 통과합니다.",
+            )
+        if decision.accept:
+            if decision.label in {"owner", "unknown"} and decision.speaker_score is not None:
+                _write(
+                    self._output,
+                    f"[소스 필터] {decision.label} 통과 "
+                    f"(화자 점수 {decision.speaker_score:.2f})",
+                )
+            return True
+        if decision.label == "music":
+            score = (
+                f" · 음악 점수 {decision.music_score:.2f}"
+                if decision.music_score is not None
+                else ""
+            )
+            _write(self._output, f"[소스 필터] 음악으로 무시{score}")
+        else:
+            score = (
+                f" · 화자 점수 {decision.speaker_score:.2f}"
+                if decision.speaker_score is not None
+                else ""
+            )
+            _write(
+                self._output,
+                f"[소스 필터] 다른 목소리로 무시{score} "
+                "(재등록: scripts\\enroll_voice.py)",
+            )
+        return False
+
+    def _emit_source_decision(self, decision: SourceDecision, *, path: SourcePath) -> None:
+        self._events.emit(
+            "voice.source_filter",
+            {
+                "path": path,
+                "label": decision.label,
+                "accept": decision.accept,
+                "reason": decision.reason,
+                "music_score": decision.music_score,
+                "speaker_score": decision.speaker_score,
+            },
+        )
+
+
+def _push_recent_frame(
+    frames: deque[AudioFrame],
+    frame: AudioFrame,
+    current_ms: int,
+    *,
+    window_ms: int,
+) -> int:
+    frames.append(frame)
+    total_ms = current_ms + frame.duration_ms
+    while frames and total_ms - frames[0].duration_ms >= window_ms and len(frames) > 1:
+        removed = frames.popleft()
+        total_ms -= removed.duration_ms
+    return total_ms
 
 
 class VoiceController:

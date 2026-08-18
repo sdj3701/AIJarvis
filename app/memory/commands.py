@@ -49,6 +49,15 @@ class CommandResult:
     record_ids: tuple[str, ...] = ()
 
 
+class PrivacyMemoryGate(Protocol):
+    def for_memory_write(
+        self,
+        rec: MemoryRecord,
+        *,
+        source_kind: Literal["user_explicit", "summarizer", "import"] | None = None,
+    ) -> tuple[MemoryRecord | None, object]: ...
+
+
 @dataclass(frozen=True, slots=True)
 class MemoryCommandContext:
     store: SQLiteSessionStore
@@ -59,6 +68,7 @@ class MemoryCommandContext:
     export_dir: Path | None = None
     turn_id: str | None = None
     events: EventSink | None = None
+    privacy_gate: PrivacyMemoryGate | None = None
 
 
 def _now(clock: Clock) -> datetime:
@@ -147,6 +157,17 @@ def _remember(text: str, ctx: MemoryCommandContext) -> CommandResult:
         supersedes=None,
         tags=("user_explicit",),
     )
+    if ctx.privacy_gate is not None:
+        gated, _findings = ctx.privacy_gate.for_memory_write(
+            record,
+            source_kind="user_explicit",
+        )
+        if gated is None:
+            return CommandResult(
+                False,
+                "비밀·민감정보가 포함되어 기억으로 저장하지 않았습니다.",
+            )
+        record = gated
     try:
         ctx.store.put_record(record)
     except JarvisMemoryError as error:
@@ -201,6 +222,17 @@ def _correct(text: str, ctx: MemoryCommandContext) -> CommandResult:
         supersedes=target.id,
         tags=("correction",),
     )
+    if ctx.privacy_gate is not None:
+        gated, _findings = ctx.privacy_gate.for_memory_write(
+            new_record,
+            source_kind="user_explicit",
+        )
+        if gated is None:
+            return CommandResult(
+                False,
+                "비밀·민감정보가 포함되어 교정 기억으로 저장하지 않았습니다.",
+            )
+        new_record = gated
     try:
         ctx.store.put_record(new_record)
         ctx.store.supersede(target.id, new_record.id, now)
@@ -221,7 +253,7 @@ def _correct(text: str, ctx: MemoryCommandContext) -> CommandResult:
     )
     return CommandResult(
         True,
-        f"교정했습니다. [{target.key}] {old_text} → {new_text}",
+        f"교정했습니다. [{target.key}] {old_text} → {new_record.value}",
         (new_record.id,),
     )
 
@@ -296,6 +328,17 @@ def _edit(text: str, ctx: MemoryCommandContext) -> CommandResult:
         supersedes=existing.id,
         tags=("edit",),
     )
+    if ctx.privacy_gate is not None:
+        gated, _findings = ctx.privacy_gate.for_memory_write(
+            new_record,
+            source_kind="user_explicit",
+        )
+        if gated is None:
+            return CommandResult(
+                False,
+                "비밀·민감정보가 포함되어 기억으로 저장하지 않았습니다.",
+            )
+        new_record = gated
     try:
         ctx.store.put_record(new_record)
         if existing.status == "confirmed":
@@ -318,7 +361,11 @@ def _edit(text: str, ctx: MemoryCommandContext) -> CommandResult:
             "memory.supersede",
             {"old_id": existing.id, "new_id": new_record.id, "key": existing.key},
         )
-    return CommandResult(True, f"수정했습니다. [{existing.key}] {new_value}", (new_record.id,))
+    return CommandResult(
+        True,
+        f"수정했습니다. [{existing.key}] {new_record.value}",
+        (new_record.id,),
+    )
 
 
 def _forget(text: str, ctx: MemoryCommandContext) -> CommandResult:

@@ -278,6 +278,28 @@ class BargeInSettings(StrictModel):
     interrupt_hotkey: NonEmptyString
 
 
+class SourceFilterSettings(StrictModel):
+    enabled: bool
+    music_enabled: bool
+    speaker_enabled: bool
+    music_reject_threshold: Ratio
+    speech_margin: Ratio
+    owner_accept_threshold: Ratio
+    other_reject_threshold: Ratio
+    analysis_window_ms: PositiveInt
+    profile_path: NonEmptyString
+    yamnet_model_path: NonEmptyString
+    ecapa_model_dir: NonEmptyString
+
+    @model_validator(mode="after")
+    def speaker_thresholds_are_ordered(self) -> Self:
+        if self.owner_accept_threshold <= self.other_reject_threshold:
+            raise ValueError(
+                "owner_accept_threshold는 other_reject_threshold보다 커야 합니다"
+            )
+        return self
+
+
 class VoiceSettings(StrictModel):
     enabled: bool
     mode: Literal["wake_word"]
@@ -285,6 +307,7 @@ class VoiceSettings(StrictModel):
     acknowledgement: NonEmptyString
     stt: STTSettings
     barge_in: BargeInSettings
+    source_filter: SourceFilterSettings
     tts: TTSSettings
     push_to_talk_hotkey: NonEmptyString
 

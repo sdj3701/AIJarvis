@@ -2,12 +2,16 @@
 
 이 디렉터리는 실제 구현 순서대로 정렬된 실행 문서다. 루트의 [README.md](../README.md)가 전체 진입점이고, 이 파일은 세부 탐색용 색인이다.
 
-현재 상태와 다음 작업은 [PROGRESS.md](./PROGRESS.md)에서 관리한다.
+- **큰 흐름(한 장):** [FLOW.md](./FLOW.md)
+- **큰 흐름 세분화:** [flow/](./flow/README.md)
+- **현재 상태·다음 작업:** [PROGRESS.md](./PROGRESS.md)
 
 ## 개발 순서
 
 ```text
 00-start-here
+  ↓
+FLOW.md → flow/L*|G*|Ops (성숙 단계 이해)
   ↓
 phase-00-foundation → phase-01-chat → phase-02-memory → phase-03-research
   ↓
@@ -19,6 +23,8 @@ phase-07-voice → phase-08-resident-ui → operations
 
 | 폴더 | 목적 | 릴리스 경계 |
 |------|------|-------------|
+| [FLOW.md](./FLOW.md) | 성숙 경로·현재 위치·다음 한 단계 | 전 Phase |
+| [flow/](./flow/README.md) | 큰 흐름의 단계별 세분화 (목표·진입·다음) | 전 Phase |
 | [00-start-here](./00-start-here/README.md) | 미결정 사항·환경·착수 순서 확정 | 착수 준비 |
 | [phase-00-foundation](./phase-00-foundation/README.md) | 프로젝트 골격·설정·로그·저장 기반 | — |
 | [phase-01-chat](./phase-01-chat/README.md) | LLM 대화와 raw 저장 | — |

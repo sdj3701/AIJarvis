@@ -95,6 +95,7 @@ def build_phase4_app(config_dir: Path) -> Phase4App:
         safety_gate=runtime.safety_gate,
         approval_store=runtime.approval_store,
         audit_writer=runtime.audit_writer,
+        privacy_gate=runtime.privacy_gate,
     )
     chat.start()
     return Phase4App(runtime=runtime, chat=chat, llm=llm, data_root=root)

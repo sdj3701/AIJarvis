@@ -24,6 +24,7 @@
 | D016 | decided | 한국어 STT | Vosk 호출어 + `faster-whisper small` 질문 인식 | 음성 세로 기능 | 로컬 처리·한국어 실장치 인식·낮은 신뢰도 재요청 확인 |
 | D017 | decided | 답변 중 끼어들기 마이크 게이트 | Gate A+B+WebRTC VAD, AEC·빔포밍 후순위 | 음성 세로 기능 | 스피커 에코 오발동 0·근거리 “자비스” 중단 성공률·설정 키 확정 |
 | D018 | decided | 호출 오인 방지·한 문장 호출+명령·답변 중단 핫키 | `[unk]`+접두 판정, 한 문장 Whisper, 핫키+D017 | 음성 세로 기능 | 오호출 감소·한 문장 경로·`ctrl+alt+j` 중단 |
+| D019 | decided | Soft 음성 소스 필터 (음악+본인 목소리) | Gate D 음악 + Gate E Soft 화자, fail-open, High 승인 비사용 | 음성 세로 기능 | 음악/타인 soft ignore·unknown 통과·프로필 embedding만 저장 |
 
 ## 결정 작성 양식
 
@@ -123,6 +124,26 @@ ID:
 - 재검토 조건: 오호출 목표 미달, 한 문장 경로 첫 음절 손실, 핫키 충돌, Whisper 지연 초과,
   호출 후 후속어가 다시 호출어로 강제되는 회귀
 
+## D019 상세 — Soft 음성 소스 필터 (decided)
+
+- 결정 날짜: 2026-08-12
+- 문제: 배경 노래·타인 “자비스”가 VAD를 통과해 웨이크/질문으로 오인됨
+- 설계·운영 문서: [음성 소스 필터](../reference/VOICE_SOURCE_FILTER.md)
+- 결정:
+  1. Soft UX 필터만 허용한다. 음성 생체 인증·High 도구 승인 대체는 금지한다.
+  2. Gate D(음악/말) → Gate E(등록 화자 Soft cosine) 순서로, 웨이크·끼어들기·질문
+     확정 직전에만 `analysis_window_ms` 창을 분석한다.
+  3. `music`·`other_speaker`는 조용히 무시하고 계속 듣는다. `unknown`은 통과한다.
+  4. 모델 미설치·추론 실패는 fail-open(기존 동작 유지 + 경고 1회)이다.
+  5. enrollment는 embedding 프로필만 `data_root`에 두고 PCM은 즉시 폐기한다.
+- 기본 임계값: `music_reject_threshold=0.45`, `owner_accept_threshold=0.60`,
+  `other_reject_threshold=0.30`, `analysis_window_ms=1200`
+  (짧은 호출어에서 Soft 오거부를 줄이도록 unknown 구간을 넓힘)
+- D017 관계: Speaking onset/VAD 게이트는 그대로 두고, 그 통과분·웨이크 후보에만
+  소스 필터를 추가한다.
+- 재검토 조건: 본인 웨이크 유지율 저하, 음악 오수락/오거부 실장치 목표 미달,
+  화자 모델 VRAM·지연 충돌
+
 ## Phase 차단 규칙
 
 - D005가 `pending`이면 Phase 1 구현을 시작하지 않는다. 현재는 위 로컬 LLM 결정으로 해소되었다.
@@ -135,5 +156,7 @@ ID:
   때만 별도 결정으로 추가한다.
 - D018은 `[unk]`·접두 호출 판정·한 문장 명령·답변 중단 핫키로 해소되었다. AEC는
   D017과 동일하게 실장치 목표 미달 시에만 별도 결정한다.
+- D019는 Soft 소스 필터(음악+화자)로 해소되었다. Hard 생체 인증이나 음성 High
+  승인은 추가하지 않는다. 실장치 임계값 확정은 VOICE_SOURCE_FILTER S3 표를 따른다.
 - D012가 `pending`이면 Phase 3에서 PDF 지원을 비활성화하고 `.md`·`.txt`만 제공한다.
 - D013~D015가 `pending`이면 Phase 8 패키징·전역 단축키·자동 시작 구현을 시작하지 않는다.

@@ -133,6 +133,8 @@ D:\Ai\Jarvis\
 │   │   └── recovery.py         # 시작 시 미완료 세션·task 탐지·복구
 │   ├── voice\                  # Phase 7
 │   │   ├── base.py             # AudioFrame, Transcript, STTEngine, TTSEngine
+│   │   ├── source_filter.py    # Soft 음악·화자 필터 (D019)
+│   │   ├── enrollment.py       # 화자 embedding 프로필
 │   │   ├── barge_in_gate.py    # TTS 기준선·onset·WebRTC VAD·pre-roll
 │   │   ├── stt.py              # Vosk 호출어 + faster-whisper 질문 인식
 │   │   ├── tts.py
@@ -940,7 +942,7 @@ class TaskStep:
 | 3 | `httpx`, `selectolax` 또는 `beautifulsoup4` | 웹 fetch·본문 추출 |
 | 3 | 검색 API SDK 또는 직접 HTTP | 웹 검색 |
 | 3(후) | `sentence-transformers` 또는 API 임베딩 | 임베딩 검색 |
-| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, `faster-whisper==1.2.1`, `webrtcvad-wheels==2.0.14`, Windows SAPI | 로컬 호출어·한국어 질문 인식·사람 음성 VAD·음성 합성 |
+| 7 | `vosk==0.3.45`, `sounddevice==0.5.5`, `faster-whisper==1.2.1`, `webrtcvad-wheels==2.0.14`, `onnxruntime==1.20.1`, `speechbrain==1.0.2`, Windows SAPI | 로컬 호출어·한국어 질문 인식·사람 음성 VAD·Soft 소스 필터·음성 합성 |
 | 8 | `pystray`, `pillow`, `keyboard` 또는 `pynput` | 트레이·단축키 |
 
 개발 의존성: `pytest`, `pytest-cov`, `pytest-timeout`, `ruff`, `mypy`.
@@ -1110,6 +1112,11 @@ Speaking 전용 임계값 이상이면서 기준선보다 급상승하고 WebRTC
 WebRTC VAD는 비음성 소음만 거르며 화자 신원을 인증하지 않는다. 현재 SAPI는 에코 제거용
 reverse PCM을 노출하지 않고 마이크도 단일 채널이므로 AEC와 빔포밍은 기본 경로에 넣지
 않는다. 실장치 목표 미달 시 D017의 후속 조건으로 재검토한다.
+
+웨이크·끼어들기·질문 확정 직전에는 Soft 소스 필터(D019)가 최근 분석 창 PCM만 보고
+`music`/`other_speaker`를 조용히 무시할 수 있다. `unknown`과 모델 실패는 통과
+(fail-open)이며 High 승인·생체 인증으로 쓰지 않는다. 운영 기준은
+[음성 소스 필터](./docs/reference/VOICE_SOURCE_FILTER.md)다.
 
 오디오 형식은 mono, 16-bit PCM으로 고정하고 sample rate는 설정값을 사용한다. 온라인 TTS는 `for_tts` 후 다시 `for_external_text(..., purpose="online_tts")`를 통과한 문자열만 전송한다.
 

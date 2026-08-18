@@ -130,6 +130,7 @@ def test_required_sensitive_test_strings_are_never_written(tmp_path: Path) -> No
         "recovery.start",
         "recovery.result",
         "voice.barge_in",
+        "voice.source_filter",
     ],
 )
 def test_required_phase_zero_event_types_are_supported(tmp_path: Path, event_type: str) -> None:

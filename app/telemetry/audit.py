@@ -9,13 +9,46 @@ import threading
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from app.core.canonical import canonical_json
 from app.core.clock import Clock
 
 _ZERO_HASH = "0" * 64
 _AUDIT_VERSION = 1
+
+AuditIssueKind = Literal[
+    "prev_hash_mismatch",
+    "seq_not_monotonic",
+    "seq_duplicate",
+    "entry_hash_mismatch",
+    "broken_json",
+    "empty",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class AuditVerifyReport:
+    """Structured result for gate --verify-audit and tests."""
+
+    ok: bool
+    files: int
+    entries: int
+    last_seq: int
+    last_hash: str
+    issue_kind: AuditIssueKind | None = None
+    error: str | None = None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "files": self.files,
+            "entries": self.entries,
+            "last_seq": self.last_seq,
+            "last_hash": self.last_hash,
+            "issue_kind": self.issue_kind,
+            "error": self.error,
+        }
 
 
 @dataclass
@@ -77,28 +110,111 @@ class JsonlAuditWriter:
 
 def verify_audit_chain(logs_dir: Path) -> tuple[bool, str | None]:
     """Return (ok, error_message). Walk all audit files in date order."""
+    report = verify_audit_chain_report(logs_dir)
+    return report.ok, report.error
+
+
+def verify_audit_chain_report(logs_dir: Path) -> AuditVerifyReport:
+    """Verify hash chain without modifying logs. Distinguishes common failure modes."""
     files = sorted(logs_dir.glob("audit-*.jsonl"))
+    if not files:
+        return AuditVerifyReport(
+            ok=True,
+            files=0,
+            entries=0,
+            last_seq=0,
+            last_hash=_ZERO_HASH,
+            issue_kind="empty",
+            error=None,
+        )
+
     prev_hash = _ZERO_HASH
     last_seq = 0
+    entries = 0
+    seen_seq: set[int] = set()
+
     for path in files:
-        for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        raw = path.read_text(encoding="utf-8")
+        lines = raw.splitlines()
+        for line_no, line in enumerate(lines, start=1):
             if not line.strip():
                 continue
-            record = json.loads(line)
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                # Trailing partial line after crash is reported separately from mid-file corruption.
+                is_last_line = line_no == len(lines) and not raw.endswith("\n")
+                kind: AuditIssueKind = "broken_json"
+                where = "trailing partial line" if is_last_line else "json"
+                return AuditVerifyReport(
+                    ok=False,
+                    files=len(files),
+                    entries=entries,
+                    last_seq=last_seq,
+                    last_hash=prev_hash,
+                    issue_kind=kind,
+                    error=f"{path.name}:{line_no} {where} parse failed",
+                )
+
             expected_prev = record.get("prev_hash")
             if expected_prev != prev_hash:
-                return False, f"{path.name}:{line_no} prev_hash mismatch"
+                return AuditVerifyReport(
+                    ok=False,
+                    files=len(files),
+                    entries=entries,
+                    last_seq=last_seq,
+                    last_hash=prev_hash,
+                    issue_kind="prev_hash_mismatch",
+                    error=f"{path.name}:{line_no} prev_hash mismatch",
+                )
+
             seq = int(record["seq"])
+            if seq in seen_seq:
+                return AuditVerifyReport(
+                    ok=False,
+                    files=len(files),
+                    entries=entries,
+                    last_seq=last_seq,
+                    last_hash=prev_hash,
+                    issue_kind="seq_duplicate",
+                    error=f"{path.name}:{line_no} duplicate seq {seq}",
+                )
             if seq <= last_seq:
-                return False, f"{path.name}:{line_no} seq not monotonic ({seq} <= {last_seq})"
+                return AuditVerifyReport(
+                    ok=False,
+                    files=len(files),
+                    entries=entries,
+                    last_seq=last_seq,
+                    last_hash=prev_hash,
+                    issue_kind="seq_not_monotonic",
+                    error=f"{path.name}:{line_no} seq not monotonic ({seq} <= {last_seq})",
+                )
+            seen_seq.add(seq)
             last_seq = seq
+
             entry_hash = record.pop("entry_hash")
             stored_prev = record.pop("prev_hash")
             computed = _entry_hash(stored_prev, record)
             if computed != entry_hash:
-                return False, f"{path.name}:{line_no} entry_hash mismatch"
+                return AuditVerifyReport(
+                    ok=False,
+                    files=len(files),
+                    entries=entries,
+                    last_seq=last_seq,
+                    last_hash=prev_hash,
+                    issue_kind="entry_hash_mismatch",
+                    error=f"{path.name}:{line_no} entry_hash mismatch",
+                )
             prev_hash = entry_hash
-    return True, None
+            entries += 1
+
+    return AuditVerifyReport(
+        ok=True,
+        files=len(files),
+        entries=entries,
+        last_seq=last_seq,
+        last_hash=prev_hash,
+    )
 
 
 def read_audit_records(logs_dir: Path) -> list[dict[str, Any]]:

@@ -1,13 +1,18 @@
-"""Audit log hash chain and denied-call coverage."""
+﻿"""Audit log hash chain and denied-call coverage."""
 
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
-from app.telemetry.audit import verify_audit_chain
-from tests.helpers.phase4_app import Phase4App
+from app.core.errors import ApprovalMismatch
+from app.llm.base import ToolCall
+from app.telemetry.audit import verify_audit_chain, verify_audit_chain_report
+from scripts.gate import main as gate_main
+from tests.helpers.phase4_app import NOW, Phase4App
+from tests.security.test_approval_binding import _ctx
 
 pytestmark = [pytest.mark.phase4, pytest.mark.security]
 
@@ -43,3 +48,47 @@ def test_tampered_line_detected(phase4_app: Phase4App) -> None:
     ok, error = verify_audit_chain(logs)
     assert not ok
     assert error is not None
+
+
+@pytest.mark.phase6
+def test_broken_trailing_line_detected(phase4_app: Phase4App) -> None:
+    phase4_app.chat.handle_turn("/open_app chrome")
+    logs = phase4_app.data_root / "logs"
+    files = sorted(logs.glob("audit-*.jsonl"))
+    assert files
+    with files[0].open("a", encoding="utf-8") as stream:
+        stream.write('{"seq":999,"broken"')
+    report = verify_audit_chain_report(logs)
+    assert not report.ok
+    assert report.issue_kind == "broken_json"
+    assert report.error is not None
+
+
+@pytest.mark.phase6
+def test_gate_verify_audit_cli(phase4_app: Phase4App, config_dir: Path) -> None:
+    phase4_app.chat.handle_turn("/open_app chrome")
+    assert gate_main(["--verify-audit", "--config-dir", str(config_dir)]) == 0
+
+
+def test_tool_name_change_invalidates_ticket(phase4_app: Phase4App) -> None:
+    call = ToolCall(
+        id="name-change",
+        name="create_file",
+        arguments={"root": "notes", "relative_path": "n.md", "content": "x"},
+    )
+    context = _ctx(phase4_app)
+    outcome = phase4_app.chat.execute_tool_call(call, ctx=context)
+    verdict = outcome.pending_approval
+    assert verdict is not None
+    ticket = phase4_app.runtime.approval_store.grant(
+        verdict,
+        ctx=context,
+        method="user_text",
+    )
+    with pytest.raises(ApprovalMismatch):
+        phase4_app.runtime.approval_store.consume(
+            ticket.id,
+            tool_name="open_folder",
+            args_hash=verdict.args_hash,
+            now=NOW,
+        )

@@ -5,13 +5,14 @@
 ## 1. 처음 시작하는 순서
 
 1. [착수 안내](./docs/00-start-here/README.md)를 읽고 미결정 항목을 확인한다.
-2. [결정 기록](./docs/00-start-here/DECISIONS.md)에서 현재 Phase를 막는 항목을 확정한다.
-3. 해당 Phase 폴더의 `README.md`를 위에서 아래로 수행한다.
-4. 각 작업마다 테스트를 먼저 연결하고 구현한다.
-5. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
+2. [큰 흐름](./docs/FLOW.md)에서 현재 성숙 단계와 다음 한 단계를 확인한다. 세분은 [flow/](./docs/flow/README.md).
+3. [결정 기록](./docs/00-start-here/DECISIONS.md)에서 현재 Phase를 막는 항목을 확정한다.
+4. 해당 Phase 폴더의 `README.md`를 위에서 아래로 수행한다.
+5. 각 작업마다 테스트를 먼저 연결하고 구현한다.
+6. `python scripts\gate.py --phase N`이 종료 코드 0일 때만 다음 Phase로 이동한다.
 
-현재 구현 결과: [Phase 1 — 대화](./docs/phase-01-chat/README.md) 완료 (`Ollama` + `qwen3.5:9b`)
-다음 개발 문서: [Phase 2 — 기억](./docs/phase-02-memory/README.md)
+현재 구현 결과: Phase 0~5 게이트 통과 (MVP + 도구 + 에이전트)
+다음 개발 문서: [Phase 6 — 보안 게이트](./docs/phase-06-security/README.md) · [G6 세분화](./docs/flow/G6-security.md)
 
 현재 진행 상태: [개발 진행 현황](./docs/PROGRESS.md)
 
@@ -61,6 +62,8 @@ WebRTC VAD)를 통과한 구간만 STT에 넣는다. `[답변 중단]` 뒤 새 �
 | [DESIGN.md](./DESIGN.md) | 모듈이 어떻게 나뉘고 어떤 계약으로 통신하는가? | 코드 구조·인터페이스의 기준 |
 | [SCHEMAS.md](./SCHEMAS.md) | 파일·DB·이벤트·도구 데이터는 어떤 모양인가? | 저장 형식의 단일 기준 |
 | [TESTING.md](./TESTING.md) | 완료를 어떻게 증명하는가? | 테스트·릴리스 게이트의 기준 |
+| [`docs/FLOW.md`](./docs/FLOW.md) | 제품이 어떤 성숙 경로로 가는가? 지금은 어디인가? | 큰 흐름 한 장 |
+| [`docs/flow/`](./docs/flow/README.md) | 각 성숙 단계의 목표·진입·다음은? | 큰 흐름 세분화 |
 | [`docs/phase-*`](./docs/README.md) | 지금 어떤 파일을 어떤 순서로 구현하는가? | 실행 순서와 작업 체크리스트 |
 | [`config/*.example.yaml`](./config) | 정책·운영 기본값은 무엇인가? | 실행 설정 템플릿 |
 

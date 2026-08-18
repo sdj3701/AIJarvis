@@ -53,8 +53,28 @@ def test_local_wake_word_configuration_loads(config_dir: Path) -> None:
     assert settings.voice.barge_in.vad_mode == 2
     assert settings.voice.barge_in.interrupt_hotkey_enabled is True
     assert settings.voice.barge_in.interrupt_hotkey == "ctrl+alt+j"
+    assert settings.voice.source_filter.enabled is True
+    assert settings.voice.source_filter.music_enabled is True
+    assert settings.voice.source_filter.speaker_enabled is True
+    assert settings.voice.source_filter.music_reject_threshold == 0.45
+    assert settings.voice.source_filter.owner_accept_threshold == 0.60
+    assert settings.voice.source_filter.other_reject_threshold == 0.30
+    assert settings.voice.source_filter.analysis_window_ms == 1_200
     assert settings.voice.tts.voice == "Microsoft Heami Desktop"
     assert settings.voice.tts.rate == 4
+
+
+def test_source_filter_rejects_unordered_speaker_thresholds(config_dir: Path) -> None:
+    settings_path = config_dir / "settings.yaml"
+    document = yaml.safe_load(settings_path.read_text(encoding="utf-8"))
+    document["voice"]["source_filter"]["owner_accept_threshold"] = 0.4
+    document["voice"]["source_filter"]["other_reject_threshold"] = 0.6
+    settings_path.write_text(
+        yaml.safe_dump(document, allow_unicode=True, sort_keys=False), encoding="utf-8"
+    )
+
+    with pytest.raises(ConfigError):
+        load_config(config_dir)
 
 
 def test_enabled_voice_rejects_non_local_tts(config_dir: Path) -> None:

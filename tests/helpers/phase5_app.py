@@ -128,6 +128,7 @@ def build_phase5_app(
         approval_store=runtime.approval_store,
         audit_writer=runtime.audit_writer,
         task_store=runtime.task_store,
+        privacy_gate=runtime.privacy_gate,
     )
     chat.start()
     return Phase5App(

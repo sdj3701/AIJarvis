@@ -29,6 +29,7 @@
 | R20b | 거부된 도구 요청도 감사 기록 | DESIGN 5.6, SCHEMAS 3.1 `denied` | [Phase 4](../phase-04-tools/README.md) | `test_denied_call_is_audited` |
 | R21 | 음성 text parity | DESIGN 음성 계약 | [Phase 7](../phase-07-voice/README.md) | `test_voice_matches_text_result` |
 | R22 | 음성 High 승인 금지 | RequestContext channel, tools config | [Phase 7](../phase-07-voice/README.md) | `test_voice_cannot_approve_high_risk` |
+| R23 | Soft 소스 필터(음악·화자) | D019, VOICE_SOURCE_FILTER | [Phase 7](../phase-07-voice/README.md) | `test_source_filter_*`, `test_command_path_source_filter_skips_whisper_for_music` |
 | R23 | 마이크 상태 표시 | DESIGN UI 상태 | [Phase 7](../phase-07-voice/README.md) | 수동+UI state 테스트 |
 | R24 | 트레이·단축키·단일 인스턴스 | DESIGN UI 계약 | [Phase 8](../phase-08-resident-ui/README.md) | `test_ui_state`, `test_single_instance` |
 | R25 | 패키징·migration | DESIGN 9.3·Phase 8 | [Phase 8](../phase-08-resident-ui/README.md) | packaged bootstrap 테스트 |

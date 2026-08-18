@@ -1,6 +1,9 @@
 # Jarvis 위협 모델
 
-이 문서는 Phase 6에서 실제 코드·테스트 상태로 갱신한다. 현재 표의 `planned`는 문서와 테스트 계획만 존재하고 구현 검증 전이라는 의미다.
+이 문서는 Phase 6에서 실제 코드·테스트 상태로 갱신한다.  
+상태 값: `verified` / `partial` / `planned` / `accepted residual` / `blocked`
+
+큰 흐름: [FLOW](../FLOW.md) · [G6](../flow/G6-security.md) · 구현: [Phase 6](../phase-06-security/README.md)
 
 ## 1. 보호 자산
 
@@ -44,30 +47,30 @@ v1은 관리자 권한 공격자나 이미 완전히 장악된 OS로부터 데�
 
 | ID | 위협 | 예방 통제 | 탐지·복구 | 검증 | 상태 |
 |----|------|-----------|-----------|------|------|
-| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | prompt injection corpus | planned |
-| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | 악성 tool call 테스트 | planned |
-| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | traversal/junction corpus | planned |
-| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | URL corpus | planned |
-| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | binding 테스트 | planned |
-| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | voice parity 테스트 | planned |
-| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | leak matrix | planned |
-| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | secret leakage 테스트 | planned |
-| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | 20회 kill 테스트 | planned |
-| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | duplicate write 테스트 | planned |
-| T11 | 감사 로그 변조 | hash chain, seq | verify-audit | tamper 테스트 | planned |
-| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | crash/restore 테스트 | planned |
-| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | hash mismatch 테스트 | planned |
-| T14 | 의존성 공급망 | hash lockfile, 최소 의존성 | 정기 검토 | clean install | planned |
-| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | budget/retry 테스트 | planned |
-| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | config loader 테스트 | planned |
-| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | restore 테스트 | planned |
-| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | lock 테스트 | planned |
-| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | state/approval UI 테스트 | planned |
+| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | `test_prompt_injection.py` | partial |
+| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | `test_forbidden_actions.py` | partial |
+| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | `test_path_traversal.py`, `test_reparse_points.py` | verified |
+| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | `test_url_schemes*.py`, `test_fetcher_ssrf.py` | verified |
+| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | `test_approval_binding.py` (+ tool_name 변경) | verified |
+| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | Phase 7 `test_voice_parity` | planned |
+| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | `test_secret_leakage.py` | verified |
+| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | `test_secret_never_leaves` | verified |
+| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | `test_crash_loop.py` | verified |
+| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | `test_agent_recovery.py` | verified |
+| T11 | 감사 로그 변조 | hash chain, seq | `gate.py --verify-audit` | `test_audit_chain.py` | verified |
+| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | `gate.py --integrity` (복원 테스트는 D007/D008 후) | partial |
+| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | run_skill disabled | partial |
+| T14 | 의존성 공급망 | hash lockfile, 최소 의존성 | 정기 검토 | P6-07 clean install | planned |
+| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | `test_budget_guard.py` | verified |
+| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | `test_config_loader.py` | verified |
+| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | `backup.py` + restore (D007/D008) | planned |
+| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | `test_single_instance.py` | verified |
+| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | Phase 8 | planned |
 | T20 | 로컬 계정 침해 | OS 계정·디스크 보안 의존 | 제한적 | 수동 검토 | accepted residual |
 
 ## 5. Phase 6 갱신 규칙
 
-각 `planned` 행을 다음 중 하나로 바꾼다.
+각 `planned`/`partial` 행을 다음 중 하나로 바꾼다.
 
 - `verified`: 코드와 테스트가 존재하고 통과
 - `accepted residual`: 완화 후 남은 위험을 사용자가 명시적으로 수용
@@ -75,3 +78,9 @@ v1은 관리자 권한 공격자나 이미 완전히 장악된 OS로부터 데�
 
 Critical/High 위험을 `accepted residual`로 처리하려면 이유·영향·대체 통제·재검토 날짜를 별도 기록한다.
 
+## 6. 2026-08-12 갱신 메모
+
+- P6-01: 위 표에 테스트·CLI 연결
+- P6-03: `user_explicit` 기억 시크릿 우회 제거, LLM 로컬 프롬프트 마스킹, `test_secret_never_leaves`
+- P6-04: `verify_audit_chain_report` + `gate.py --verify-audit|--integrity|--report`
+- 남은 Critical 경로: T17 백업(D007/D008), T01/T02 코퍼스 강화(P6-02), T14 공급망(P6-07)

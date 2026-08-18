@@ -34,6 +34,7 @@ from app.orchestrator.research import (
 )
 from app.orchestrator.tasks import StepRecord, TaskStore
 from app.orchestrator.tool_commands import parse_tool_command
+from app.privacy.gate import PrivacyGate
 from app.rag.indexer import DocumentIndexer
 from app.safety.approval import ApprovalStore, ApprovalTicket
 from app.safety.gate import SafetyGate, Verdict
@@ -118,6 +119,7 @@ class ChatOrchestrator:
         approval_store: ApprovalStore | None = None,
         audit_writer: AuditWriter | None = None,
         task_store: TaskStore | None = None,
+        privacy_gate: PrivacyGate | None = None,
     ) -> None:
         self._settings = settings
         self._llm = llm
@@ -140,6 +142,7 @@ class ChatOrchestrator:
         self._approval_store = approval_store
         self._audit = audit_writer or NullAuditWriter()
         self._task_store = task_store
+        self._privacy_gate = privacy_gate
         self._verified = verify_model is None
         self._prompt = PromptAssembler(llm, settings.llm.context)
         self._history: list[Message] = []
@@ -558,6 +561,7 @@ class ChatOrchestrator:
             export_dir=Path(export_dir) if export_dir is not None else None,
             turn_id=turn_id,
             events=self._events,
+            privacy_gate=self._privacy_gate,
         )
 
     def handle_index(self) -> str:
@@ -569,6 +573,11 @@ class ChatOrchestrator:
             f"삭제 {report.removed}, 건너뜀 {report.skipped}"
             + (f", 오류 {len(report.errors)}" if report.errors else "")
         )
+
+    def _safe_llm_text(self, text: str) -> str:
+        if self._privacy_gate is not None:
+            return self._privacy_gate.for_llm_local(text)
+        return self._masker.for_log(text)
 
     def _memory_budget_tokens(self) -> int:
         context = self._settings.llm.context
@@ -738,7 +747,9 @@ class ChatOrchestrator:
                 meta={"used_tools": True, "research": True},
             )
         )
-        self._history.extend((Message("user", text), Message("assistant", answer_text)))
+        self._history.extend(
+            (Message("user", self._safe_llm_text(text)), Message("assistant", answer_text))
+        )
         return TurnOutcome(
             ok=True,
             text=answer_text,
@@ -882,7 +893,10 @@ class ChatOrchestrator:
                         )
                     )
                     self._history.extend(
-                        (Message("user", text), Message("assistant", agent_outcome.text))
+                        (
+                            Message("user", self._safe_llm_text(text)),
+                            Message("assistant", agent_outcome.text),
+                        )
                     )
                 return agent_outcome
             if not self._verified and self._verify_model is not None:
@@ -899,8 +913,9 @@ class ChatOrchestrator:
                 bound_events=bound_events,
             )
             context = replace(context, memory_record_ids=memory_record_ids)
+            safe_user_text = self._safe_llm_text(text)
             plan = self._prompt.build(
-                current_user_text=text,
+                current_user_text=safe_user_text,
                 history=self._history,
                 cancel=cancel,
                 confirmed_memory=confirmed_block,
@@ -937,7 +952,10 @@ class ChatOrchestrator:
                         )
                     )
                     self._history.extend(
-                        (Message("user", text), Message("assistant", agent_outcome.text))
+                        (
+                            Message("user", self._safe_llm_text(text)),
+                            Message("assistant", agent_outcome.text),
+                        )
                     )
                 return agent_outcome
             if response.tool_calls and self._tool_runner is not None:
@@ -989,7 +1007,12 @@ class ChatOrchestrator:
             if self._test_hook is not None:
                 self._test_hook.after("memory.write")
             session = self._sessions.record_turn(session_id, response.usage)
-            self._history.extend((Message("user", text), Message("assistant", assistant_text)))
+            self._history.extend(
+                (
+                    Message("user", self._safe_llm_text(text)),
+                    Message("assistant", assistant_text),
+                )
+            )
             if session.turn_count % self._settings.memory.checkpoint_every_turns == 0:
                 checkpoint_seq = session.turn_count // self._settings.memory.checkpoint_every_turns
                 self._sessions.checkpoint(

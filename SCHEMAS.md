@@ -108,6 +108,7 @@
 | `budget.stop` | 100% 도달 | `period_kind`, `used`, `limit`, `service_breakdown` |
 | `voice.recording` | 녹음 시작/종료 | `state`(started/stopped), `device`, `duration_ms` |
 | `voice.barge_in` | 답변 중 호출 감시/감지/종료 | `state`(started/detected/stopped), `device`, `duration_ms`, `source`(wake_word/hotkey), `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames` |
+| `voice.source_filter` | Soft 소스 필터 판정 | `path`(wake/barge_in/command), `label`, `accept`, `reason`, `music_score`, `speaker_score` |
 | `stt.result` | 음성 인식 완료 | `language`, `duration_ms`, `latency_ms`, `text_len` |
 | `tts.result` | 낭독 완료/취소/끼어들기/거부 | `state`(completed/cancelled/interrupted/refused), `engine`, `chars`, `latency_ms` |
 | `ui.state` | 상주 UI 상태 전이 | `from`, `to`, `cause` |
@@ -849,6 +850,13 @@ detector는 `\b`에 의존하지 않고 `(?<!\d)`·`(?!\d)` 경계를 사용해 
 `interrupt_hotkey_enabled`, `interrupt_hotkey`를 모두 요구한다. dBFS는
 `-96..0`, onset 상승은 `0..96`, VAD mode는 `0..3`, frame은 `10/20/30ms`, 음성 비율은
 `0 초과 1 이하`가 아니면 설정을 거부한다.
+
+`settings.voice.source_filter`는 `enabled`, `music_enabled`, `speaker_enabled`,
+`music_reject_threshold`, `speech_margin`, `owner_accept_threshold`,
+`other_reject_threshold`, `analysis_window_ms`, `profile_path`, `yamnet_model_path`,
+`ecapa_model_dir`를 모두 요구한다. 비율 필드는 `0..1`이며
+`owner_accept_threshold`는 `other_reject_threshold`보다 커야 한다. Soft UX 필터이며
+High 승인·생체 인증으로 쓰지 않는다.
 
 - `settings.voice.tts.engine=edge-tts`인데 `privacy.api_transmission.services.online_tts=false`면 실행을 거부하거나 TTS를 disabled로 유지한다. 조용히 전송하지 않는다.
 - `settings.rag.supported_extensions`에 `.pdf`가 있는데 parser 구현·설정이 없으면 거부한다.

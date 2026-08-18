@@ -62,12 +62,19 @@ from app.voice.barge_in_gate import (
     WebRtcVoiceActivityDetector,
 )
 from app.voice.controller import LocalVoiceListener, VoiceController, microphone_factory
+from app.voice.enrollment import TorchEcapaSpeakerEmbedder, load_speaker_profile
 from app.voice.interrupt_hotkey import (
     InterruptHotkeyFactory,
     InterruptHotkeyMonitor,
     create_interrupt_hotkey,
 )
 from app.voice.microphone import SpeechCapturePolicy
+from app.voice.source_filter import (
+    SourceFilter,
+    SourceFilterPolicy,
+    SpeakerSoftMatcher,
+    build_music_classifier,
+)
 from app.voice.stt import FasterWhisperSTTEngine, VoskSTTEngine
 from app.voice.tts import WindowsSapiTTS
 
@@ -106,6 +113,51 @@ def _data_path(config: LoadedConfig, configured: Path) -> Path:
     if configured.is_absolute():
         return configured.resolve(strict=False)
     return (config.settings.paths.data_root / configured).resolve(strict=False)
+
+
+def _build_source_filter(config: LoadedConfig) -> SourceFilter | None:
+    settings = config.settings.voice.source_filter
+    if not settings.enabled:
+        return None
+    policy = SourceFilterPolicy(
+        enabled=settings.enabled,
+        music_enabled=settings.music_enabled,
+        speaker_enabled=settings.speaker_enabled,
+        music_reject_threshold=settings.music_reject_threshold,
+        speech_margin=settings.speech_margin,
+        owner_accept_threshold=settings.owner_accept_threshold,
+        other_reject_threshold=settings.other_reject_threshold,
+        analysis_window_ms=settings.analysis_window_ms,
+    )
+    music_classifier = None
+    if settings.music_enabled:
+        music_classifier = build_music_classifier(
+            yamnet_model_path=_data_path(config, Path(settings.yamnet_model_path)),
+        )
+    speaker_embedder = None
+    speaker_matcher = None
+    if settings.speaker_enabled:
+        profile = load_speaker_profile(_data_path(config, Path(settings.profile_path)))
+        if profile is not None:
+            speaker_embedder = TorchEcapaSpeakerEmbedder(
+                _data_path(config, Path(settings.ecapa_model_dir)),
+            )
+            speaker_matcher = SpeakerSoftMatcher(
+                profile.embedding,
+                owner_accept_threshold=settings.owner_accept_threshold,
+                other_reject_threshold=settings.other_reject_threshold,
+            )
+    source_filter = SourceFilter(
+        policy,
+        music_classifier=music_classifier,
+        speaker_embedder=speaker_embedder,
+        speaker_matcher=speaker_matcher,
+    )
+    # Warm ECAPA on voice start so the first wake is not blocked by model fetch.
+    if isinstance(speaker_embedder, TorchEcapaSpeakerEmbedder):
+        with suppress(Exception):
+            speaker_embedder.warm()
+    return source_filter
 
 
 def build(
@@ -362,6 +414,7 @@ def run_application(
             approval_store=runtime.approval_store,
             audit_writer=runtime.audit_writer,
             task_store=runtime.task_store,
+            privacy_gate=runtime.privacy_gate,
         )
         if voice:
             voice_settings = runtime.config.settings.voice
@@ -428,6 +481,7 @@ def run_application(
                     return create_interrupt_hotkey(hotkey_spec)
 
                 interrupt_hotkey_factory = create_hotkey_monitor
+            source_filter = _build_source_filter(runtime.config)
             listener = LocalVoiceListener(
                 wake_stt=wake_stt,
                 command_stt=command_stt,
@@ -445,6 +499,7 @@ def run_application(
                 ),
                 barge_in_gate_factory=barge_in_gate_factory,
                 interrupt_hotkey_factory=interrupt_hotkey_factory,
+                source_filter=source_filter,
                 min_avg_logprob=command_settings.min_avg_logprob,
                 max_no_speech_probability=command_settings.max_no_speech_probability,
                 device_label=voice_settings.stt.device,

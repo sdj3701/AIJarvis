@@ -2,9 +2,10 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-11 (Phase 5 에이전트 완료)
-> 현재 상태: Phase 5 멀티스텝 에이전트 완료
-> 현재 Phase: Phase 6 준비 (D007~D008 필요)
+> 마지막 문서 정리: 2026-08-12 (FLOW + flow/ 세분화, Phase 6 착수)
+> 현재 상태: Phase 5 완료 → G6 보안 게이트 진행 중
+> 현재 Phase: Phase 6 (P6-01~P6-04·P6-07 우선, D007~D008은 백업 완료에 필요)
+> 큰 흐름: [FLOW.md](./FLOW.md) · 세분화: [flow/G6-security.md](./flow/G6-security.md)
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 
 ## 1. 상태 값
@@ -25,24 +26,25 @@
 | 3 검색/RAG | completed | [Phase 3](./phase-03-research/README.md) | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) | P3-01~P3-08 완료, 337 passed |
 | 4 PC 도구 | completed | [Phase 4](./phase-04-tools/README.md) | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) | P4-01~P4-07 완료, 379 passed |
 | 5 에이전트 | completed | [Phase 5](./phase-05-agent/README.md) | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) | TaskStore·멀티스텝·복구, 393 passed |
-| 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
+| 6 보안 게이트 | in_progress | [Phase 6](./phase-06-security/README.md) · [G6](./flow/G6-security.md) | — | P6-01~04 우선, D007~D008은 백업 |
 | 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | 하이브리드 STT·적응형 VAD 끼어들기·1.55배 TTS 선행 구현, 사람 발화 스모크와 정식 게이트는 별도 |
 | 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
 | v1 안정화 | not_started | [운영](./operations/README.md) | — | 7일 기록 필요 |
 
 ## 3. 현재 작업 큐
 
-Phase 5 문서의 작업 ID와 동일하게 유지한다.
+Phase 6 문서·[G6 세분화](./flow/G6-security.md)의 작업 ID와 동일하게 유지한다.
 
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
-| P5-01 TaskStore | completed | Cursor | 2026-08-11 | 2026-08-11 | tasks/task_steps, idempotency |
-| P5-02 루프 확장 | completed | Cursor | 2026-08-11 | 2026-08-11 | Decide→Act→Observe, max_steps |
-| P5-03 승인 중단·재개 | completed | Cursor | 2026-08-11 | 2026-08-11 | pending_approval + task/step |
-| P5-04 재시도 정책 | completed | Cursor | 2026-08-11 | 2026-08-11 | 검색만 자동 재시도 |
-| P5-05 복구 | completed | Cursor | 2026-08-11 | 2026-08-11 | running step 수동 판정 |
-| P5-06 복합 태스크 | completed | Cursor | 2026-08-11 | 2026-08-11 | 검색→저장→폴더 |
-| P5-07 run_skill 골격 | completed | Cursor | 2026-08-11 | 2026-08-11 | 기본 disabled |
+| P6-01 위협 모델 검토 | completed | Cursor | 2026-08-12 | 2026-08-12 | THREAT_MODEL T01~T20 연결 |
+| P6-02 보안 코퍼스 완성 | in_progress | Cursor | 2026-08-12 | — | tool_name 변경 케이스 추가, 나머지 확장 예정 |
+| P6-03 시크릿 유출 매트릭스 | completed | Cursor | 2026-08-12 | 2026-08-12 | LLM/로그/raw/기억/TTS, user_explicit 우회 제거 |
+| P6-04 감사 로그 검증기 | completed | Cursor | 2026-08-12 | 2026-08-12 | gate --verify-audit/--integrity/--report |
+| P6-05 백업 | blocked | — | — | — | D007·D008 필요 |
+| P6-06 복원 | blocked | — | — | — | D007·D008 필요 |
+| P6-07 공급망·설정 검토 | not_started | — | — | — | lockfile·dev_mode |
+| P6-08 정량 게이트 | blocked | — | — | — | 복원·95% 태스크 포함 |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 

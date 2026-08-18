@@ -18,7 +18,11 @@ dependencies = [
 [project.optional-dependencies]
 voice = [
     "faster-whisper==1.2.1",
+    # SpeechBrain 1.0.2 still passes use_auth_token; hub 1.x removed it.
+    "huggingface_hub>=0.34.0,<1.0",
+    "onnxruntime==1.20.1",
     "sounddevice==0.5.5",
+    "speechbrain==1.0.2",
     "vosk==0.3.45",
     "webrtcvad-wheels==2.0.14",
 ]

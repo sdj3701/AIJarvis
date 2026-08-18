@@ -4,6 +4,7 @@
 
 새 기능을 추가하지 않고 Phase 0~5의 신뢰 경계·도구·복구·백업을 공격 관점에서 검증한다. Critical/High 결함 0건과 실제 복원 성공이 v0.5 출시 조건이다.
 
+큰 흐름: [FLOW](../FLOW.md) · 세분화: [G6-security](../flow/G6-security.md)  
 이전: [Phase 5](../phase-05-agent/README.md) · 다음: [Phase 7](../phase-07-voice/README.md)
 
 ## 2. 진입 조건

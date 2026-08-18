@@ -195,6 +195,19 @@ voice:                       # 명시적으로 --voice를 지정할 때만 마�
     vad_min_voiced_ratio: 0.3
     interrupt_hotkey_enabled: true
     interrupt_hotkey: "ctrl+alt+j"  # 답변 TTS 중 즉시 중단 (음성 호출과 병행)
+  source_filter:                 # D019 Soft 음악·화자 필터 (생체 인증 아님)
+    enabled: true
+    music_enabled: true
+    speaker_enabled: true          # 프로필 없으면 Gate E 자동 skip
+    music_reject_threshold: 0.45
+    speech_margin: 0.05
+    # Soft: 짧은 “자비스”는 점수가 낮게 나올 수 있어 unknown 구간을 넓게 둔다.
+    owner_accept_threshold: 0.60
+    other_reject_threshold: 0.30
+    analysis_window_ms: 1200
+    profile_path: "voice\\speaker_profile.npz"
+    yamnet_model_path: "models\\yamnet\\yamnet.onnx"
+    ecapa_model_dir: "models\\spkrec-ecapa-voxceleb"
   tts:
     engine: local
     voice: "Microsoft Heami Desktop"

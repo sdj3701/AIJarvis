@@ -10,11 +10,13 @@ import pytest
 import yaml
 
 from app.llm.fake import FakeLLMClient
+from app.memory.commands import try_handle_memory_command
 from app.memory.migrations import initialize_database
 from app.orchestrator.loop import ChatOrchestrator
 from app.wiring import build
 from scripts.bootstrap import create_tree
 from tests.fakes.clock import FrozenClock
+from tests.helpers.phase4_app import Phase4App
 
 pytestmark = [pytest.mark.phase3, pytest.mark.security]
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -67,6 +69,7 @@ def test_local_only_doc_not_sent_to_api(tmp_path: Path) -> None:
         safety_gate=runtime.safety_gate,
         approval_store=runtime.approval_store,
         audit_writer=runtime.audit_writer,
+        privacy_gate=runtime.privacy_gate,
     )
     chat.start()
     chat.handle_turn("/search secret")
@@ -99,3 +102,41 @@ def test_external_search_query_blocks_secret(tmp_path: Path) -> None:
     )
     assert decision.text is None
     assert decision.blocked is True
+
+
+@pytest.mark.phase6
+def test_secret_never_leaves(phase4_app: Phase4App) -> None:
+    phase4_app.llm.reply("확인했습니다.")
+    phase4_app.say(f"내 키는 {SECRET} 인데 기억해둬")
+
+    sent = "\n".join(
+        message.content for call in phase4_app.llm.calls for message in call
+    )
+    assert SECRET not in sent
+
+    logs = phase4_app.data_root / "logs"
+    for path in logs.rglob("*.jsonl"):
+        assert SECRET not in path.read_text(encoding="utf-8")
+
+    for record in phase4_app.runtime.sessions.list_records():
+        assert SECRET not in record.value
+
+    raw_dir = phase4_app.data_root / "memory" / "raw"
+    for path in raw_dir.rglob("*.jsonl"):
+        assert SECRET not in path.read_text(encoding="utf-8")
+
+    spoken = phase4_app.runtime.privacy_gate.for_tts(f"키는 {SECRET} 입니다")
+    assert SECRET not in spoken
+
+
+@pytest.mark.phase6
+def test_explicit_remember_blocks_secret(phase4_app: Phase4App) -> None:
+    ctx = phase4_app.chat.memory_command_context()
+    assert ctx is not None
+    result = try_handle_memory_command(f"기억해: 말투 키는 {SECRET}", ctx)
+    assert result is not None
+    assert not result.ok
+    assert all(
+        SECRET not in record.value
+        for record in phase4_app.runtime.sessions.list_records()
+    )
