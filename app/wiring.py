@@ -18,7 +18,8 @@ from typing import TextIO
 from app import __version__
 from app.budget import BudgetGuard, SQLiteBudgetLedger
 from app.cli import run_cli
-from app.config.loader import DEFAULT_CONFIG_DIR, load_config
+from app.config.defaults import DEFAULT_CONFIG_DIR
+from app.config.loader import load_config
 from app.config.models import LoadedConfig
 from app.config.secrets import SecretLoader
 from app.core.clock import (

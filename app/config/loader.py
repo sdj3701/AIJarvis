@@ -13,10 +13,10 @@ from typing import Any, TypeVar
 import yaml
 from pydantic import BaseModel, ValidationError
 
+from app.config.defaults import DEFAULT_CONFIG_DIR
 from app.config.models import LoadedConfig, Policies, PrivacyPolicy, Settings, ToolPolicy
 from app.core.errors import ConfigError
 
-DEFAULT_CONFIG_DIR = Path(r"D:\Jarvis\config")
 _CONFIG_FILENAMES = ("settings.yaml", "tools.yaml", "privacy.yaml")
 _SETTINGS_RELATIVE_PATHS = (
     "memory_db",

@@ -190,7 +190,7 @@ tools:
     # 예:
     # registry:
     #   - skill_name: "daily_note"
-    #     path: "D:\\Jarvis\\skills\\daily_note.py"
+    #     path: "D:\\Jarvis-v2-dev\\skills\\daily_note.py"
     #     sha256: "<파일 해시>"
     #     capabilities: [fs_write]
 

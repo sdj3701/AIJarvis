@@ -2,6 +2,11 @@
 
 이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 현재 Phase 0 기반과 Phase 1 로컬 대화 게이트를 통과했으며, Ollama `qwen3.5:9b`로 한국어 멀티턴 대화, raw 선저장, 재시도, 컨텍스트·비용 통제를 수행하는 CLI를 실행할 수 있다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
 
+> 현재 브랜치는 `rebuild/v2`다. 기존 프로토타입은 `main`과
+> `D:\Ai\Jarvis-prototype`에 동결되어 있으며, v2의 개발 데이터는
+> `D:\Jarvis-v2-dev`만 사용한다. 작업 규칙은
+> [v2 재구축 안내](./docs/00-start-here/REBUILD.md)를 먼저 확인한다.
+
 ## 1. 처음 시작하는 순서
 
 1. [착수 안내](./docs/00-start-here/README.md)를 읽고 미결정 항목을 확인한다.
@@ -37,7 +42,7 @@ CLI에서는 `/help`, `/clear`, `/budget`, `/bye`를 사용할 수 있다. 한 �
 
 PowerShell 실행 정책 때문에 `Activate.ps1`을 실행할 수 없어도 위 명령은 그대로 동작한다.
 첫 준비에서는 고정 SHA의 Vosk 호출어 모델과 faster-whisper small 질문 모델을
-`D:\Jarvis\models`에 설치한다.
+`D:\Jarvis-v2-dev\models`에 설치한다.
 
 터미널에 `[마이크 켜짐]`이 표시되면 “자비스”만 부르거나,
 “자비스 수돗물의 성분에 대해서 알려줘”처럼 **호출과 질문을 한 문장으로** 이어서 말한다.
@@ -105,7 +110,9 @@ WebRTC VAD)를 통과한 구간만 STT에 넣는다. `[답변 중단]` 뒤 새 �
 ## 5. 고정된 프로젝트 경계
 
 - 소스 저장소: `D:\Ai\Jarvis`
-- 운영 데이터: `D:\Jarvis`
+- 프로토타입 데이터: `D:\Jarvis` (v2에서 접근 금지)
+- v2 개발 데이터: `D:\Jarvis-v2-dev`
+- v2 출시 후 운영 데이터: 별도 마이그레이션 승인 전까지 미변경
 - 테스트 데이터: pytest의 `tmp_path` 아래 임시 루트
 - 운영 시크릿: Windows Credential Manager
 - 개발용 `.env`: `D:\Ai\Jarvis\.env`, `dev_mode=true`에서만 허용

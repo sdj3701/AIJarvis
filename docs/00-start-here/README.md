@@ -25,7 +25,7 @@ Get-PSDrive D
 - Windows 10/11
 - Python 3.11 이상
 - `D:\Ai\Jarvis` 쓰기 가능
-- `D:\Jarvis`를 생성할 권한과 최소 5GB 여유 공간
+- `D:\Jarvis-v2-dev`를 생성할 권한과 최소 5GB 여유 공간
 - Phase 7에서만 NVIDIA 드라이버·CUDA 호환성 필요
 
 GPU 확인 실패는 Phase 0~6을 막지 않는다. Python 또는 D 드라이브 조건 실패는 Phase 0 진입을 막는다.
@@ -35,12 +35,14 @@ GPU 확인 실패는 Phase 0~6을 막지 않는다. Python 또는 D 드라이브
 | 용도 | 경로 | 규칙 |
 |------|------|------|
 | 소스 | `D:\Ai\Jarvis` | Git 관리 대상 |
-| 운영 데이터 | `D:\Jarvis` | Git 관리 금지 |
+| 프로토타입 소스 | `D:\Ai\Jarvis-prototype` | `main` 동결본, 참고·비교 전용 |
+| 프로토타입 데이터 | `D:\Jarvis` | v2에서 접근·변경 금지 |
+| v2 개발 데이터 | `D:\Jarvis-v2-dev` | Git 관리 금지, 재구축 전용 |
 | 설정 템플릿 | `D:\Ai\Jarvis\config` | 예제만 저장 |
-| 운영 설정 | `D:\Jarvis\config` | bootstrap이 최초 복사, 이후 덮어쓰기 금지 |
+| v2 개발 설정 | `D:\Jarvis-v2-dev\config` | bootstrap이 최초 복사, 이후 덮어쓰기 금지 |
 | 개발 시크릿 | `D:\Ai\Jarvis\.env` | `dev_mode=true`에서만 사용, Git 제외 |
 | 운영 시크릿 | Windows Credential Manager | 파일 저장 금지 |
-| 테스트 | pytest `tmp_path` | `D:\Jarvis` 접근 금지 |
+| 테스트 | pytest `tmp_path` | `D:\Jarvis`와 `D:\Jarvis-v2-dev` 접근 금지 |
 
 ## 4. 읽어야 할 문서
 
@@ -49,6 +51,7 @@ GPU 확인 실패는 Phase 0~6을 막지 않는다. Python 또는 D 드라이브
 3. [DESIGN 1~3장](../../DESIGN.md) — 설계 원칙·모듈·의존 규칙
 4. [TESTING 1장](../../TESTING.md) — 테스트 원칙
 5. [결정 기록](./DECISIONS.md)
+6. [v2 재구축 안내](./REBUILD.md)
 
 ## 5. 착수 체크리스트
 

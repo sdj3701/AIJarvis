@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from app.config.loader import DEFAULT_CONFIG_DIR
+from app.config.defaults import DEFAULT_CONFIG_DIR
 from app.wiring import run_application
 
 

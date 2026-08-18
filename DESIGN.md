@@ -45,7 +45,8 @@
 
 ## 2. 디렉터리·모듈 구조
 
-소스 저장소는 `D:\Ai\Jarvis`, 운영 데이터는 `D:\Jarvis`다(PLAN 5장). 아래는 소스 저장소 트리다.
+소스 저장소는 `D:\Ai\Jarvis`다. 출시 후 운영 데이터 목표는 `D:\Jarvis`지만,
+`rebuild/v2` 개발 중에는 D019에 따라 `D:\Jarvis-v2-dev`만 사용한다. 아래는 소스 저장소 트리다.
 
 ```
 D:\Ai\Jarvis\
@@ -60,12 +61,12 @@ D:\Ai\Jarvis\
 ├── .gitignore
 ├── docs\                       # Phase별 실행 문서·운영·추적표
 ├── artifacts\gates\            # Phase 게이트 증거 JSON (커밋 대상, TESTING 3장)
-├── config\                     # 템플릿. 운영 사본은 D:\Jarvis\config
+├── config\                     # 템플릿. v2 개발 사본은 D:\Jarvis-v2-dev\config
 │   ├── settings.example.yaml
 │   ├── tools.example.yaml
 │   └── privacy.example.yaml
 ├── scripts\
-│   ├── bootstrap.py            # D:\Jarvis 트리 생성 + config 초기 복사
+│   ├── bootstrap.py            # D:\Jarvis-v2-dev 트리 생성 + config 초기 복사
 │   ├── gate.py                 # Phase 게이트 테스트 실행
 │   └── backup.py               # 암호화 백업/복원
 ├── app\
@@ -954,7 +955,7 @@ class TaskStep:
 
 ### 14.3 부트스트랩
 
-`python scripts\bootstrap.py`가 하는 일: `D:\Jarvis` 트리 생성 → `config\*.example.yaml`을 `D:\Jarvis\config\*.yaml`로 복사(이미 있으면 건너뜀) → SQLite 초기화 + 마이그레이션 → 쓰기 권한·용량 확인 → 결과 요약 출력. 멱등이어야 한다.
+`python scripts\bootstrap.py`가 하는 일: `D:\Jarvis-v2-dev` 트리 생성 → `config\*.example.yaml`을 `D:\Jarvis-v2-dev\config\*.yaml`로 복사(이미 있으면 건너뜀) → SQLite 초기화 + 마이그레이션 → 쓰기 권한·용량 확인 → 결과 요약 출력. 멱등이어야 한다. 출시 전에는 별도 승인된 마이그레이션 절차로 운영 경로를 확정한다.
 
 ---
 

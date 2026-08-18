@@ -189,7 +189,7 @@ deletion:
 backup:
   enabled: true
   # backups\ 는 staging 전용. 실제 사본은 아래 target으로 옮긴다.
-  staging_dir: "D:\\Jarvis\\backups"
+  staging_dir: "D:\\Jarvis-v2-dev\\backups"
   target: "<외부 드라이브 또는 별도 보안 위치 경로>"
   encryption: aes256            # 7z AES-256 또는 age
   # 암호는 파일에 적지 않는다. Windows 자격 증명 관리자에서 읽는다.

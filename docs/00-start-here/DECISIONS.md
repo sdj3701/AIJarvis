@@ -24,6 +24,7 @@
 | D016 | decided | 한국어 STT | Vosk 호출어 + `faster-whisper small` 질문 인식 | 음성 세로 기능 | 로컬 처리·한국어 실장치 인식·낮은 신뢰도 재요청 확인 |
 | D017 | decided | 답변 중 끼어들기 마이크 게이트 | Gate A+B+WebRTC VAD, AEC·빔포밍 후순위 | 음성 세로 기능 | 스피커 에코 오발동 0·근거리 “자비스” 중단 성공률·설정 키 확정 |
 | D018 | decided | 호출 오인 방지·한 문장 호출+명령·답변 중단 핫키 | `[unk]`+접두 판정, 한 문장 Whisper, 핫키+D017 | 음성 세로 기능 | 오호출 감소·한 문장 경로·`ctrl+alt+j` 중단 |
+| D019 | decided | v2 재구축 데이터 격리 | 개발 중 `D:\Jarvis-v2-dev`, 프로토타입 `D:\Jarvis` 접근 금지 | `rebuild/v2` 전체 | 기본 bootstrap·실행·테스트 경로 분리 확인 |
 
 ## 결정 작성 양식
 
