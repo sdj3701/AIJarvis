@@ -76,6 +76,7 @@ Phase를 완료할 때 행을 추가한다.
 | 2026-08-11 | Phase 3 | 40ba9cc | `python scripts\gate.py --phase 3` | 0 | 337 passed, failed 0, skipped 0, security·phase3 green | [phase3-20260811.json](../artifacts/gates/phase3-20260811.json) |
 | 2026-08-11 | Phase 4 | 40ba9cc | `python scripts\gate.py --phase 4` | 0 | 379 passed, failed 0, skipped 0, phase4·security green | [phase4-20260811.json](../artifacts/gates/phase4-20260811.json) |
 | 2026-08-11 | Phase 5 | 40ba9cc | `python scripts\gate.py --phase 5` | 0 | 393 passed, failed 0, skipped 0, phase5·security green | [phase5-20260811.json](../artifacts/gates/phase5-20260811.json) |
+| 2026-08-18 | Phase 0 | 4ed1eaf | `python scripts\gate.py --phase 0` | 0 | 148 passed, failed 0, skipped 0 · Newprototype 시작 경로 다지기 | [phase0-20260818.json](../artifacts/gates/phase0-20260818.json) |
 
 기록 예:
 
