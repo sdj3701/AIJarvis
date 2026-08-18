@@ -24,6 +24,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Parse CLI flags and hand off to ``run_application``; no business logic here."""
     args = _parser().parse_args(argv)
     return run_application(
         config_dir=args.config_dir,

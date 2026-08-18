@@ -36,7 +36,7 @@ app/__main__.py
 app/cli.py
 app/wiring.py
 app/config/{models.py,loader.py,secrets.py}
-app/core/{clock.py,ids.py,context.py,atomic.py,canonical.py,errors.py}
+app/core/{clock.py,ids.py,context.py,atomic.py,canonical.py,errors.py,recovery.py}
 app/telemetry/{events.py,masking.py}
 app/ui/single_instance.py
 app/memory/{schema.sql,migrations.py}
@@ -133,7 +133,7 @@ DDL은 문서에서 아직 실행 검증된 적이 없다. 이 작업에서 다�
 ### P0-07 원자적 쓰기·복구·단일 인스턴스
 
 1. 임시 파일 → flush → fsync → `os.replace`로 쓰는 `write_atomic` 구현
-2. 시작 시 `*.tmp`와 깨진 JSONL 꼬리를 `state/quarantine`으로 이동
+2. 시작 시 `*.tmp`와 깨진 JSONL 꼬리를 `state/quarantine`으로 이동 (`app.core.recovery`)
 3. `state/jarvis.lock`을 `msvcrt.locking`으로 잠금
 4. 두 번째 인스턴스는 사용자 메시지와 종료 코드 1로 끝냄
 5. 모든 복구 결과를 이벤트로 기록

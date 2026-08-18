@@ -1,4 +1,9 @@
-"""Composition root for all Phase 0 runtime dependencies."""
+"""Composition root: choose implementations and run process lifetime.
+
+``build()`` constructs services for the current product (chat, memory, tools,
+and optional voice). ``run_application()`` is the startup/shutdown sequence:
+load → lock → recover → CLI or voice → ``app.stop`` → release lock.
+"""
 
 from __future__ import annotations
 
@@ -26,6 +31,7 @@ from app.core.clock import (
 )
 from app.core.errors import ConfigError, ExitCode, JarvisError, exit_code_for
 from app.core.ids import PrefixedIdFactory, SystemIdFactory
+from app.core.recovery import recover_startup
 from app.core.test_hooks import CrashTestHook, CrashTestLLMClient
 from app.llm.base import LLMClient
 from app.llm.ollama_client import OllamaClient
@@ -33,7 +39,7 @@ from app.memory.migrations import initialize_database
 from app.memory.store import SQLiteSessionStore
 from app.memory.summarizer import SessionSummarizer, SummarizerSettings
 from app.orchestrator.loop import ChatOrchestrator
-from app.orchestrator.recovery import recover_sessions, recover_startup, recover_tasks
+from app.orchestrator.recovery import recover_sessions, recover_tasks
 from app.orchestrator.research import ResearchRunner
 from app.orchestrator.tasks import TaskStore
 from app.privacy.gate import PrivacyGate
@@ -115,7 +121,7 @@ def build(
     ids: PrefixedIdFactory | None = None,
     llm: LLMClient | None = None,
 ) -> Runtime:
-    """Load configuration and construct every Phase 0 service in one place."""
+    """Construct every runtime service from the loaded configuration."""
     loaded = load_config(config_dir)
     runtime_clock = clock or SystemClock()
     runtime_ids = ids or SystemIdFactory()
@@ -163,7 +169,7 @@ def build(
         fetch_settings=loaded.settings.rag.fetch,
         network=loaded.policies.tools.network,
     )
-    phase = 5
+    phase = 5  # Highest tool phase currently wired; higher-phase specs stay disabled.
     enabled = {
         defn.name: spec_from_definition(defn)
         for defn in loaded.policies.tools.tools
@@ -296,6 +302,114 @@ def _record_error(runtime: Runtime, error: BaseException, *, handled: bool) -> N
         )
 
 
+def _run_voice_mode(
+    runtime: Runtime,
+    chat: ChatOrchestrator,
+    output_stream: TextIO,
+) -> int:
+    """Assemble local STT/TTS and run the voice controller."""
+    voice_settings = runtime.config.settings.voice
+    if not voice_settings.enabled:
+        raise ConfigError("설정에서 음성 모드가 비활성화되어 있습니다.")
+    model_path = (
+        _data_path(runtime.config, runtime.config.settings.paths.models_dir)
+        / voice_settings.stt.wake.model
+    )
+    wake_stt = VoskSTTEngine(
+        model_path,
+        sample_rate=voice_settings.stt.sample_rate_hz,
+        language=voice_settings.stt.language,
+        expected_archive_sha256=voice_settings.stt.wake.model_archive_sha256,
+    )
+    command_settings = voice_settings.stt.command
+    command_model_path = (
+        _data_path(runtime.config, runtime.config.settings.paths.models_dir)
+        / command_settings.model
+    )
+    command_stt = FasterWhisperSTTEngine(
+        command_model_path,
+        expected_model_sha256=command_settings.model_sha256,
+        language=voice_settings.stt.language,
+        device=command_settings.device,
+        compute_type=command_settings.compute_type,
+        cpu_fallback=command_settings.cpu_fallback,
+        cpu_compute_type=command_settings.cpu_compute_type,
+        beam_size=command_settings.beam_size,
+        vad_filter=command_settings.vad_filter,
+        initial_prompt=command_settings.initial_prompt,
+    )
+    barge_in_settings = voice_settings.barge_in
+    barge_in_policy = BargeInGatePolicy(
+        speech_threshold_dbfs=barge_in_settings.speech_threshold_dbfs,
+        min_onset_rise_db=barge_in_settings.min_onset_rise_db,
+        baseline_window_ms=barge_in_settings.baseline_window_ms,
+        startup_guard_ms=barge_in_settings.startup_guard_ms,
+        recent_speech_ms=barge_in_settings.recent_speech_ms,
+        pre_roll_ms=barge_in_settings.pre_roll_ms,
+    )
+    barge_in_gate_factory: Callable[[], BargeInGate] | None = None
+    if barge_in_settings.enabled:
+
+        def create_barge_in_gate() -> BargeInGate:
+            return BargeInGate(
+                barge_in_policy,
+                WebRtcVoiceActivityDetector(
+                    mode=barge_in_settings.vad_mode,
+                    frame_ms=barge_in_settings.vad_frame_ms,
+                    min_voiced_ratio=barge_in_settings.vad_min_voiced_ratio,
+                ),
+            )
+
+        barge_in_gate_factory = create_barge_in_gate
+    interrupt_hotkey_factory: InterruptHotkeyFactory | None = None
+    if barge_in_settings.enabled and barge_in_settings.interrupt_hotkey_enabled:
+        hotkey_spec = barge_in_settings.interrupt_hotkey
+
+        def create_hotkey_monitor() -> InterruptHotkeyMonitor:
+            return create_interrupt_hotkey(hotkey_spec)
+
+        interrupt_hotkey_factory = create_hotkey_monitor
+    listener = LocalVoiceListener(
+        wake_stt=wake_stt,
+        command_stt=command_stt,
+        microphone_factory=microphone_factory(
+            voice_settings.stt.device,
+            sample_rate=voice_settings.stt.sample_rate_hz,
+        ),
+        wake_word=voice_settings.wake_word,
+        capture_policy=SpeechCapturePolicy(
+            pre_roll_ms=command_settings.pre_roll_ms,
+            speech_threshold_dbfs=command_settings.speech_threshold_dbfs,
+            trailing_silence_ms=command_settings.trailing_silence_ms,
+            min_speech_ms=command_settings.min_speech_ms,
+            max_duration_ms=int(voice_settings.stt.max_command_seconds * 1000),
+        ),
+        barge_in_gate_factory=barge_in_gate_factory,
+        interrupt_hotkey_factory=interrupt_hotkey_factory,
+        min_avg_logprob=command_settings.min_avg_logprob,
+        max_no_speech_probability=command_settings.max_no_speech_probability,
+        device_label=voice_settings.stt.device,
+        events=runtime.events,
+        clock=runtime.clock,
+        output_stream=output_stream,
+    )
+    controller = VoiceController(
+        listener=listener,
+        tts=WindowsSapiTTS(
+            voice_settings.tts.voice,
+            rate=voice_settings.tts.rate,
+        ),
+        chat=chat,
+        masker=runtime.masker,
+        acknowledgement=voice_settings.acknowledgement,
+        max_tts_chars=voice_settings.tts.max_chars,
+        events=runtime.events,
+        clock=runtime.clock,
+        output_stream=output_stream,
+    )
+    return controller.run()
+
+
 def run_application(
     *,
     config_dir: Path = DEFAULT_CONFIG_DIR,
@@ -306,7 +420,7 @@ def run_application(
     voice: bool = False,
     llm: LLMClient | None = None,
 ) -> int:
-    """Run startup, CLI, and cleanup with production-safe exception reporting."""
+    """Acquire the instance lock, recover leftover files, then serve CLI or voice."""
     runtime: Runtime | None = None
     started = False
     started_ms = 0
@@ -364,109 +478,7 @@ def run_application(
             task_store=runtime.task_store,
         )
         if voice:
-            voice_settings = runtime.config.settings.voice
-            if not voice_settings.enabled:
-                raise ConfigError("설정에서 음성 모드가 비활성화되어 있습니다.")
-            model_path = (
-                _data_path(runtime.config, runtime.config.settings.paths.models_dir)
-                / voice_settings.stt.wake.model
-            )
-            wake_stt = VoskSTTEngine(
-                model_path,
-                sample_rate=voice_settings.stt.sample_rate_hz,
-                language=voice_settings.stt.language,
-                expected_archive_sha256=voice_settings.stt.wake.model_archive_sha256,
-            )
-            command_settings = voice_settings.stt.command
-            command_model_path = (
-                _data_path(runtime.config, runtime.config.settings.paths.models_dir)
-                / command_settings.model
-            )
-            command_stt = FasterWhisperSTTEngine(
-                command_model_path,
-                expected_model_sha256=command_settings.model_sha256,
-                language=voice_settings.stt.language,
-                device=command_settings.device,
-                compute_type=command_settings.compute_type,
-                cpu_fallback=command_settings.cpu_fallback,
-                cpu_compute_type=command_settings.cpu_compute_type,
-                beam_size=command_settings.beam_size,
-                vad_filter=command_settings.vad_filter,
-                initial_prompt=command_settings.initial_prompt,
-            )
-            barge_in_settings = voice_settings.barge_in
-            barge_in_policy = BargeInGatePolicy(
-                speech_threshold_dbfs=barge_in_settings.speech_threshold_dbfs,
-                min_onset_rise_db=barge_in_settings.min_onset_rise_db,
-                baseline_window_ms=barge_in_settings.baseline_window_ms,
-                startup_guard_ms=barge_in_settings.startup_guard_ms,
-                recent_speech_ms=barge_in_settings.recent_speech_ms,
-                pre_roll_ms=barge_in_settings.pre_roll_ms,
-            )
-            barge_in_gate_factory: Callable[[], BargeInGate] | None = None
-            if barge_in_settings.enabled:
-
-                def create_barge_in_gate() -> BargeInGate:
-                    return BargeInGate(
-                        barge_in_policy,
-                        WebRtcVoiceActivityDetector(
-                            mode=barge_in_settings.vad_mode,
-                            frame_ms=barge_in_settings.vad_frame_ms,
-                            min_voiced_ratio=barge_in_settings.vad_min_voiced_ratio,
-                        ),
-                    )
-
-                barge_in_gate_factory = create_barge_in_gate
-            interrupt_hotkey_factory: InterruptHotkeyFactory | None = None
-            if (
-                barge_in_settings.enabled
-                and barge_in_settings.interrupt_hotkey_enabled
-            ):
-                hotkey_spec = barge_in_settings.interrupt_hotkey
-
-                def create_hotkey_monitor() -> InterruptHotkeyMonitor:
-                    return create_interrupt_hotkey(hotkey_spec)
-
-                interrupt_hotkey_factory = create_hotkey_monitor
-            listener = LocalVoiceListener(
-                wake_stt=wake_stt,
-                command_stt=command_stt,
-                microphone_factory=microphone_factory(
-                    voice_settings.stt.device,
-                    sample_rate=voice_settings.stt.sample_rate_hz,
-                ),
-                wake_word=voice_settings.wake_word,
-                capture_policy=SpeechCapturePolicy(
-                    pre_roll_ms=command_settings.pre_roll_ms,
-                    speech_threshold_dbfs=command_settings.speech_threshold_dbfs,
-                    trailing_silence_ms=command_settings.trailing_silence_ms,
-                    min_speech_ms=command_settings.min_speech_ms,
-                    max_duration_ms=int(voice_settings.stt.max_command_seconds * 1000),
-                ),
-                barge_in_gate_factory=barge_in_gate_factory,
-                interrupt_hotkey_factory=interrupt_hotkey_factory,
-                min_avg_logprob=command_settings.min_avg_logprob,
-                max_no_speech_probability=command_settings.max_no_speech_probability,
-                device_label=voice_settings.stt.device,
-                events=runtime.events,
-                clock=runtime.clock,
-                output_stream=output_stream,
-            )
-            controller = VoiceController(
-                listener=listener,
-                tts=WindowsSapiTTS(
-                    voice_settings.tts.voice,
-                    rate=voice_settings.tts.rate,
-                ),
-                chat=chat,
-                masker=runtime.masker,
-                acknowledgement=voice_settings.acknowledgement,
-                max_tts_chars=voice_settings.tts.max_chars,
-                events=runtime.events,
-                clock=runtime.clock,
-                output_stream=output_stream,
-            )
-            exit_code = controller.run()
+            exit_code = _run_voice_mode(runtime, chat, output_stream)
         else:
             exit_code = run_cli(
                 input_stream=input_stream,

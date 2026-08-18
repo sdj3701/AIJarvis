@@ -1,4 +1,7 @@
-"""Phase 4 text chat interface with tool approval flow."""
+"""Text CLI: slash commands, tool-approval prompts, and the chat turn loop.
+
+Callers may omit ``chat`` to keep the echo fallback used by Phase 0 unit tests.
+"""
 
 from __future__ import annotations
 

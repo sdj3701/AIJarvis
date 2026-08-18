@@ -1,4 +1,7 @@
-"""Crash-safe replacement of complete files."""
+"""Crash-safe replacement of complete files.
+
+Partial-file quarantine on startup lives in ``app.core.recovery``.
+"""
 
 from __future__ import annotations
 

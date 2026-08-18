@@ -114,7 +114,10 @@ class SecretLoader:
         return f"JARVIS_{key_name.upper()}"
 
     def get_optional(self, key_name: str) -> SecretStr | None:
-        """Return a secret when configured; absence is valid during Phase 0."""
+        """Return a secret when configured; absence is valid so the skeleton can boot.
+
+        The raw value is registered with the masker before this method returns.
+        """
         env_name = self.environment_name(key_name)
         credential = self._get_credential(key_name)
         if credential is not None:

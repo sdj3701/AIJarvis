@@ -27,6 +27,7 @@ class SingleInstanceLock:
         return self._file is not None
 
     def acquire(self) -> None:
+        """Take a non-blocking byte lock so a second process fails immediately."""
         if self._file is not None:
             raise RuntimeError("single-instance lock is already acquired")
         self._path.parent.mkdir(parents=True, exist_ok=True)

@@ -33,7 +33,11 @@ SensitiveKind = Literal["secret", "pii_high", "pii", "pii_low"]
 
 
 class StrictModel(BaseModel):
-    """Reject every key that is not part of the documented schema."""
+    """Reject every key that is not part of the documented schema.
+
+    ``extra="forbid"`` is the config contract: a typo in YAML must fail startup
+    instead of being silently ignored.
+    """
 
     model_config = ConfigDict(
         extra="forbid",

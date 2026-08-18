@@ -77,7 +77,11 @@ def load_config(
     *,
     registered_tools: set[str] | None = None,
 ) -> LoadedConfig:
-    """Load the operational configuration directory as one immutable bundle."""
+    """Load the operational configuration directory as one immutable bundle.
+
+    Missing files mean bootstrap has not run. Unknown YAML keys are rejected by
+    the Pydantic models (``extra="forbid"``), not by this function.
+    """
     directory = Path(config_dir)
     if not directory.is_dir():
         raise ConfigError(

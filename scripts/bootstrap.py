@@ -73,6 +73,7 @@ def _copy_initial_configs(data_root: Path, source: Path) -> tuple[BootstrapActio
         if not source_path.is_file():
             raise ConfigError("초기 설정 원본 파일이 없습니다.", {"source": str(source_path)})
         try:
+            # "xb" creates the file only when missing so a rerun cannot clobber live config.
             with source_path.open("rb") as input_file, target_path.open("xb") as output_file:
                 shutil.copyfileobj(input_file, output_file)
         except FileExistsError:

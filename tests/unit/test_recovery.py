@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 from app.core.errors import RecoveryError
-from app.orchestrator.recovery import recover_startup
+from app.core.recovery import recover_startup
 from scripts.bootstrap import create_tree
 
 pytestmark = pytest.mark.phase0

@@ -7,10 +7,12 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from threading import Event
-from typing import Any, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
-from app.config.models import Settings
 from app.core.clock import Clock, RandomSource, Sleeper
+
+if TYPE_CHECKING:
+    from app.config.models import Settings
 
 _ULID_PATTERN = r"[0-9A-HJKMNP-TV-Z]{26}"
 
@@ -56,7 +58,7 @@ class RequestContext:
     clock: Clock
     sleeper: Sleeper
     random: RandomSource
-    settings: Settings
+    settings: Settings  # injected; config is imported only under TYPE_CHECKING
     events: EventWriter
     audit: AuditWriter
     cancel: CancelToken

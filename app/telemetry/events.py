@@ -109,6 +109,7 @@ class JsonlEventWriter:
         actor: Actor = "system",
         level: Level = "info",
     ) -> None:
+        """Mask the payload, then append one JSON line. Return means the line was flushed."""
         if event_type not in EVENT_TYPES:
             raise ValueError(f"unsupported event_type: {event_type}")
         if actor not in {"user", "assistant", "system", "tool"}:

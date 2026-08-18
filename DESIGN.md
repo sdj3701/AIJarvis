@@ -82,7 +82,8 @@ D:\Ai\Jarvis\
 │   │   ├── ids.py              # ULID: request/session/turn/task/record id
 │   │   ├── clock.py            # Clock / Sleeper / RandomSource 프로토콜 + 시스템 구현
 │   │   ├── context.py          # RequestContext, CancelToken (4장)
-│   │   ├── atomic.py           # 원자적 쓰기, 파일 락, 부분 파일 탐지·격리
+│   │   ├── atomic.py           # 원자적 쓰기
+│   │   ├── recovery.py         # 시작 시 *.tmp·깨진 JSONL 꼬리 격리
 │   │   ├── canonical.py        # 정규 JSON 직렬화, args_hash 계산
 │   │   └── errors.py           # 예외 계층 (6장)
 │   ├── telemetry\              # 이름 주의: stdlib logging과 혼동 방지
