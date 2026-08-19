@@ -45,3 +45,14 @@ def test_cli_once_echoes_without_prompt() -> None:
 
     assert exit_code == 0
     assert output.getvalue() == "한 번\n"
+
+
+def test_phase0_cli_echoes_later_phase_commands() -> None:
+    output = StringIO()
+
+    exit_code = run_cli(input_stream=StringIO("/clear\n/bye\n"), output_stream=output)
+
+    rendered = output.getvalue()
+    assert exit_code == ExitCode.SUCCESS
+    assert "/clear" in rendered
+    assert "현재 대화 문맥을 초기화" not in rendered

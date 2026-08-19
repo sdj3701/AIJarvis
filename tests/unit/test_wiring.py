@@ -12,13 +12,9 @@ from typing import Any
 import pytest
 import yaml
 
-from app.budget import BudgetGuard
 from app.core.errors import ExitCode
-from app.llm.fake import FakeLLMClient
-from app.llm.ollama_client import OllamaClient
-from app.memory.store import SQLiteSessionStore
 from app.ui.single_instance import SingleInstanceLock
-from app.wiring import build, run_application
+from app.wiring import build_foundation, run_application
 from scripts.bootstrap import create_tree
 
 pytestmark = pytest.mark.phase0
@@ -38,10 +34,7 @@ def runtime_config(tmp_path: Path) -> Path:
     create_tree(root)
     _mutate_yaml(
         config_dir / "settings.yaml",
-        lambda document: (
-            document["paths"].__setitem__("data_root", str(root)),
-            document["memory"].__setitem__("summarize_on_exit", False),
-        ),
+        lambda document: document["paths"].__setitem__("data_root", str(root)),
     )
     return config_dir
 
@@ -63,16 +56,15 @@ def _events(config_dir: Path) -> list[dict[str, Any]]:
 
 
 def test_build_assembles_config_clock_ids_events_and_secrets(runtime_config: Path) -> None:
-    runtime = build(runtime_config)
+    runtime = build_foundation(runtime_config)
 
     assert runtime.config.settings.schema_version == 1
     assert runtime.clock.now().tzinfo is not None
     assert runtime.ids.new("req").startswith("req_")
     assert runtime.memory_db.name == "jarvis.sqlite3"
     assert runtime.lock.acquired is False
-    assert isinstance(runtime.llm, OllamaClient)
-    assert isinstance(runtime.sessions, SQLiteSessionStore)
-    assert isinstance(runtime.budget, BudgetGuard)
+    assert runtime.config.config_hash
+    assert not hasattr(runtime, "llm")
 
 
 def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) -> None:
@@ -84,27 +76,21 @@ def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) 
         input_stream=StringIO("확인\n/bye\n"),
         output_stream=output,
         error_stream=errors,
-        llm=FakeLLMClient().reply("확인 응답"),
     )
 
     assert exit_code == 0
-    assert "확인 응답" in output.getvalue()
+    rendered = output.getvalue()
+    assert "확인" in rendered
+    assert "확인 응답" not in rendered
     assert errors.getvalue() == ""
     event_types = [record["event_type"] for record in _events(runtime_config)]
     assert event_types == [
         "app.start",
         "recovery.start",
         "recovery.result",
-        "recovery.start",
-        "recovery.result",
-        "recovery.result",
-        "session.start",
-        "user.input",
-        "memory.search",
-        "session.end",
         "app.stop",
     ]
-    runtime = build(runtime_config)
+    runtime = build_foundation(runtime_config)
     with runtime.lock:
         assert runtime.lock.acquired
 

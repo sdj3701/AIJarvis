@@ -10,10 +10,12 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from app.config.defaults import DEFAULT_DATA_ROOT
+
 MODEL_NAME = "vosk-model-small-ko-0.22"
 MODEL_URL = f"https://alphacephei.com/vosk/models/{MODEL_NAME}.zip"
 MODEL_SHA256 = "eea36124087fed26c59996a4761519458e3bd185e8ea9d9865ad8760c4a1d989"
-DEFAULT_MODELS_DIR = Path(r"D:\Jarvis\models")
+DEFAULT_MODELS_DIR = DEFAULT_DATA_ROOT / "models"
 REQUIRED_FILES = (Path("am/final.mdl"), Path("conf/model.conf"), Path("graph/HCLr.fst"))
 WHISPER_REPO_ID = "Systran/faster-whisper-small"
 WHISPER_REVISION = "536b0662742c02347bc0e980a01041f333bce120"

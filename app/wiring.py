@@ -1,8 +1,8 @@
 """Composition root: choose implementations and run process lifetime.
 
-``build()`` constructs services for the current product (chat, memory, tools,
-and optional voice). ``run_application()`` is the startup/shutdown sequence:
-load → lock → recover → CLI or voice → ``app.stop`` → release lock.
+``build_foundation()`` is the Phase 0 composition root: config, clock, IDs,
+events, secrets, and the instance lock. ``run_application()`` uses that path
+for the echo CLI. ``build()`` remains the later-phase product runtime.
 """
 
 from __future__ import annotations
@@ -80,6 +80,20 @@ from app.voice.tts import WindowsSapiTTS
 
 
 @dataclass(frozen=True, slots=True)
+class FoundationRuntime:
+    """Phase 0 process services: no LLM, tools, or voice."""
+
+    config: LoadedConfig
+    clock: Clock
+    ids: PrefixedIdFactory
+    masker: LogMasker
+    events: JsonlEventWriter
+    secrets: SecretLoader
+    lock: SingleInstanceLock
+    memory_db: Path
+
+
+@dataclass(frozen=True, slots=True)
 class Runtime:
     config: LoadedConfig
     clock: Clock
@@ -113,6 +127,42 @@ def _data_path(config: LoadedConfig, configured: Path) -> Path:
     if configured.is_absolute():
         return configured.resolve(strict=False)
     return (config.settings.paths.data_root / configured).resolve(strict=False)
+
+
+def build_foundation(
+    config_dir: Path = DEFAULT_CONFIG_DIR,
+    *,
+    clock: Clock | None = None,
+    ids: PrefixedIdFactory | None = None,
+) -> FoundationRuntime:
+    """Assemble the Phase 0 runtime: config, clock, IDs, events, and secrets."""
+    loaded = load_config(config_dir)
+    runtime_clock = clock or SystemClock()
+    runtime_ids = ids or SystemIdFactory()
+    masker = LogMasker.from_policy(loaded.policies.privacy)
+    logs_dir = _data_path(loaded, loaded.settings.paths.logs_dir)
+    state_dir = _data_path(loaded, loaded.settings.paths.state_dir)
+    events = JsonlEventWriter(
+        logs_dir,
+        clock=runtime_clock,
+        masker=masker,
+        fsync_events=loaded.settings.logging.fsync_events,
+    )
+    secrets = SecretLoader(
+        dev_mode=loaded.settings.dev_mode,
+        masker=masker,
+        events=events,
+    )
+    return FoundationRuntime(
+        config=loaded,
+        clock=runtime_clock,
+        ids=runtime_ids,
+        masker=masker,
+        events=events,
+        secrets=secrets,
+        lock=SingleInstanceLock(state_dir / "jarvis.lock"),
+        memory_db=_data_path(loaded, loaded.settings.paths.memory_db),
+    )
 
 
 def build(
@@ -283,7 +333,12 @@ def build(
     )
 
 
-def _record_error(runtime: Runtime, error: BaseException, *, handled: bool) -> None:
+def _record_error(
+    runtime: FoundationRuntime | Runtime,
+    error: BaseException,
+    *,
+    handled: bool,
+) -> None:
     if isinstance(error, JarvisError):
         user_message = error.user_message
         detail = error.detail
@@ -422,12 +477,17 @@ def run_application(
     llm: LLMClient | None = None,
 ) -> int:
     """Acquire the instance lock, recover leftover files, then serve CLI or voice."""
-    runtime: Runtime | None = None
+    runtime: FoundationRuntime | Runtime | None = None
+    product: Runtime | None = None
     started = False
     started_ms = 0
     exit_code = int(ExitCode.UNHANDLED_ERROR)
     try:
-        runtime = build(config_dir, llm=llm)
+        if voice:
+            product = build(config_dir, llm=llm)
+            runtime = product
+        else:
+            runtime = build_foundation(config_dir)
         runtime.lock.acquire()
         initialize_database(runtime.memory_db)
         started_ms = runtime.clock.monotonic_ms()
@@ -442,52 +502,50 @@ def run_application(
         )
         started = True
         recover_startup(runtime.config.settings.paths.data_root, runtime.events)
-        recover_sessions(
-            runtime.sessions,
-            policy=runtime.config.settings.session.recovery,
-            events=runtime.events,
-            clock=runtime.clock,
-            summarizer=runtime.summarizer,
-            settings=runtime.config.settings,
-            ids=runtime.ids,
-            sleeper=runtime.sleeper,
-            random=runtime.random,
-        )
-        recover_tasks(runtime.task_store, runtime.events)
-        verifier = getattr(runtime.llm, "verify_model", None)
-        chat = ChatOrchestrator(
-            settings=runtime.config.settings,
-            llm=runtime.llm,
-            sessions=runtime.sessions,
-            budget=runtime.budget,
-            masker=runtime.masker,
-            events=runtime.events,
-            clock=runtime.clock,
-            sleeper=runtime.sleeper,
-            random=runtime.random,
-            ids=runtime.ids,
-            verify_model=verifier if callable(verifier) else None,
-            test_hook=runtime.test_hook,
-            metrics=runtime.metrics,
-            summarizer=runtime.summarizer,
-            indexer=runtime.indexer,
-            research=runtime.research,
-            tool_runner=runtime.tool_runner,
-            safety_gate=runtime.safety_gate,
-            approval_store=runtime.approval_store,
-            audit_writer=runtime.audit_writer,
-            task_store=runtime.task_store,
-        )
-        if voice:
-            exit_code = _run_voice_mode(runtime, chat, output_stream)
-        else:
+        if product is None:
             exit_code = run_cli(
                 input_stream=input_stream,
                 output_stream=output_stream,
                 once=once,
-                chat=chat,
-                typed_confirm_phrase=runtime.config.policies.tools.approval.typed_confirm_phrase,
             )
+        else:
+            recover_sessions(
+                product.sessions,
+                policy=product.config.settings.session.recovery,
+                events=product.events,
+                clock=product.clock,
+                summarizer=product.summarizer,
+                settings=product.config.settings,
+                ids=product.ids,
+                sleeper=product.sleeper,
+                random=product.random,
+            )
+            recover_tasks(product.task_store, product.events)
+            verifier = getattr(product.llm, "verify_model", None)
+            chat = ChatOrchestrator(
+                settings=product.config.settings,
+                llm=product.llm,
+                sessions=product.sessions,
+                budget=product.budget,
+                masker=product.masker,
+                events=product.events,
+                clock=product.clock,
+                sleeper=product.sleeper,
+                random=product.random,
+                ids=product.ids,
+                verify_model=verifier if callable(verifier) else None,
+                test_hook=product.test_hook,
+                metrics=product.metrics,
+                summarizer=product.summarizer,
+                indexer=product.indexer,
+                research=product.research,
+                tool_runner=product.tool_runner,
+                safety_gate=product.safety_gate,
+                approval_store=product.approval_store,
+                audit_writer=product.audit_writer,
+                task_store=product.task_store,
+            )
+            exit_code = _run_voice_mode(product, chat, output_stream)
     except KeyboardInterrupt as error:
         exit_code = int(ExitCode.INTERRUPTED)
         output_stream.write("\n입력을 중단하고 안전하게 종료합니다.\n")

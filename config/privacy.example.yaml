@@ -1,5 +1,5 @@
 # 자비스 프라이버시·전송 정책 템플릿
-# 사본 위치: D:\Jarvis\config\privacy.yaml
+# 재구축 개발 사본 위치: D:\Jarvis-v2-dev\config\privacy.yaml
 #
 # 이 파일은 네 개의 독립된 경로를 각각 통제한다 (PLAN 9.4절).
 #   api          : 외부 LLM/검색 API로 나가는 내용

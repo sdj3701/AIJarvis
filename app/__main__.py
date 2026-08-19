@@ -11,10 +11,10 @@ from app.wiring import run_application
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Jarvis local Ollama assistant")
+    parser = argparse.ArgumentParser(description="Jarvis local CLI")
     parser.add_argument("--config-dir", type=Path, default=DEFAULT_CONFIG_DIR)
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--once", help="한 번 질문하고 답변한 뒤 종료합니다.")
+    mode.add_argument("--once", help="한 줄 입력하고 그대로 출력한 뒤 종료합니다.")
     mode.add_argument(
         "--voice",
         action="store_true",

@@ -2,8 +2,8 @@
 
 이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
 
-> 마지막 문서 정리: 2026-08-18 (P0-01 완료)
-> 현재 상태: `rebuild/v2` Phase 0 재구축 진행 중, P0-01 완료
+> 마지막 문서 정리: 2026-08-19 (P0-02~P0-08 완료, Phase 0 게이트 대기)
+> 현재 상태: `rebuild/v2` Phase 0 구현 완료. 공식 게이트는 작업 트리 정리 후 실행
 > 현재 Phase: Phase 0
 > 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
 > 브랜치: `rebuild/v2`. 프로토타입 게이트 기록은 비교용이며 v2 완료가 아니다.
@@ -22,7 +22,7 @@
 
 | Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
 |-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01 완료. 다음은 P0-02 |
+| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-08 구현 완료. `pytest -m phase0` 154 passed. 공식 게이트 대기 |
 | 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 decided |
 | 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | |
 | 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006 decided, D012 pending |
@@ -40,13 +40,13 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
 |------|------|------|------|------|-----------|
 | P0-01 프로젝트와 품질 도구 | completed | Cursor | 2026-08-18 | 2026-08-18 | collect-only 453, ruff/mypy 통과, lock은 `--extra=dev` |
-| P0-02 설정 모델과 로더 | not_started | — | — | — | |
-| P0-03 시크릿 로더 | not_started | — | — | — | |
-| P0-04 공통 타입 | not_started | — | — | — | |
-| P0-05 데이터 트리와 SQLite | not_started | — | — | — | |
-| P0-06 이벤트·마스킹 | not_started | — | — | — | |
-| P0-07 원자적 쓰기·복구·단일 인스턴스 | not_started | — | — | — | |
-| P0-08 CLI와 조립 | not_started | — | — | — | |
+| P0-02 설정 모델과 로더 | completed | Cursor | 2026-08-19 | 2026-08-19 | example 3파일 로드, deny·해시·v2 config dir |
+| P0-03 시크릿 로더 | completed | Cursor | 2026-08-19 | 2026-08-19 | keyring 우선, .env는 dev_mode만, 원문 비노출 |
+| P0-04 공통 타입 | completed | Cursor | 2026-08-19 | 2026-08-19 | Clock·ID·예외·canonical hash |
+| P0-05 데이터 트리와 SQLite | completed | Cursor | 2026-08-19 | 2026-08-19 | bootstrap 멱등, FTS integrity-check |
+| P0-06 이벤트·마스킹 | completed | Cursor | 2026-08-19 | 2026-08-19 | 봉투·fsync·민감문자열 0건 |
+| P0-07 원자적 쓰기·복구·단일 인스턴스 | completed | Cursor | 2026-08-19 | 2026-08-19 | tmp 격리, lock, 종료 코드 1 |
+| P0-08 CLI와 조립 | completed | Cursor | 2026-08-19 | 2026-08-19 | `python -m app` echo, LLM 없음 |
 
 Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
 

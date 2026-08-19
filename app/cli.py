@@ -1,7 +1,4 @@
-"""Text CLI: slash commands, tool-approval prompts, and the chat turn loop.
-
-Callers may omit ``chat`` to keep the echo fallback used by Phase 0 unit tests.
-"""
+"""Text CLI: Phase 0 echo loop, plus later-phase slash commands when chat is wired."""
 
 from __future__ import annotations
 
@@ -12,7 +9,8 @@ from app.memory.commands import try_handle_memory_command
 from app.orchestrator.loop import ChatOrchestrator, TurnOutcome
 from app.safety.approval import GrantMethod
 
-HELP_TEXT = (
+HELP_TEXT = "사용 가능한 명령: /help(도움말), /bye(종료)"
+CHAT_HELP_TEXT = (
     "사용 가능한 명령: /help(도움말), /clear(현재 문맥 초기화), "
     "/budget(비용 현황), /index(문서 동기화), /search <질의>(웹·문서 검색), "
     "/open_app <앱>(허용 앱 실행), /open_folder <root> [경로], "
@@ -121,7 +119,7 @@ def _handle_line(
 ) -> bool:
     command = text.strip().lower()
     if command == "/help":
-        _write(output_stream, HELP_TEXT)
+        _write(output_stream, CHAT_HELP_TEXT if chat is not None else HELP_TEXT)
         return True
     if command == "/bye":
         if chat is not None:
@@ -129,47 +127,44 @@ def _handle_line(
             chat.end(reason="bye")
         _write(output_stream, "안전하게 종료합니다.")
         return False
+    if chat is None:
+        if text.strip():
+            _write(output_stream, text)
+        return True
     if command == "/clear":
-        if chat is not None:
-            chat.clear()
-            chat.discard_pending_approval(cause="new_input")
+        chat.clear()
+        chat.discard_pending_approval(cause="new_input")
         _write(output_stream, "현재 대화 문맥을 초기화했습니다. raw 기록은 유지됩니다.")
         return True
     if command == "/budget":
-        _write(output_stream, "비용 기록이 없습니다." if chat is None else _budget_text(chat))
+        _write(output_stream, _budget_text(chat))
         return True
     if command == "/index":
-        if chat is None:
-            _write(output_stream, "문서 인덱서가 구성되지 않았습니다.")
-        else:
-            chat.start()
-            _write(output_stream, chat.handle_index())
+        chat.start()
+        _write(output_stream, chat.handle_index())
         return True
     if not text.strip():
         return True
-    if chat is not None:
-        chat.start()
-        memory_ctx = chat.memory_command_context()
-        if memory_ctx is not None:
-            memory_result = try_handle_memory_command(text, memory_ctx)
-            if memory_result is not None:
-                _write(output_stream, memory_result.message)
-                return memory_result.ok or True
-        if input_stream is None:
-            _write(output_stream, chat.handle_turn(text).text)
-        else:
-            _write(
-                output_stream,
-                _handle_turn_with_approval(
-                    text,
-                    chat=chat,
-                    input_stream=input_stream,
-                    output_stream=output_stream,
-                    typed_phrase=typed_phrase,
-                ),
-            )
-        return True
-    _write(output_stream, text)
+    chat.start()
+    memory_ctx = chat.memory_command_context()
+    if memory_ctx is not None:
+        memory_result = try_handle_memory_command(text, memory_ctx)
+        if memory_result is not None:
+            _write(output_stream, memory_result.message)
+            return memory_result.ok or True
+    if input_stream is None:
+        _write(output_stream, chat.handle_turn(text).text)
+    else:
+        _write(
+            output_stream,
+            _handle_turn_with_approval(
+                text,
+                chat=chat,
+                input_stream=input_stream,
+                output_stream=output_stream,
+                typed_phrase=typed_phrase,
+            ),
+        )
     return True
 
 
@@ -181,7 +176,7 @@ def run_cli(
     chat: ChatOrchestrator | None = None,
     typed_confirm_phrase: str = "실행합니다",
 ) -> int:
-    """Run local chat; direct unit callers may omit chat for the Phase 0 echo fallback."""
+    """Run the Phase 0 echo CLI, or the later chat loop when ``chat`` is provided."""
     try:
         if chat is not None:
             chat.start()

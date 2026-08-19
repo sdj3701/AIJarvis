@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import shutil
 from collections.abc import Callable
 from pathlib import Path
@@ -10,6 +11,7 @@ from typing import Any
 import pytest
 import yaml
 
+from app.config.defaults import DEFAULT_CONFIG_DIR
 from app.config.loader import load_config, load_policies, load_settings
 from app.core.errors import ConfigError
 
@@ -67,6 +69,11 @@ def test_example_yaml_files_load(config_dir: Path) -> None:
     assert loaded.policies.privacy.api_transmission.default == "deny"
     assert len(loaded.config_hash) == 64
     assert set(loaded.config_hash) <= set("0123456789abcdef")
+
+
+def test_loader_defaults_to_v2_dev_config_dir() -> None:
+    assert inspect.signature(load_config).parameters["config_dir"].default == DEFAULT_CONFIG_DIR
+    assert Path(r"D:\Jarvis-v2-dev") / "config" == DEFAULT_CONFIG_DIR
 
 
 def test_missing_config_directory_reports_bootstrap(config_dir: Path) -> None:

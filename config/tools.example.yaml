@@ -1,5 +1,5 @@
 # 자비스 도구 정책 템플릿
-# 사본 위치: D:\Jarvis\config\tools.yaml
+# 재구축 개발 사본 위치: D:\Jarvis-v2-dev\config\tools.yaml
 # 이 파일이 이 프로젝트 보안의 핵심이다. 여기 없는 것은 실행되지 않는다.
 #
 # 규칙
