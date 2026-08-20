@@ -40,11 +40,15 @@ Phase 0 완료 시 CLI는 설정을 검증하고 단일 인스턴스 락을 잡�
 | [SCHEMAS.md](./SCHEMAS.md) | 파일·DB·이벤트·도구 데이터는 어떤 모양인가? | 저장 형식의 단일 기준 |
 | [TESTING.md](./TESTING.md) | 완료를 어떻게 증명하는가? | 테스트·릴리스 게이트의 기준 |
 | [`docs/phase-*`](./docs/README.md) | 지금 어떤 파일을 어떤 순서로 구현하는가? | 실행 순서와 작업 체크리스트 |
+| [`docs/*/DETAIL.md`](./docs/DETAIL.md) | 그 규칙이 왜 필요한가? | 세부 개발문서, 설명 전용 |
 | [`config/*.example.yaml`](./config) | 정책·운영 기본값은 무엇인가? | 실행 설정 템플릿 |
 
 내용이 충돌하면 `PLAN → DESIGN → SCHEMAS → TESTING → Phase 문서` 순으로 무조건 덮어쓰지 않는다. 먼저 충돌의 성격에 맞는 기준 문서를 수정하고, [문서 변경 규칙](./docs/reference/DOCUMENTATION_RULES.md)에 따라 하위 문서를 동기화한다.
 
 ## 3. 전체 개발 흐름
+
+작업 ID 단위의 상세 흐름·게이트·의존 관계는 [개발 흐름](./docs/DEVELOPMENT_FLOW.md)에 있다.
+아래는 단계 요약이다.
 
 | 순서 | 개발 단계 | 핵심 산출물 | 완료 후 상태 |
 |------|-----------|-------------|--------------|
@@ -107,7 +111,9 @@ Phase 0 완료 시 CLI는 설정을 검증하고 단일 인스턴스 락을 잡�
 
 ## 7. 참고 문서
 
+- [전체 개발 흐름](./docs/DEVELOPMENT_FLOW.md)
 - [전체 문서 지도](./docs/README.md)
+- [세부 개발문서 지도](./docs/DETAIL.md)
 - [개발 진행 현황](./docs/PROGRESS.md)
 - [요구사항 추적표](./docs/reference/TRACEABILITY.md)
 - [위협 모델](./docs/reference/THREAT_MODEL.md)

@@ -2,6 +2,8 @@
 
 이 디렉터리는 실제 구현 순서대로 정렬된 실행 문서다. 루트의 [README.md](../README.md)가 전체 진입점이고, 이 파일은 세부 탐색용 색인이다.
 
+작업 ID 단위로 이어 붙인 전체 순서는 [개발 흐름](./DEVELOPMENT_FLOW.md)에 있다. 어느 작업이 끝나면 무엇이 열리는지 한 문서에서 확인할 수 있다.
+
 현재 상태와 다음 작업은 [PROGRESS.md](./PROGRESS.md)에서 관리한다. `rebuild/v2`의 다음 작업은 [Phase 0](./phase-00-foundation/README.md)이다.
 
 ## 개발 순서
@@ -32,6 +34,20 @@ phase-07-voice → phase-08-resident-ui → operations
 | [operations](./operations/README.md) | 운영·복원·장애 대응·안정화 | v1 |
 | [post-v1](./post-v1/README.md) | Phase 9 선택 기능을 개별 제안으로 분리 | v1 이후 |
 | [reference](./reference/README.md) | 추적표·문서 규칙·용어와 기준 링크 | 전 Phase |
+
+## 세부 개발문서
+
+각 폴더에는 같은 위치의 `README.md`를 배경·이유·주의점까지 풀어 쓴 `DETAIL.md`가 있다. 설명은
+게임 개발 용어에 빗대어 쓴다. 전체 지도는 [docs/DETAIL.md](./DETAIL.md)다.
+
+세부 개발문서는 설명 전용이며 기준이 아니다. 인터페이스·설정 키·완료 기준은 항상 `README.md`와
+기준 문서를 따른다. 원문이 바뀌면 같은 변경에서 세부 개발문서도 함께 수정한다.
+
+| 문서 | 답하는 질문 |
+|------|-------------|
+| [DEVELOPMENT_FLOW.md](./DEVELOPMENT_FLOW.md) | 단계가 어떤 순서로 이어지고 무엇이 무엇을 여는가 |
+| `docs/*/README.md` | 지금 어떤 파일을 어떤 순서로 구현하는가 |
+| `docs/*/DETAIL.md` | 그 규칙이 왜 필요한가 |
 
 ## 기준 문서 바로가기
 

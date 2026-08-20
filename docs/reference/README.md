@@ -8,6 +8,8 @@
 - [한국어 STT 운영 가이드](./VOICE_STT.md): 호출어·Whisper 질문·현재 끼어들기 운영
 - [답변 중 마이크 게이트](./VOICE_BARGE_IN_GATE.md): TTS 에코 완화 Gate A/B+WebRTC VAD (D017)
 - [호출·한 문장 명령 UX 제안](./VOICE_WAKE_COMMAND_UX.md): 오호출·한 문장 질문·재호출 (D018)
+- [세부 개발문서](./DETAIL.md): 이 폴더 문서들의 배경 설명
+- [전체 개발 흐름](../DEVELOPMENT_FLOW.md): 작업 ID 단위 순서와 게이트
 - [루트 개발 허브](../../README.md)
 - [PLAN](../../PLAN.md)
 - [DESIGN](../../DESIGN.md)
