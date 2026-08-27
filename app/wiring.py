@@ -1,8 +1,8 @@
 """Composition root: choose implementations and run process lifetime.
 
-``build_foundation()`` is the Phase 0 composition root: config, clock, IDs,
-events, secrets, and the instance lock. ``run_application()`` uses that path
-for the echo CLI. ``build()`` remains the later-phase product runtime.
+``build()`` constructs services for the current product (chat, memory, tools,
+and optional voice). ``run_application()`` is the startup/shutdown sequence:
+load → lock → recover → CLI or voice → ``app.stop`` → release lock.
 """
 
 from __future__ import annotations
@@ -477,17 +477,12 @@ def run_application(
     llm: LLMClient | None = None,
 ) -> int:
     """Acquire the instance lock, recover leftover files, then serve CLI or voice."""
-    runtime: FoundationRuntime | Runtime | None = None
-    product: Runtime | None = None
+    runtime: Runtime | None = None
     started = False
     started_ms = 0
     exit_code = int(ExitCode.UNHANDLED_ERROR)
     try:
-        if voice:
-            product = build(config_dir, llm=llm)
-            runtime = product
-        else:
-            runtime = build_foundation(config_dir)
+        runtime = build(config_dir, llm=llm)
         runtime.lock.acquire()
         initialize_database(runtime.memory_db)
         started_ms = runtime.clock.monotonic_ms()
@@ -502,50 +497,52 @@ def run_application(
         )
         started = True
         recover_startup(runtime.config.settings.paths.data_root, runtime.events)
-        if product is None:
+        recover_sessions(
+            runtime.sessions,
+            policy=runtime.config.settings.session.recovery,
+            events=runtime.events,
+            clock=runtime.clock,
+            summarizer=runtime.summarizer,
+            settings=runtime.config.settings,
+            ids=runtime.ids,
+            sleeper=runtime.sleeper,
+            random=runtime.random,
+        )
+        recover_tasks(runtime.task_store, runtime.events)
+        verifier = getattr(runtime.llm, "verify_model", None)
+        chat = ChatOrchestrator(
+            settings=runtime.config.settings,
+            llm=runtime.llm,
+            sessions=runtime.sessions,
+            budget=runtime.budget,
+            masker=runtime.masker,
+            events=runtime.events,
+            clock=runtime.clock,
+            sleeper=runtime.sleeper,
+            random=runtime.random,
+            ids=runtime.ids,
+            verify_model=verifier if callable(verifier) else None,
+            test_hook=runtime.test_hook,
+            metrics=runtime.metrics,
+            summarizer=runtime.summarizer,
+            indexer=runtime.indexer,
+            research=runtime.research,
+            tool_runner=runtime.tool_runner,
+            safety_gate=runtime.safety_gate,
+            approval_store=runtime.approval_store,
+            audit_writer=runtime.audit_writer,
+            task_store=runtime.task_store,
+        )
+        if voice:
+            exit_code = _run_voice_mode(runtime, chat, output_stream)
+        else:
             exit_code = run_cli(
                 input_stream=input_stream,
                 output_stream=output_stream,
                 once=once,
+                chat=chat,
+                typed_confirm_phrase=runtime.config.policies.tools.approval.typed_confirm_phrase,
             )
-        else:
-            recover_sessions(
-                product.sessions,
-                policy=product.config.settings.session.recovery,
-                events=product.events,
-                clock=product.clock,
-                summarizer=product.summarizer,
-                settings=product.config.settings,
-                ids=product.ids,
-                sleeper=product.sleeper,
-                random=product.random,
-            )
-            recover_tasks(product.task_store, product.events)
-            verifier = getattr(product.llm, "verify_model", None)
-            chat = ChatOrchestrator(
-                settings=product.config.settings,
-                llm=product.llm,
-                sessions=product.sessions,
-                budget=product.budget,
-                masker=product.masker,
-                events=product.events,
-                clock=product.clock,
-                sleeper=product.sleeper,
-                random=product.random,
-                ids=product.ids,
-                verify_model=verifier if callable(verifier) else None,
-                test_hook=product.test_hook,
-                metrics=product.metrics,
-                summarizer=product.summarizer,
-                indexer=product.indexer,
-                research=product.research,
-                tool_runner=product.tool_runner,
-                safety_gate=product.safety_gate,
-                approval_store=product.approval_store,
-                audit_writer=product.audit_writer,
-                task_store=product.task_store,
-            )
-            exit_code = _run_voice_mode(product, chat, output_stream)
     except KeyboardInterrupt as error:
         exit_code = int(ExitCode.INTERRUPTED)
         output_stream.write("\n입력을 중단하고 안전하게 종료합니다.\n")
