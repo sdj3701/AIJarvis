@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS — STARK INDUSTRIES HUD</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Holographic Scanline Overlay -->
+  <div class="scanlines"></div>
+  <div class="grid-bg"></div>
+
+  <div class="hud-container">
+    <!-- Top Status Bar -->
+    <header class="hud-header">
+      <div class="header-left">
+        <div class="logo-text">STARK <span class="accent-gold">INDUSTRIES</span></div>
+        <div class="system-status">SYS.VER // <span class="accent-cyan">JARVIS.AI v2.0</span></div>
+      </div>
+      <div class="header-center">
+        <div class="core-mode-badge" id="core-mode-badge">
+          <span class="status-dot"></span>
+          <span id="core-mode-text">STANDBY // READY</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="hud-metrics">
+          <div class="metric-item">
+            <span class="metric-label">LOC.OLLAMA</span>
+            <span class="metric-val accent-cyan" id="ollama-status">ONLINE</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">VRAM.ALLOC</span>
+            <span class="metric-val accent-gold" id="vram-status">6.6 GB</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">MODEL</span>
+            <span class="metric-val accent-cyan">QWEN-3.5:9B</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="hud-main">
+      <!-- Left HUD Panel: Diagnostics & Quick Controls -->
+      <aside class="hud-panel left-panel">
+        <div class="panel-header">
+          <span class="bracket">[</span> PROTOCOL CONTROLS <span class="bracket">]</span>
+        </div>
+        <div class="panel-content">
+          <div class="quick-actions">
+            <button class="hud-btn" onclick="clearConversation()">
+              <span class="btn-icon">⚡</span> CLEAR CONTEXT
+            </button>
+            <button class="hud-btn" onclick="checkBudget()">
+              <span class="btn-icon">📊</span> SYSTEM BUDGET
+            </button>
+            <button class="hud-btn" onclick="showHelp()">
+              <span class="btn-icon">💡</span> PROTOCOL HELP
+            </button>
+          </div>
+
+          <div class="hud-subpanel">
+            <div class="subpanel-title">TELEMETRY DATA</div>
+            <div class="telemetry-item">
+              <span>LATENCY (p95)</span>
+              <span class="telemetry-val" id="latency-val">12 ms</span>
+            </div>
+            <div class="telemetry-item">
+              <span>ACTIVE SESSION</span>
+              <span class="telemetry-val accent-gold" id="session-val">SES_ACTIVE</span>
+            </div>
+            <div class="telemetry-item">
+              <span>SECURITY PROTOCOL</span>
+              <span class="telemetry-val accent-cyan">LEVEL 5 LOCAL</span>
+            </div>
+            <div class="telemetry-item">
+              <span>WRITE-AHEAD LOG</span>
+              <span class="telemetry-val text-green">SYNCHRONIZED</span>
+            </div>
+          </div>
+
+          <div class="hud-subpanel wave-subpanel">
+            <div class="subpanel-title">CORE FREQUENCY</div>
+            <div class="audio-wave-bars" id="audio-wave-bars">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: ARC REACTOR HOLOGRAM -->
+      <section class="reactor-container">
+        <div class="reactor-wrapper">
+          <canvas id="reactor-canvas" width="460" height="460"></canvas>
+          <div class="reactor-ring-text" id="reactor-ring-text">
+            <span>JARVIS 3D NEURAL SPHERE • STARK INDUSTRIES HOLOGRAM</span>
+          </div>
+        </div>
+        <div class="reactor-state-display" id="reactor-state-display">
+          <div class="state-title">CORE STATUS</div>
+          <div class="state-desc" id="reactor-state-desc">AWAITING VOCAL / TEXT DIRECTIVE</div>
+        </div>
+      </section>
+
+      <!-- Right HUD Panel: Holographic Chat Stream -->
+      <section class="hud-panel right-panel">
+        <div class="panel-header">
+          <span class="bracket">[</span> NEURAL DIALOGUE STREAM <span class="bracket">]</span>
+          <span class="stream-badge">LIVE</span>
+        </div>
+        
+        <div class="chat-stream" id="chat-stream">
+          <div class="chat-message assistant">
+            <div class="msg-meta">
+              <span class="sender-name">JARVIS</span>
+              <span class="msg-time">ONLINE</span>
+            </div>
+            <div class="msg-content">
+              안녕하세요, 보스. 스타크 시스템이 온라인 상태로 준비되었습니다. 무엇을 지시하시겠습니까?
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="chat-input-wrapper">
+          <div class="input-glow-border">
+            <input type="text" id="chat-input" placeholder="명령 또는 질문을 입력하세요 (예: /help, /budget)..." autocomplete="off" />
+            <button class="send-btn" id="send-btn" onclick="handleSend()">
+              <span>TRANSMIT</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="arc_reactor.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

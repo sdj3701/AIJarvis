@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "phase": 0,
+  "started_at": "2026-08-27T15:39:20.624+09:00",
+  "finished_at": "2026-08-27T15:39:25.178+09:00",
+  "exit_code": 0,
+  "commit": "d779152",
+  "worktree_clean": true,
+  "marker_expr": "(phase0) and not allow_network",
+  "tests": {
+    "passed": 154,
+    "failed": 0,
+    "skipped": 1,
+    "skipped_reasons": []
+  },
+  "metrics": [],
+  "unmet": [],
+  "notes": [
+    "Phase 0에는 외부 API 호출과 정량 성능 기준이 없습니다."
+  ]
+}
