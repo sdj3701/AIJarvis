@@ -300,7 +300,7 @@ confirmed/candidate → /forget → deleted
 
 > ★ **이 Phase 완료가 MVP 경계다.**
 
-**목표**: 질문 인입 시 **로컬 RAG 서고를 1차 선조회**하고, 없을 때만 **Ollama(로컬 LLM) 및 웹 검색으로 확장**한다. 새로 도출된 답변과 데이터는 **로컬 RAG 지식베이스에 자동 보관·누적**한다. 외부 텍스트는 항상 신뢰할 수 없는 데이터로 취급하고, 핵심 주장에 출처와 확인 날짜를 붙인다.
+**목표**: 외부 API 없이 **FTS5 키워드 + 로컬 벡터 임베딩 + RRF 융합의 <하이브리드 RAG>**를 구현한다. 질문 시 하이브리드 서고를 1차 선조회(0.01초)하고, 없을 때만 Ollama 및 웹 검색으로 확장하며, 새 답변을 지식베이스에 자동 누적한다.
 
 **진입 조건**: Phase 2 게이트 0 + 기억 정확도 90% 이상 · [D006](./00-start-here/DECISIONS.md)
 `decided` · `privacy.yaml` 문서 전송 등급 검토 · D012가 `pending`이면 `.md`·`.txt`만 지원
@@ -310,7 +310,7 @@ confirmed/candidate → /forget → deleted
 | P3-01 | Privacy Gate 완성 | 탐지기 컴파일, 잘못된 정규식은 시작 시 거부. `for_api`·`for_log`·`for_tts`·`for_memory_write`를 독립 경로로. Finding에 원문 미저장. **`secret`은 사용자가 승인해도 외부 전송 금지** | [DESIGN 5.3](../DESIGN.md) |
 | P3-02 | 도구 공통 계약과 레지스트리 | `ToolSpec`·`ToolResult`·`Tool`. 현재 Phase 이하 + enabled만 등록. `additionalProperties=false`·required·길이 제한 검사. LLM에는 이름·설명·인자 스키마만 노출하고 risk·capability·실제 경로는 숨김. 검색 결과는 항상 `untrusted=true` | — |
 | P3-03 | 로컬 문서 인덱싱 | 허용 확장자·최대 크기, canonical path가 docs root 아래인지 확인, `content_hash` 변경분만 재색인, chunk `start_char`/`end_char`/ordinal, 문서·chunk·FTS를 한 트랜잭션으로. PDF parser 미정이면 `.pdf`를 제거하고 "지원하지 않는 형식"을 명시 | — |
-| P3-04 | 문서 검색 및 RAG 선조회 | 1차 로컬 RAG 선조회(완결 시 즉시 응답), 부재 시 2단계 Ollama/웹 검색 확장. FTS 상위 후보, chunk 병합·토큰 예산. `local_only` 본문은 외부 프롬프트에 미포함 | — |
+| P3-04 | 하이브리드 검색과 RRF 융합 | FTS5(BM25)와 로컬 벡터 임베딩 순위를 RRF 알고리즘으로 융합. 1차 완결 시 즉시 응답, 부재 시 2단계 Ollama/웹 확장. chunk 병합·토큰 예산. `local_only` 원문은 외부 전송 차단 | — |
 | P3-05 | 웹 검색 제공자 | query를 `for_external_text(purpose="search_query")` 통과 후 전송. `SearchHit`에 title·URL·snippet·published_at·fetched_at. 요청 전 `BudgetGuard.check`, 성공 후 `record_charge`. **검색 오류를 빈 성공으로 위장 금지**. 자동 테스트는 `FakeSearchProvider`만 | — |
 | P3-06 | 안전한 fetcher | http/https만, 자격증명 URL·loopback·사설/link-local IP·`.local`·장치 스킴 차단, DNS 해석 전후 IP 모두 검사(rebinding 완화), redirect마다 재검증 최대 3회, 헤더와 누적 크기 모두 2MB, Content-Type 확인, 비본문 제거 후 `untrusted_content` 봉투 | — |
 | P3-07 | 신뢰 경계와 프롬프트 | 본문 안의 봉투 종료 태그 이스케이프, 외부 본문에서 나온 URL·경로·명령을 도구 인자로 자동 승격 금지, 현재 요청과 무관한 부작용 도구 call 거부 | [SCHEMAS 9장](../SCHEMAS.md) |
