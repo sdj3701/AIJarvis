@@ -509,6 +509,8 @@ def run_application(
             random=runtime.random,
         )
         recover_tasks(runtime.task_store, runtime.events)
+        with suppress(Exception):
+            runtime.indexer.sync()
         verifier = getattr(runtime.llm, "verify_model", None)
         chat = ChatOrchestrator(
             settings=runtime.config.settings,

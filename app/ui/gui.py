@@ -91,6 +91,10 @@ def run_gui(
             random=runtime.random,
         )
         recover_tasks(runtime.task_store, runtime.events)
+        try:
+            runtime.indexer.sync()
+        except Exception as e:
+            print(f"[JARVIS RAG SYNC] Note: {e}")
 
         verifier = getattr(runtime.llm, "verify_model", None)
         chat = ChatOrchestrator(

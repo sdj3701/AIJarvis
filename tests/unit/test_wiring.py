@@ -98,6 +98,7 @@ def test_application_runs_recovery_cli_and_normal_cleanup(runtime_config: Path) 
         "recovery.start",
         "recovery.result",
         "recovery.result",
+        "rag.index",
         "session.start",
         "user.input",
         "memory.search",
