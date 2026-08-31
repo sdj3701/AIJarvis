@@ -54,6 +54,7 @@ async function handleSend() {
   if (!text) return;
 
   chatInput.value = '';
+  resetInputHeight();
   appendMessage('USER', text, true);
 
   // 1. Trigger THINKING State
@@ -94,9 +95,28 @@ async function handleSend() {
   }
 }
 
+function autoResizeInput() {
+  chatInput.style.height = 'auto';
+  const newHeight = Math.min(chatInput.scrollHeight, 100);
+  chatInput.style.height = newHeight + 'px';
+}
+
+function resetInputHeight() {
+  chatInput.style.height = '38px';
+}
+
+chatInput.addEventListener('input', autoResizeInput);
+
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
-    handleSend();
+    if (e.shiftKey) {
+      // Shift + Enter: 줄 바꿈 허용 및 자동 높이 조절
+      setTimeout(autoResizeInput, 0);
+    } else {
+      // Enter: AI에게 질문 전송
+      e.preventDefault();
+      handleSend();
+    }
   }
 });
 

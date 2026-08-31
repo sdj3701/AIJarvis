@@ -300,8 +300,7 @@ confirmed/candidate → /forget → deleted
 
 > ★ **이 Phase 완료가 MVP 경계다.**
 
-**목표**: 모델의 기억만으로 답하지 않고 웹·로컬 문서에서 근거를 찾는다. 외부 텍스트는 항상
-신뢰할 수 없는 데이터로 취급하고, 핵심 주장에 출처와 확인 날짜를 붙인다.
+**목표**: 질문 인입 시 **로컬 RAG 서고를 1차 선조회**하고, 없을 때만 **Ollama(로컬 LLM) 및 웹 검색으로 확장**한다. 새로 도출된 답변과 데이터는 **로컬 RAG 지식베이스에 자동 보관·누적**한다. 외부 텍스트는 항상 신뢰할 수 없는 데이터로 취급하고, 핵심 주장에 출처와 확인 날짜를 붙인다.
 
 **진입 조건**: Phase 2 게이트 0 + 기억 정확도 90% 이상 · [D006](./00-start-here/DECISIONS.md)
 `decided` · `privacy.yaml` 문서 전송 등급 검토 · D012가 `pending`이면 `.md`·`.txt`만 지원
@@ -311,11 +310,11 @@ confirmed/candidate → /forget → deleted
 | P3-01 | Privacy Gate 완성 | 탐지기 컴파일, 잘못된 정규식은 시작 시 거부. `for_api`·`for_log`·`for_tts`·`for_memory_write`를 독립 경로로. Finding에 원문 미저장. **`secret`은 사용자가 승인해도 외부 전송 금지** | [DESIGN 5.3](../DESIGN.md) |
 | P3-02 | 도구 공통 계약과 레지스트리 | `ToolSpec`·`ToolResult`·`Tool`. 현재 Phase 이하 + enabled만 등록. `additionalProperties=false`·required·길이 제한 검사. LLM에는 이름·설명·인자 스키마만 노출하고 risk·capability·실제 경로는 숨김. 검색 결과는 항상 `untrusted=true` | — |
 | P3-03 | 로컬 문서 인덱싱 | 허용 확장자·최대 크기, canonical path가 docs root 아래인지 확인, `content_hash` 변경분만 재색인, chunk `start_char`/`end_char`/ordinal, 문서·chunk·FTS를 한 트랜잭션으로. PDF parser 미정이면 `.pdf`를 제거하고 "지원하지 않는 형식"을 명시 | — |
-| P3-04 | 문서 검색 | FTS 상위 후보, 과도한 chunk 병합, chunk 수·토큰 예산 적용, 결과에 파일명·상대 경로·chunk ID·문자 범위·transfer class 포함. `local_only` 본문은 외부 프롬프트에 미포함 | — |
+| P3-04 | 문서 검색 및 RAG 선조회 | 1차 로컬 RAG 선조회(완결 시 즉시 응답), 부재 시 2단계 Ollama/웹 검색 확장. FTS 상위 후보, chunk 병합·토큰 예산. `local_only` 본문은 외부 프롬프트에 미포함 | — |
 | P3-05 | 웹 검색 제공자 | query를 `for_external_text(purpose="search_query")` 통과 후 전송. `SearchHit`에 title·URL·snippet·published_at·fetched_at. 요청 전 `BudgetGuard.check`, 성공 후 `record_charge`. **검색 오류를 빈 성공으로 위장 금지**. 자동 테스트는 `FakeSearchProvider`만 | — |
 | P3-06 | 안전한 fetcher | http/https만, 자격증명 URL·loopback·사설/link-local IP·`.local`·장치 스킴 차단, DNS 해석 전후 IP 모두 검사(rebinding 완화), redirect마다 재검증 최대 3회, 헤더와 누적 크기 모두 2MB, Content-Type 확인, 비본문 제거 후 `untrusted_content` 봉투 | — |
 | P3-07 | 신뢰 경계와 프롬프트 | 본문 안의 봉투 종료 태그 이스케이프, 외부 본문에서 나온 URL·경로·명령을 도구 인자로 자동 승격 금지, 현재 요청과 무관한 부작용 도구 call 거부 | [SCHEMAS 9장](../SCHEMAS.md) |
-| P3-08 | 근거 응답 조립 | 주장마다 실제로 뒷받침하는 근거 ID. 독립 출처 2개 미만이면 `근거 부족`, 출처 충돌이면 양쪽 표시 후 `상충`. 검색 실패와 결과 0건을 구분 | — |
+| P3-08 | 근거 조립과 지식 자동 누적 | 주장마다 근거 ID, 독립 출처 2개 미만 시 `근거 부족`, 출처 충돌 시 `상충`. 새로 발견·도출된 지식은 로컬 RAG 저장소에 자동 색인·보관하여 자가 성장 체계 구축 | — |
 
 **응답 최소 형식**
 

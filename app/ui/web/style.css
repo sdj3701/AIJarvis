@@ -463,7 +463,7 @@ html, body {
 
 .input-glow-border {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   background: rgba(3, 10, 20, 0.9);
   border: 1px solid var(--cyan-neon);
   border-radius: 4px;
@@ -485,9 +485,20 @@ html, body {
   color: #fff;
   font-family: var(--font-korean);
   font-size: 0.9rem;
+  line-height: 1.45;
   padding: 8px 10px;
   user-select: text;
+  resize: none;
+  min-height: 38px;
+  max-height: 100px; /* 약 4줄 높이 제한 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
+
+#chat-input::-webkit-scrollbar { width: 4px; }
+#chat-input::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.4); border-radius: 2px; }
+#chat-input::-webkit-scrollbar-track { background: transparent; }
 
 #chat-input::placeholder { color: #497184; font-size: 0.8rem; }
 
