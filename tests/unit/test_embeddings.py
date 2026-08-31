@@ -65,3 +65,21 @@ def test_vector_store_top_k_ranking() -> None:
     assert len(results) == 2
     assert results[0].chunk_id == "chk_1"  # doc_1 should be 1st rank
     assert results[0].score > results[1].score
+
+
+def test_reciprocal_rank_fusion() -> None:
+    from app.rag.embeddings import reciprocal_rank_fusion
+
+    # Engine A (FTS): doc_1 is 1st, doc_2 is 2nd
+    # Engine B (Vector): doc_2 is 1st, doc_1 is 2nd, doc_3 is 3rd
+    fts_ranks = ["doc_1", "doc_2"]
+    vec_ranks = ["doc_2", "doc_1", "doc_3"]
+
+    fused = reciprocal_rank_fusion([fts_ranks, vec_ranks], k=60)
+    # doc_1: 1/(60+1) + 1/(60+2) = 1/61 + 1/62 = 0.016393 + 0.016129 = 0.032522
+    # doc_2: 1/(60+2) + 1/(60+1) = 0.032522
+    # doc_3: 1/(60+3) = 0.015873
+    assert len(fused) == 3
+    assert fused[2][0] == "doc_3"  # doc_3 should be lowest
+    assert fused[0][1] > fused[2][1]
+

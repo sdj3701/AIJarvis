@@ -155,3 +155,28 @@ class VectorStore:
             )
             for doc, score in scored[:top_k]
         ]
+
+
+def reciprocal_rank_fusion(
+    rankings: Sequence[Sequence[str]],
+    k: int = 60,
+) -> list[tuple[str, float]]:
+    """Combine multiple ranking lists into a unified score using RRF algorithm.
+
+    Formula:
+        RRF_Score(d) = sum_{m in models} (1.0 / (k + rank_m(d)))
+
+    Args:
+        rankings: A sequence of ranked item ID lists from different retrieval engines.
+        k: Smoothing constant to dampen high-rank advantages (standard constant = 60).
+
+    Returns:
+        Sorted list of (item_id, rrf_score) tuples in descending order of score.
+    """
+    scores: dict[str, float] = {}
+    for rank_list in rankings:
+        for rank_idx, item_id in enumerate(rank_list, start=1):
+            scores[item_id] = scores.get(item_id, 0.0) + (1.0 / (k + rank_idx))
+
+    return sorted(scores.items(), key=lambda item: item[1], reverse=True)
+

@@ -16,6 +16,11 @@ from app.core.errors import ConfigError, JarvisError
 from app.core.ids import PrefixedIdFactory
 from app.memory.migrations import configure_connection
 from app.rag.chunker import chunk_text
+from app.rag.embeddings import (
+    LocalEmbeddingEngine,
+    cosine_similarity,
+    reciprocal_rank_fusion,
+)
 from app.rag.models import IndexReport, RetrievedChunk
 
 
@@ -85,8 +90,12 @@ class DocumentIndexer:
         limit = max_results or self.settings.search.max_results
         chunk_limit = max_chunks or self.settings.max_chunks_per_answer
         fts_query = _fts_query(query)
+        embedding_engine = LocalEmbeddingEngine(dimension=512)
+        query_vec = embedding_engine.embed(query)
+
         with self._connection() as connection:
-            rows = connection.execute(
+            # 1. Lexical Search (FTS5 BM25)
+            fts_rows = connection.execute(
                 """
                 SELECT
                     dc.chunk_id,
@@ -108,14 +117,69 @@ class DocumentIndexer:
                 (fts_query, limit * 3),
             ).fetchall()
 
+            # 2. Dense Semantic Vector Search (Cosine Similarity across chunks)
+            all_chunks = connection.execute(
+                """
+                SELECT
+                    dc.chunk_id,
+                    dc.doc_id,
+                    d.path,
+                    dc.ordinal,
+                    dc.text,
+                    dc.start_char,
+                    dc.end_char,
+                    d.transfer_class
+                FROM doc_chunks dc
+                JOIN documents d ON d.doc_id = dc.doc_id
+                """
+            ).fetchall()
+
+        # Map all chunk data by chunk_id
+        chunk_map: dict[str, dict[str, Any]] = {}
+        for row in all_chunks:
+            cid = str(row["chunk_id"])
+            chunk_map[cid] = dict(row)
+
+        # FTS Rank List
+        fts_ranked_ids: list[str] = [str(r["chunk_id"]) for r in fts_rows]
+
+        # Vector Rank List (Calculate Cosine Similarity for each chunk)
+        vector_scored: list[tuple[str, float]] = []
+        for row in all_chunks:
+            cid = str(row["chunk_id"])
+            text = str(row["text"])
+            doc_vec = embedding_engine.embed(text)
+            sim = cosine_similarity(query_vec, doc_vec)
+            if sim > 0.05:  # Only consider non-trivial semantic similarity
+                vector_scored.append((cid, sim))
+
+        vector_scored.sort(key=lambda item: item[1], reverse=True)
+        vector_ranked_ids: list[str] = [cid for cid, _ in vector_scored[: limit * 3]]
+
+        # 3. Reciprocal Rank Fusion (RRF)
+        # Combine FTS5 rankings and Vector rankings with k=60
+        rankings_to_fuse: list[list[str]] = []
+        if fts_ranked_ids:
+            rankings_to_fuse.append(fts_ranked_ids)
+        if vector_ranked_ids:
+            rankings_to_fuse.append(vector_ranked_ids)
+
+        if not rankings_to_fuse:
+            return ()
+
+        fused_scores = reciprocal_rank_fusion(rankings_to_fuse, k=60)
+
         hits: list[RetrievedChunk] = []
         seen_docs: dict[str, int] = {}
-        for row in rows:
+        for chunk_id, rrf_score in fused_scores:
+            row = chunk_map.get(chunk_id)
+            if not row:
+                continue
             doc_id = str(row["doc_id"])
             if seen_docs.get(doc_id, 0) >= 2:
                 continue
             chunk = RetrievedChunk(
-                chunk_id=str(row["chunk_id"]),
+                chunk_id=chunk_id,
                 doc_id=doc_id,
                 relative_path=str(row["path"]),
                 ordinal=int(row["ordinal"]),
@@ -123,7 +187,7 @@ class DocumentIndexer:
                 start_char=int(row["start_char"]),
                 end_char=int(row["end_char"]),
                 transfer_class=row["transfer_class"],
-                score=float(row["score"]),
+                score=float(rrf_score),
             )
             hits.append(chunk)
             seen_docs[doc_id] = seen_docs.get(doc_id, 0) + 1
