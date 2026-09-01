@@ -40,7 +40,7 @@ def schema_for_definition(defn: ToolDefinition) -> dict[str, Any]:
     static = _STATIC_SCHEMAS.get(defn.name)
     if static is not None:
         return static
-    if defn.name == "open_app":
+    if defn.name in {"open_app", "close_app"}:
         apps = sorted((defn.app_map or {}).keys())
         return {
             "type": "object",

@@ -132,6 +132,21 @@ tools:
     # 앱에 넘길 수 있는 추가 인자. 비워두면 인자 없이 실행한다.
     allow_args: false
 
+  - name: close_app
+    enabled: true
+    phase: 4
+    risk: medium
+    capabilities: [proc_spawn]
+    execution_mode: in_process
+    idempotent: false
+    untrusted_output: false
+    timeout_s: 10
+    description: "허용 목록에 등록된 애플리케이션을 종료한다."
+    app_map:
+      notepad: "C:\\Windows\\System32\\notepad.exe"
+      calc: "C:\\Windows\\System32\\calc.exe"
+      explorer: "C:\\Windows\\explorer.exe"
+
   - name: open_folder
     enabled: true
     phase: 4

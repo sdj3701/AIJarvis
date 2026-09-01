@@ -174,6 +174,8 @@ class SafetyGate:
     ) -> dict[str, Any]:
         if tool_name == "open_app":
             return self._normalize_open_app(arguments, defn)
+        if tool_name == "close_app":
+            return self._normalize_close_app(arguments, defn)
         if tool_name == "open_folder":
             return self._normalize_open_folder(arguments, defn)
         if tool_name == "open_url":
@@ -196,6 +198,22 @@ class SafetyGate:
             raise PolicyDenied("이 앱에는 추가 인자를 전달할 수 없습니다.")
         exe = defn.app_map[app]
         return {"app": app, "exe_path": str(exe.resolve(strict=False))}
+
+    def _normalize_close_app(
+        self,
+        arguments: dict[str, Any],
+        defn: ToolDefinition | None,
+    ) -> dict[str, Any]:
+        app = str(arguments["app"])
+        if defn is None or not defn.app_map or app not in defn.app_map:
+            raise PolicyDenied(f"등록되지 않은 앱입니다: {app}")
+        exe = defn.app_map[app]
+        exe_name = exe.name if hasattr(exe, "name") else str(exe).split("\\")[-1]
+        return {
+            "app": app,
+            "exe_path": str(exe.resolve(strict=False)),
+            "exe_name": exe_name,
+        }
 
     def _normalize_open_folder(
         self,
@@ -300,6 +318,8 @@ class SafetyGate:
     ) -> str:
         if decision == "allow":
             return f"{tool_name} 실행을 허용합니다."
+        if tool_name == "close_app":
+            return "애플리케이션 종료 작업입니다. y/n 확인이 필요합니다."
         if tool_name == "create_file" and normalized.get("overwrite"):
             return "기존 파일을 덮어씁니다. 확인 문구 입력이 필요합니다."
         if tool_name == "open_url" and not normalized.get("listed_domain"):
@@ -311,6 +331,8 @@ class SafetyGate:
     def _build_display(self, tool_name: str, normalized: dict[str, Any]) -> str:
         if tool_name == "open_app":
             return f"앱 실행: {normalized['app']} ({normalized['exe_path']})"
+        if tool_name == "close_app":
+            return f"앱 종료: {normalized['app']} ({normalized.get('exe_name', '')})"
         if tool_name == "open_folder":
             return f"폴더 열기: {normalized['path']}"
         if tool_name == "open_url":

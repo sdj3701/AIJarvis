@@ -393,6 +393,8 @@ class ToolDefinition(StrictModel):
             self.execution_mode != "detached_allowlisted" or not self.app_map
         ):
             raise ValueError("open_app은 detached_allowlisted와 app_map이 필요합니다")
+        if self.name == "close_app" and not self.app_map:
+            raise ValueError("close_app은 app_map이 필요합니다")
         if self.name == "run_skill" and self.execution_mode != "managed_process":
             raise ValueError("run_skill은 managed_process여야 합니다")
         return self
