@@ -65,3 +65,63 @@ def test_unknown_arg_rejected() -> None:
 def test_control_chars_rejected() -> None:
     with pytest.raises(ToolArgInvalid):
         validate_tool_args(WEB_SCHEMA, {"query": "bad\x00query"})
+
+
+def test_open_and_close_app_schema_validation() -> None:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["app"],
+        "properties": {
+            "app": {"type": "string", "enum": ["calc", "notepad"]},
+        },
+    }
+    # Valid app
+    assert validate_tool_args(schema, {"app": "notepad"}) == {"app": "notepad"}
+
+    # Invalid unlisted app
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {"app": "chrome"})
+
+    # Missing required 'app'
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {})
+
+    # Unknown parameter injection
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {"app": "notepad", "extra_arg": "hack"})
+
+
+def test_create_file_schema_validation() -> None:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["root", "relative_path", "content"],
+        "properties": {
+            "root": {"type": "string", "enum": ["notes", "docs"]},
+            "relative_path": {"type": "string", "maxLength": 512},
+            "content": {"type": "string", "maxLength": 1000},
+            "overwrite": {"type": "boolean"},
+        },
+    }
+    # Valid call
+    valid_args = {
+        "root": "notes",
+        "relative_path": "meeting.txt",
+        "content": "hello world",
+        "overwrite": True,
+    }
+    assert validate_tool_args(schema, valid_args) == valid_args
+
+    # Unlisted root
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {**valid_args, "root": "system32"})
+
+    # Content length exceeded
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {**valid_args, "content": "x" * 1001})
+
+    # Non-boolean overwrite
+    with pytest.raises(ToolArgInvalid):
+        validate_tool_args(schema, {**valid_args, "overwrite": "yes"})
+
