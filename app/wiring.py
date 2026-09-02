@@ -35,6 +35,7 @@ from app.core.ids import PrefixedIdFactory, SystemIdFactory
 from app.core.recovery import recover_startup
 from app.core.test_hooks import CrashTestHook, CrashTestLLMClient
 from app.llm.base import LLMClient
+from app.llm.launcher import OllamaLauncher
 from app.llm.ollama_client import OllamaClient
 from app.memory.migrations import initialize_database
 from app.memory.store import SQLiteSessionStore
@@ -55,6 +56,7 @@ from app.telemetry.events import JsonlEventWriter
 from app.telemetry.masking import LogMasker
 from app.telemetry.metrics import SQLiteMetrics
 from app.tools.base import Tool
+from app.tools.impl.close_app import CloseAppTool
 from app.tools.impl.create_file import CreateFileTool
 from app.tools.impl.open_app import OpenAppTool
 from app.tools.impl.open_folder import OpenFolderTool
@@ -249,6 +251,8 @@ def build(
         )
     if "open_app" in enabled:
         implementations["open_app"] = OpenAppTool(spec=enabled["open_app"])
+    if "close_app" in enabled:
+        implementations["close_app"] = CloseAppTool(spec=enabled["close_app"])
     if "open_folder" in enabled:
         implementations["open_folder"] = OpenFolderTool(spec=enabled["open_folder"])
     if "open_url" in enabled:
@@ -295,8 +299,10 @@ def build(
         retrieval_settings=loaded.settings.memory.retrieval,
         key_aliases=loaded.settings.memory.key_aliases,
     )
+    ollama_launcher = OllamaLauncher(base_url=loaded.settings.llm.base_url)
+    effective_llm = runtime_llm or OllamaClient(loaded.settings.llm, launcher=ollama_launcher)
     summarizer = SessionSummarizer(
-        llm=runtime_llm or OllamaClient(loaded.settings.llm),
+        llm=effective_llm,
         store=sessions,
         gate=privacy_gate,
         ids=runtime_ids,
@@ -312,7 +318,7 @@ def build(
         secrets=secrets,
         lock=SingleInstanceLock(state_dir / "jarvis.lock"),
         memory_db=memory_db,
-        llm=runtime_llm or OllamaClient(loaded.settings.llm),
+        llm=effective_llm,
         sessions=sessions,
         budget=budget,
         sleeper=SystemSleeper(),
