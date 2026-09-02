@@ -22,6 +22,7 @@ from app.llm.base import (
     ToolSpec,
     validate_request_limits,
 )
+from app.llm.launcher import OllamaLauncher
 
 _MAX_RESPONSE_BYTES = 4 * 1024 * 1024
 _PROMPT_VERSION = re.compile(r"^<!--\s*version:\s*([^\s]+)\s*-->")
@@ -115,6 +116,7 @@ class OllamaClient:
         settings: LLMSettings,
         *,
         transport: OllamaTransport | None = None,
+        launcher: OllamaLauncher | None = None,
     ) -> None:
         if settings.base_url != OLLAMA_BASE_URL:
             raise ValueError("Ollama base URL은 고정 loopback 주소여야 합니다.")
@@ -122,6 +124,7 @@ class OllamaClient:
             raise ValueError("Ollama 클라이언트는 local_only=true만 지원합니다.")
         self._settings = settings
         self._transport = transport or UrllibOllamaTransport()
+        self._launcher = launcher
 
     def verify_model(self, *, timeout_s: float = 5.0) -> OllamaModelInfo:
         """Verify the installed tag and full manifest digest before chat starts."""
@@ -140,9 +143,22 @@ class OllamaClient:
         except OllamaTimeoutFailure as error:
             raise LLMTimeout("Ollama 모델 확인 시간이 초과되었습니다.") from error
         except OllamaConnectionFailure as error:
-            raise LLMUnavailable(
-                "Ollama에 연결할 수 없습니다. Ollama가 실행 중인지 확인하세요."
-            ) from error
+            if self._launcher and self._launcher.ensure_running():
+                try:
+                    response = self._transport.request_json(
+                        "GET",
+                        f"{OLLAMA_BASE_URL}/api/tags",
+                        None,
+                        timeout_s=timeout_s,
+                    )
+                except Exception as retry_err:
+                    raise LLMUnavailable(
+                        "Ollama에 연결할 수 없습니다. Ollama가 실행 중인지 확인하세요."
+                    ) from retry_err
+            else:
+                raise LLMUnavailable(
+                    "Ollama에 연결할 수 없습니다. Ollama가 실행 중인지 확인하세요."
+                ) from error
         except OllamaHTTPFailure as error:
             raise LLMUnavailable(
                 "Ollama 모델 목록을 확인할 수 없습니다.",
@@ -247,8 +263,11 @@ class OllamaClient:
                 self._retry_or_raise("timeout", attempt, ctx, error)
                 continue
             except OllamaConnectionFailure as error:
-                self._retry_or_raise("connection_error", attempt, ctx, error)
-                continue
+                if self._launcher and self._launcher.ensure_running():
+                    pass
+                else:
+                    self._retry_or_raise("connection_error", attempt, ctx, error)
+                    continue
             except OllamaHTTPFailure as error:
                 if 500 <= error.status <= 599:
                     self._retry_or_raise("server_error", attempt, ctx, error)
