@@ -143,11 +143,17 @@ function showHelp() {
 
 // Voice Event Handlers called from Python bridge
 window.onJarvisWake = function() {
+  const lastVoice = document.getElementById('last-voice-val');
+  if (lastVoice) lastVoice.textContent = '호출어 감지됨...';
+
   setReactorState('listening');
   startWaveAnimation();
 };
 
 window.onJarvisVoiceInput = function(text) {
+  const lastVoice = document.getElementById('last-voice-val');
+  if (lastVoice) lastVoice.textContent = text;
+
   appendMessage('VOICE', text, true);
   setReactorState('thinking');
 };
@@ -197,6 +203,13 @@ window.onMicStateChanged = function(isActive) {
       panelMicBtn.style.boxShadow = '0 0 12px rgba(255, 183, 0, 0.2)';
       if (panelMicIcon) panelMicIcon.textContent = '🔇';
     }
+  }
+
+  // 3. Telemetry Voice Sensor
+  const sensorVal = document.getElementById('voice-sensor-val');
+  if (sensorVal) {
+    sensorVal.textContent = isActive ? 'ONLINE' : 'MUTED';
+    sensorVal.className = isActive ? 'telemetry-val text-green' : 'telemetry-val accent-gold';
   }
 };
 
