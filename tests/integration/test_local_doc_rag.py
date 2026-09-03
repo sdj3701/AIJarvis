@@ -15,6 +15,7 @@ from app.orchestrator.loop import ChatOrchestrator
 from app.wiring import build
 from scripts.bootstrap import create_tree
 from tests.fakes.clock import FrozenClock
+from tests.fakes.search import FakeSearchProvider
 
 pytestmark = pytest.mark.phase3
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +47,10 @@ def test_local_doc_answer_cites_filename(tmp_path: Path) -> None:
     )
     runtime = build(config_dir, clock=FrozenClock(NOW), llm=llm)
     initialize_database(runtime.memory_db, created_at=NOW)
+    search = FakeSearchProvider()
+    web_tool = runtime.tool_runner.registry.tools.get("web_search")
+    if web_tool is not None:
+        web_tool.provider = search  # type: ignore[attr-defined]
     public = runtime.indexer.docs_root / "public"
     public.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(

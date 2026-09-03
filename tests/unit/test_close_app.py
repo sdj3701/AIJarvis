@@ -173,7 +173,14 @@ def test_close_app_safety_gate_evaluation(tmp_path: Path) -> None:
         ],
         forbidden=[],
     )
-    sandbox = Sandbox(data_root=tmp_path)
+    sandbox = Sandbox(
+        data_root=tmp_path,
+        write_roots=(),
+        read_roots=(),
+        root_map={},
+        policy=policy.sandbox,
+        deny_paths=(),
+    )
     gate = SafetyGate(
         policy=policy,
         sandbox=sandbox,
