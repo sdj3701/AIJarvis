@@ -41,13 +41,15 @@ class FakeListenerWithCommands:
         self._barge_ins = list(barge_ins or [])
         self.wakes = 0
 
-    def await_turn_start(self) -> Any:
+    def await_turn_start(self, *args: Any, **kwargs: Any) -> Any:
+        del args, kwargs
         from app.voice.controller import TurnStart
 
         self.wakes += 1
         return TurnStart("standalone", None)
 
-    def listen_for_command(self) -> Transcript:
+    def listen_for_command(self, *args: Any, **kwargs: Any) -> Transcript:
+        del args, kwargs
         if not self._commands:
             return Transcript("", "ko", 0, None)
         item = self._commands.pop(0)

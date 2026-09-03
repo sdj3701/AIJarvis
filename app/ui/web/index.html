@@ -25,8 +25,10 @@
           <span id="core-mode-text">STANDBY // READY</span>
         </div>
       </div>
-      <div class="header-right">
-        <div class="hud-metrics">
+          <div class="metric-item mic-badge" id="mic-status-item" onclick="toggleMic()" style="cursor: pointer;" title="클릭하여 마이크 음소거 토글">
+            <span class="metric-label">VOICE MIC</span>
+            <span class="metric-val text-green" id="mic-status-val">● LISTENING</span>
+          </div>
           <div class="metric-item">
             <span class="metric-label">LOC.OLLAMA</span>
             <span class="metric-val accent-cyan" id="ollama-status">ONLINE</span>

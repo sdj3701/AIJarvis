@@ -8,6 +8,7 @@ load → lock → recover → CLI or voice → ``app.stop`` → release lock.
 from __future__ import annotations
 
 import os
+import sys
 import traceback
 from collections.abc import Callable
 from contextlib import suppress
@@ -364,12 +365,12 @@ def _record_error(
         )
 
 
-def _run_voice_mode(
+def build_voice_controller(
     runtime: Runtime,
     chat: ChatOrchestrator,
-    output_stream: TextIO,
-) -> int:
-    """Assemble local STT/TTS and run the voice controller."""
+    output_stream: TextIO | None = None,
+) -> VoiceController:
+    """Assemble local STT/TTS and create a VoiceController instance."""
     voice_settings = runtime.config.settings.voice
     if not voice_settings.enabled:
         raise ConfigError("설정에서 음성 모드가 비활성화되어 있습니다.")
@@ -431,6 +432,7 @@ def _run_voice_mode(
             return create_interrupt_hotkey(hotkey_spec)
 
         interrupt_hotkey_factory = create_hotkey_monitor
+    stream = output_stream or sys.stdout
     listener = LocalVoiceListener(
         wake_stt=wake_stt,
         command_stt=command_stt,
@@ -453,9 +455,9 @@ def _run_voice_mode(
         device_label=voice_settings.stt.device,
         events=runtime.events,
         clock=runtime.clock,
-        output_stream=output_stream,
+        output_stream=stream,
     )
-    controller = VoiceController(
+    return VoiceController(
         listener=listener,
         tts=WindowsSapiTTS(
             voice_settings.tts.voice,
@@ -467,8 +469,17 @@ def _run_voice_mode(
         max_tts_chars=voice_settings.tts.max_chars,
         events=runtime.events,
         clock=runtime.clock,
-        output_stream=output_stream,
+        output_stream=stream,
     )
+
+
+def _run_voice_mode(
+    runtime: Runtime,
+    chat: ChatOrchestrator,
+    output_stream: TextIO,
+) -> int:
+    """Assemble local STT/TTS and run the voice controller."""
+    controller = build_voice_controller(runtime, chat, output_stream)
     return controller.run()
 
 

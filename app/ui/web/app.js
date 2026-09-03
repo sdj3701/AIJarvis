@@ -141,6 +141,61 @@ function showHelp() {
   appendMessage('JARVIS', '사용 가능한 프로토콜: /help(도움말), /clear(문맥 초기화), /budget(비용 현황), /bye(종료)', false);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+// Voice Event Handlers called from Python bridge
+window.onJarvisWake = function() {
+  setReactorState('listening');
+  startWaveAnimation();
+};
+
+window.onJarvisVoiceInput = function(text) {
+  appendMessage('VOICE', text, true);
+  setReactorState('thinking');
+};
+
+window.onJarvisVoiceOutput = function(text) {
+  appendMessage('JARVIS', text, false);
+  setReactorState('speaking');
+};
+
+window.onJarvisStateChange = function(state) {
+  setReactorState(state);
+  if (state === 'listening' || state === 'speaking') {
+    startWaveAnimation();
+  } else if (state === 'idle') {
+    stopWaveAnimation();
+  }
+};
+
+window.onMicStateChanged = function(isActive) {
+  const badge = document.getElementById('mic-status-val');
+  if (badge) {
+    if (isActive) {
+      badge.textContent = '● LISTENING';
+      badge.className = 'metric-val text-green';
+    } else {
+      badge.textContent = '○ MUTED';
+      badge.className = 'metric-val accent-gold';
+    }
+  }
+};
+
+async function toggleMic() {
+  if (window.pywebview && window.pywebview.api) {
+    const res = await window.pywebview.api.toggle_mic();
+    window.onMicStateChanged(!res.mic_muted);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
   chatInput.focus();
+  if (window.pywebview && window.pywebview.api) {
+    try {
+      const status = await window.pywebview.api.get_status();
+      if (!status.voice_enabled) {
+        window.onMicStateChanged(false);
+      }
+    } catch (e) {
+      console.warn('Status check deferred', e);
+    }
+  }
 });

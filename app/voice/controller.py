@@ -43,7 +43,7 @@ class VoiceEventSink(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class TurnStart:
-    mode: Literal["standalone", "inline_command"]
+    mode: Literal["standalone", "inline_command", "cancelled"]
     command: Transcript | None
 
 
@@ -60,8 +60,8 @@ class LocalVoiceListener:
         capture_policy: SpeechCapturePolicy,
         barge_in_gate_factory: Callable[[], BargeInGate] | None = None,
         interrupt_hotkey_factory: InterruptHotkeyFactory | None = None,
-        min_avg_logprob: float,
-        max_no_speech_probability: float,
+        min_avg_logprob: float | None = None,
+        max_no_speech_probability: float | None = None,
         device_label: str,
         events: VoiceEventSink,
         clock: Clock,
@@ -82,8 +82,8 @@ class LocalVoiceListener:
         self._clock = clock
         self._output = output_stream
 
-    def await_turn_start(self) -> TurnStart:
-        return self._await_wake_session()
+    def await_turn_start(self, *, stop_event: Event | None = None) -> TurnStart:
+        return self._await_wake_session(stop_event=stop_event)
 
     def wait_for_wake(self) -> Transcript:
         """Compatibility helper: wait until a wake word is accepted."""
@@ -97,8 +97,8 @@ class LocalVoiceListener:
             )
         return Transcript(self._wake_word_text, "ko", 0, None)
 
-    def listen_for_command(self) -> Transcript:
-        return self._capture_and_transcribe_command()
+    def listen_for_command(self, *, stop_event: Event | None = None) -> Transcript:
+        return self._capture_and_transcribe_command(stop_event=stop_event)
 
     def wait_for_barge_in(self, speech_done: Event, *, spoken_text: str = "") -> bool:
         """Watch wake-word results and optional hotkey while TTS is speaking."""
@@ -253,7 +253,7 @@ class LocalVoiceListener:
             )
         return detected
 
-    def _await_wake_session(self) -> TurnStart:
+    def _await_wake_session(self, *, stop_event: Event | None = None) -> TurnStart:
         recognizer = self._wake_stt.stream(phrases=WAKE_PHRASES)
         capture = SpeechCapture(self._capture_policy)
         started_ms = self._clock.monotonic_ms()
@@ -273,6 +273,8 @@ class LocalVoiceListener:
         try:
             with self._microphone_factory() as microphone:
                 while True:
+                    if stop_event is not None and stop_event.is_set():
+                        return TurnStart("cancelled", None)
                     frame = microphone.next_frame(timeout_s=0.5)
                     elapsed_ms = max(0, self._clock.monotonic_ms() - started_ms)
                     if frame is None:
@@ -415,7 +417,7 @@ class LocalVoiceListener:
         _write(self._output, f"[한 문장 명령] {command_text}")
         return TurnStart("inline_command", command)
 
-    def _capture_and_transcribe_command(self) -> Transcript:
+    def _capture_and_transcribe_command(self, *, stop_event: Event | None = None) -> Transcript:
         started_ms = self._clock.monotonic_ms()
         capture = SpeechCapture(self._capture_policy)
         self._events.emit(
@@ -431,6 +433,8 @@ class LocalVoiceListener:
         try:
             with self._microphone_factory() as microphone:
                 while not capture.finished:
+                    if stop_event is not None and stop_event.is_set():
+                        return Transcript("", self._command_stt.language, 0, None)
                     frame = microphone.next_frame(timeout_s=0.5)
                     if frame is None:
                         elapsed_ms = max(0, self._clock.monotonic_ms() - started_ms)
@@ -546,7 +550,16 @@ class VoiceController:
         self._clock = clock
         self._output = output_stream
 
-    def run(self, *, max_interactions: int | None = None) -> int:
+    def run(
+        self,
+        *,
+        max_interactions: int | None = None,
+        stop_event: Event | None = None,
+        on_wake: Callable[[], None] | None = None,
+        on_transcript: Callable[[str], None] | None = None,
+        on_response: Callable[[str], None] | None = None,
+        on_state: Callable[[str], None] | None = None,
+    ) -> int:
         interactions = 0
         wake_already_detected = False
         _write(
@@ -556,26 +569,61 @@ class VoiceController:
         )
         try:
             while max_interactions is None or interactions < max_interactions:
+                if stop_event is not None and stop_event.is_set():
+                    break
+                if on_state:
+                    on_state("idle")
                 if wake_already_detected:
                     wake_already_detected = False
+                    if on_wake:
+                        on_wake()
+                    if on_state:
+                        on_state("listening")
                     self._speak(self._acknowledgement)
-                    transcript = self._listener.listen_for_command()
+                    try:
+                        transcript = self._listener.listen_for_command(stop_event=stop_event)
+                    except TypeError:
+                        transcript = self._listener.listen_for_command()
                 else:
-                    turn = self._listener.await_turn_start()
+                    try:
+                        turn = self._listener.await_turn_start(stop_event=stop_event)
+                    except TypeError:
+                        turn = self._listener.await_turn_start()
+                    if stop_event is not None and stop_event.is_set():
+                        break
+                    if turn.mode == "cancelled":
+                        break
+                    if on_wake:
+                        on_wake()
+                    if on_state:
+                        on_state("listening")
                     if turn.mode == "inline_command" and turn.command is not None:
                         transcript = turn.command
                     else:
                         self._speak(self._acknowledgement)
-                        transcript = self._listener.listen_for_command()
+                        try:
+                            transcript = self._listener.listen_for_command(stop_event=stop_event)
+                        except TypeError:
+                            transcript = self._listener.listen_for_command()
+                if stop_event is not None and stop_event.is_set():
+                    break
                 if not transcript.text:
                     self._speak(MISHEARD_TEXT)
                     continue
                 _write(self._output, f"인식: {transcript.text}")
+                if on_transcript:
+                    on_transcript(transcript.text)
+                if on_state:
+                    on_state("thinking")
                 if normalize_spoken_command(transcript.text) in EXIT_PHRASES:
                     self._speak(EXIT_TEXT)
                     break
                 outcome = self._chat.handle_turn(transcript.text, channel="voice")
                 _write(self._output, f"Jarvis: {outcome.text}")
+                if on_response:
+                    on_response(outcome.text)
+                if on_state:
+                    on_state("speaking")
                 prepared = prepare_speech(
                     outcome.text,
                     masker=self._masker,
@@ -588,6 +636,8 @@ class VoiceController:
                 interactions += 1
             return 0
         finally:
+            if on_state:
+                on_state("idle")
             self._chat.end(reason="bye")
             self._tts.close()
 
