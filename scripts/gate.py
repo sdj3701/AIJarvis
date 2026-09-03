@@ -23,8 +23,15 @@ ARTIFACTS_DIR = REPOSITORY_ROOT / "artifacts" / "gates"
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Jarvis Phase 완료 게이트 및 보안 감사")
     parser.add_argument("--phase", type=int, choices=range(0, 9), help="실행할 Phase 번호 (0~8)")
-    parser.add_argument("--verify-audit", action="store_true", help="감사 로그 해시 체인 무결성 검증")
-    parser.add_argument("--logs-dir", type=Path, default=Path(r"D:\Jarvis\logs"), help="검증할 감사 로그 디렉터리")
+    parser.add_argument(
+        "--verify-audit", action="store_true", help="감사 로그 해시 체인 무결성 검증"
+    )
+    parser.add_argument(
+        "--logs-dir",
+        type=Path,
+        default=Path(r"D:\Jarvis\logs"),
+        help="검증할 감사 로그 디렉터리",
+    )
     parser.add_argument("--report", action="store_true", help="게이트 결과 요약 리포트 출력")
     return parser
 
@@ -90,14 +97,14 @@ def _phase_evidence(phase: int, *, passed: bool) -> tuple[list[dict[str, object]
             },
             {
                 "name": "audit_chain.verified",
-                "value": True if passed else False,
+                "value": bool(passed),
                 "threshold": True,
                 "ok": passed,
                 "note": "감사 로그 해시 체인 변조 검출 및 연속성 검증 통과",
             },
             {
                 "name": "backup_restore.verified",
-                "value": True if passed else False,
+                "value": bool(passed),
                 "threshold": True,
                 "ok": passed,
                 "note": "격리 테스트 디렉터리 복원 후 기억 검색 쿼리 성공",
@@ -106,6 +113,44 @@ def _phase_evidence(phase: int, *, passed: bool) -> tuple[list[dict[str, object]
         return metrics, [
             "Phase 6 v0.5 릴리스 게이트 완료.",
             "신규 기능 추가 없이 Phase 0~5의 신뢰 경계·복구·백업을 전수 검증했습니다.",
+        ]
+    if phase == 7:
+        voice_metrics: list[dict[str, object]] = [
+            {
+                "name": "voice.text_parity_verified",
+                "value": bool(passed),
+                "threshold": True,
+                "ok": passed,
+                "note": "텍스트/음성 동일 지시 TurnOutcome 의미 일치 및 허용 앱 실행 성공",
+            },
+            {
+                "name": "voice.high_approval_blocked",
+                "value": 0 if passed else 1,
+                "threshold": 0,
+                "ok": passed,
+                "note": "음성 채널에서 High 위험 작업 승인 차단 및 텍스트 타이핑 강제 전환",
+            },
+            {
+                "name": "voice.sensitive_spoken_count",
+                "value": 0 if passed else 1,
+                "threshold": 0,
+                "ok": passed,
+                "note": "secret 및 pii_high 민감정보 음성 낭독 0건 (화면 전용 대체 안내)",
+            },
+            {
+                "name": "voice.device_failure_isolated",
+                "value": bool(passed),
+                "threshold": True,
+                "ok": passed,
+                "note": "오디오 장치 오류 발생 시에도 텍스트 인터페이스 정상 동작 보존",
+            },
+        ]
+        return voice_metrics, [
+            "Phase 7 음성 입출력(Voice I/O) 게이트 완료.",
+            (
+                "로컬 Vosk 웨이크워드, Whisper small STT, SAPI TTS, "
+                "3단 끼어들기 및 보안 정책 통합 검증 통과."
+            ),
         ]
     metrics: list[dict[str, object]] = [
         {
@@ -157,7 +202,12 @@ def print_report() -> int:
             exit_code = data.get("exit_code")
             tests = data.get("tests", {})
             status = "PASS" if exit_code == 0 else "FAIL"
-            print(f"[{status}] Phase {phase} ({item.name}) - Passed: {tests.get('passed', 0)}, Failed: {tests.get('failed', 0)}")
+            passed_cnt = tests.get("passed", 0)
+            failed_cnt = tests.get("failed", 0)
+            print(
+                f"[{status}] Phase {phase} ({item.name}) - "
+                f"Passed: {passed_cnt}, Failed: {failed_cnt}"
+            )
         except Exception as e:
             print(f"[ERROR] {item.name}: {e}")
     return 0

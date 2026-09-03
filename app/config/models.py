@@ -85,6 +85,9 @@ class ContextSettings(StrictModel):
         return self
 
 
+LLMContextSettings = ContextSettings
+
+
 class ModelPricing(StrictModel):
     input_per_1k: NonNegativeDecimal
     output_per_1k: NonNegativeDecimal
