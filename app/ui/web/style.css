@@ -72,9 +72,10 @@ html, body {
   flex-direction: column;
   height: 100vh;
   max-height: 100vh;
-  padding: 16px 20px;
-  gap: 14px;
+  padding: 12px 16px;
+  gap: 12px;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Top Header */
@@ -83,7 +84,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 18px;
+  padding: 8px 16px;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 4px;
@@ -170,10 +171,9 @@ html, body {
 .hud-main {
   display: grid;
   grid-template-columns: 280px 1fr 440px;
-  gap: 16px;
+  gap: 14px;
   flex: 1;
   min-height: 0;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -267,6 +267,18 @@ html, body {
   color: #fff;
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
   transform: translateX(4px);
+}
+
+.hud-btn.mic-btn {
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+}
+
+.hud-btn.mic-btn:hover {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: var(--green-ok);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
 }
 
 .hud-subpanel {

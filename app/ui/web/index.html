@@ -25,6 +25,8 @@
           <span id="core-mode-text">STANDBY // READY</span>
         </div>
       </div>
+      <div class="header-right">
+        <div class="hud-metrics">
           <div class="metric-item mic-badge" id="mic-status-item" onclick="toggleMic()" style="cursor: pointer;" title="클릭하여 마이크 음소거 토글">
             <span class="metric-label">VOICE MIC</span>
             <span class="metric-val text-green" id="mic-status-val">● LISTENING</span>
@@ -54,6 +56,10 @@
         </div>
         <div class="panel-content">
           <div class="quick-actions">
+            <button class="hud-btn mic-btn" id="panel-mic-btn" onclick="toggleMic()" style="border-color: rgba(0, 255, 136, 0.6); box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);">
+              <span class="btn-icon" id="panel-mic-icon">🎙️</span>
+              <span id="panel-mic-text" style="color: var(--green-ok); font-weight: 700;">VOICE MIC: LISTENING</span>
+            </button>
             <button class="hud-btn" onclick="clearConversation()">
               <span class="btn-icon">⚡</span> CLEAR CONTEXT
             </button>

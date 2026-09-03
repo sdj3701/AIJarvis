@@ -167,14 +167,35 @@ window.onJarvisStateChange = function(state) {
 };
 
 window.onMicStateChanged = function(isActive) {
-  const badge = document.getElementById('mic-status-val');
-  if (badge) {
+  // 1. Top status bar badge
+  const headerBadge = document.getElementById('mic-status-val');
+  if (headerBadge) {
     if (isActive) {
-      badge.textContent = '● LISTENING';
-      badge.className = 'metric-val text-green';
+      headerBadge.textContent = '● LISTENING';
+      headerBadge.className = 'metric-val text-green';
     } else {
-      badge.textContent = '○ MUTED';
-      badge.className = 'metric-val accent-gold';
+      headerBadge.textContent = '○ MUTED';
+      headerBadge.className = 'metric-val accent-gold';
+    }
+  }
+
+  // 2. Left Protocol Controls panel button
+  const panelMicText = document.getElementById('panel-mic-text');
+  const panelMicBtn = document.getElementById('panel-mic-btn');
+  const panelMicIcon = document.getElementById('panel-mic-icon');
+  if (panelMicText && panelMicBtn) {
+    if (isActive) {
+      panelMicText.textContent = 'VOICE MIC: LISTENING';
+      panelMicText.style.color = 'var(--green-ok)';
+      panelMicBtn.style.borderColor = 'rgba(0, 255, 136, 0.6)';
+      panelMicBtn.style.boxShadow = '0 0 12px rgba(0, 255, 136, 0.2)';
+      if (panelMicIcon) panelMicIcon.textContent = '🎙️';
+    } else {
+      panelMicText.textContent = 'VOICE MIC: MUTED';
+      panelMicText.style.color = 'var(--gold-neon)';
+      panelMicBtn.style.borderColor = 'rgba(255, 183, 0, 0.6)';
+      panelMicBtn.style.boxShadow = '0 0 12px rgba(255, 183, 0, 0.2)';
+      if (panelMicIcon) panelMicIcon.textContent = '🔇';
     }
   }
 };
