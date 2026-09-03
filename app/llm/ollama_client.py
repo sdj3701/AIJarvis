@@ -264,10 +264,9 @@ class OllamaClient:
                 continue
             except OllamaConnectionFailure as error:
                 if self._launcher and self._launcher.ensure_running():
-                    pass
-                else:
-                    self._retry_or_raise("connection_error", attempt, ctx, error)
                     continue
+                self._retry_or_raise("connection_error", attempt, ctx, error)
+                continue
             except OllamaHTTPFailure as error:
                 if 500 <= error.status <= 599:
                     self._retry_or_raise("server_error", attempt, ctx, error)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,8 +16,9 @@ from app.orchestrator.loop import ChatOrchestrator
 from app.wiring import build
 from scripts.bootstrap import create_tree
 from tests.fakes.clock import FrozenClock
+from tests.fakes.search import FakeSearchProvider
 
-pytestmark = [pytest.mark.phase3, pytest.mark.security]
+pytestmark = [pytest.mark.phase3, pytest.mark.phase6, pytest.mark.security]
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 KST = timezone(timedelta(hours=9), name="KST")
 NOW = datetime(2026, 8, 11, 16, 0, tzinfo=KST)
@@ -46,6 +48,10 @@ def test_local_only_doc_not_sent_to_api(tmp_path: Path) -> None:
     )
     runtime = build(config_dir, clock=FrozenClock(NOW), llm=llm)
     initialize_database(runtime.memory_db, created_at=NOW)
+    search = FakeSearchProvider()
+    web_tool = runtime.tool_runner.registry.tools.get("web_search")
+    if web_tool is not None:
+        web_tool.provider = search  # type: ignore[attr-defined]
     private = runtime.indexer.docs_root / "private"
     private.mkdir(parents=True, exist_ok=True)
     (private / "secret.txt").write_text(f"secret marker {SECRET}", encoding="utf-8")
@@ -99,3 +105,29 @@ def test_external_search_query_blocks_secret(tmp_path: Path) -> None:
     )
     assert decision.text is None
     assert decision.blocked is True
+
+
+def test_backup_manifest_contains_no_secrets(tmp_path: Path) -> None:
+    from scripts.backup import create_backup, restore_backup
+
+    data_root = tmp_path / "data_root"
+    (data_root / "memory" / "raw").mkdir(parents=True, exist_ok=True)
+    (data_root / "config").mkdir(parents=True, exist_ok=True)
+
+    # Config has secret masked or dummy, raw log has secret token masked
+    (data_root / "config" / "settings.yaml").write_text("app:\n  language: ko\n", encoding="utf-8")
+    (data_root / "memory" / "raw" / "log.jsonl").write_text(
+        json.dumps({"msg": f"Bearer [REDACTED:{SECRET[:4]}...]"}) + "\n",
+        encoding="utf-8",
+    )
+
+    target_backup = tmp_path / "backups"
+    archive = create_backup(data_root, target_backup, password="test_secret_pw")
+
+    # Restore to check manifest
+    restore_target = tmp_path / "restored"
+    restore_backup(archive, restore_target, password="test_secret_pw", verify_retrieval=False)
+
+    manifest_text = (restore_target / "manifest.json").read_text(encoding="utf-8")
+    assert SECRET not in manifest_text
+

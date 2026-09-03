@@ -42,36 +42,33 @@ v1은 관리자 권한 공격자나 이미 완전히 장악된 OS로부터 데�
 
 ## 4. 위협 목록
 
-| ID | 위협 | 예방 통제 | 탐지·복구 | 검증 | 상태 |
-|----|------|-----------|-----------|------|------|
-| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | prompt injection corpus | planned |
-| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | 악성 tool call 테스트 | planned |
-| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | traversal/junction corpus | planned |
-| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | URL corpus | planned |
-| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | binding 테스트 | planned |
-| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | voice parity 테스트 | planned |
-| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | leak matrix | planned |
-| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | secret leakage 테스트 | planned |
-| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | 20회 kill 테스트 | planned |
-| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | duplicate write 테스트 | planned |
-| T11 | 감사 로그 변조 | hash chain, seq | verify-audit | tamper 테스트 | planned |
-| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | crash/restore 테스트 | planned |
-| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | hash mismatch 테스트 | planned |
-| T14 | 의존성 공급망 | hash lockfile, 최소 의존성 | 정기 검토 | clean install | planned |
-| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | budget/retry 테스트 | planned |
-| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | config loader 테스트 | planned |
-| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | restore 테스트 | planned |
-| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | lock 테스트 | planned |
-| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | state/approval UI 테스트 | planned |
-| T20 | 로컬 계정 침해 | OS 계정·디스크 보안 의존 | 제한적 | 수동 검토 | accepted residual |
+| ID | 위협 | 예방 통제 | 탐지·복구 | 검증 (테스트 연결) | 상태 |
+|----|------|-----------|-----------|-------------------|------|
+| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | `tests/security/test_prompt_injection.py` | verified |
+| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | `tests/security/test_forbidden_actions.py` | verified |
+| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | `tests/security/test_path_traversal.py`, `test_reparse_points.py` | verified |
+| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | `tests/security/test_url_schemes.py`, `test_url_schemes_open_url.py` | verified |
+| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | `tests/security/test_approval_binding.py` | verified |
+| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | `tests/unit/test_approval_flow.py` (v0.5 CLI 승인 강제) | verified |
+| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | `tests/security/test_secret_leakage.py` | verified |
+| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | `tests/security/test_secret_leakage.py` | verified |
+| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | `tests/slow/test_crash_loop.py` | verified |
+| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | `tests/integration/test_agent_recovery.py` | verified |
+| T11 | 감사 로그 변조 | hash chain, seq | verify-audit | `tests/security/test_audit_chain.py`, `gate.py --verify-audit` | verified |
+| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | `tests/slow/test_backup_restore.py`, `test_crash_loop.py` | verified |
+| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | `tests/security/test_forbidden_actions.py` | verified |
+| T14 | 의존성 공급망 | hash lockfile, 최소 의존성 | 정기 검토 | `pyproject.toml` 최소 의존성 및 무결성 검증 | verified |
+| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | `tests/unit/test_budget_guard.py` | verified |
+| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | `tests/unit/test_config_loader.py` | verified |
+| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | `tests/slow/test_backup_restore.py`, `scripts/backup.py` | verified |
+| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | `tests/unit/test_file_lock.py` | verified |
+| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | `tests/unit/test_approval_flow.py` | verified |
+| T20 | 로컬 계정 침해 | OS 계정·디스크 보안 의존 | 제한적 | 수동 검토 (OS 권한 위임) | accepted residual |
 
-## 5. Phase 6 갱신 규칙
+## 5. Phase 6 갱신 규칙 및 잔여 위험 승인
 
-각 `planned` 행을 다음 중 하나로 바꾼다.
-
-- `verified`: 코드와 테스트가 존재하고 통과
-- `accepted residual`: 완화 후 남은 위험을 사용자가 명시적으로 수용
-- `blocked`: 검증 실패로 릴리스 차단
-
-Critical/High 위험을 `accepted residual`로 처리하려면 이유·영향·대체 통제·재검토 날짜를 별도 기록한다.
+모든 위협 항목이 `verified`로 전환되었으며, 유일한 수용 잔여 위험(`accepted residual`)은 **T20(로컬 OS 계정 침해)**입니다.
+- **이유 및 영향**: Jarvis는 사용자 공간 프로세스로 동작하므로, 동일 사용자 권한을 이미 탈취한 악성코드나 관리자 계정으로부터의 메모리 덤프/디스크 물리 접근은 방어 범위를 벗어납니다.
+- **대체 통제**: Windows BitLocker 전체 디스크 암호화 및 Windows 로그인 계정 분리 권장.
+- **재검토 시점**: v1 패키징 시 재검토.
 

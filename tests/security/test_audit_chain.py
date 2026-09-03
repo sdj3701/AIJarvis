@@ -9,7 +9,7 @@ import pytest
 from app.telemetry.audit import verify_audit_chain
 from tests.helpers.phase4_app import Phase4App
 
-pytestmark = [pytest.mark.phase4, pytest.mark.security]
+pytestmark = [pytest.mark.phase4, pytest.mark.phase6, pytest.mark.security]
 
 
 def test_denied_call_is_audited(phase4_app: Phase4App) -> None:
@@ -43,3 +43,24 @@ def test_tampered_line_detected(phase4_app: Phase4App) -> None:
     ok, error = verify_audit_chain(logs)
     assert not ok
     assert error is not None
+    assert "entry_hash mismatch" in error
+
+
+def test_non_monotonic_seq_detected(phase4_app: Phase4App) -> None:
+    notes = phase4_app.data_root / "docs" / "notes"
+    notes.mkdir(parents=True, exist_ok=True)
+    phase4_app.say("/create_file notes a.md test")
+    phase4_app.say("/create_file notes b.md test")
+    logs = phase4_app.data_root / "logs"
+    files = sorted(logs.glob("audit-*.jsonl"))
+    assert files
+    lines = files[0].read_text(encoding="utf-8").splitlines()
+    assert len(lines) >= 2
+    record2 = json.loads(lines[1])
+    record2["seq"] = 1  # non-monotonic duplicate seq
+    lines[1] = json.dumps(record2, ensure_ascii=False, separators=(",", ":"))
+    files[0].write_text("\n".join(lines) + "\n", encoding="utf-8")
+    ok, error = verify_audit_chain(logs)
+    assert not ok
+    assert error is not None
+    assert "seq not monotonic" in error

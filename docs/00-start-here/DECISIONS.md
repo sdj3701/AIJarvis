@@ -12,8 +12,8 @@
 | D004 | decided | 패키지 관리 | `venv`, `pip`, hash lockfile | Phase 0 | bootstrap 문서화 |
 | D005 | decided | LLM 런타임·모델 | `Ollama` + `qwen3.5:9b` | Phase 1 | 로컬 스모크·모델 식별자 검증 |
 | D006 | decided | 검색 제공자 | DuckDuckGo (`ddgs`) | Phase 3 | FakeSearchProvider 테스트·실장치 allow_network 스모크 |
-| D007 | pending | 백업 대상 | 미정 | Phase 6 진입 전 | 별도 장치/보안 위치 경로 확정 |
-| D008 | pending | 백업 암호화 도구 | 7-Zip AES-256 또는 age | Phase 6 진입 전 | 설치·복원 자동화 방식 확정 |
+| D007 | decided | 백업 대상 | `D:\JarvisBackups` (운영 루트와 분리된 디렉터리 또는 외부 드라이브) | Phase 6 | 격리 디렉터리 복원 검증 |
+| D008 | decided | 백업 암호화 도구 | AES-256 암호화 아카이브 (키는 Windows Credential Manager `backup_key`에서 획득) | Phase 6 | 백업 생성 및 복원 자동화 통과 |
 | D009 | decided | TTS | Windows SAPI `Microsoft Heami Desktop`, rate 4 로컬 TTS | 음성 세로 기능 | 한국어 음성·약 1.5배 속도·외부 전송 0 확인 |
 | D010 | decided | 음성 호출 | opt-in 로컬 웨이크워드 `자비스`, PTT는 후속 보조 입력 | 음성 세로 기능 | `--voice`에서만 마이크 열림·호출 전 PCM 비저장 |
 | D011 | decided | 상주 시작 | autostart 기본 false | Phase 8 | 사용자 opt-in만 허용 |

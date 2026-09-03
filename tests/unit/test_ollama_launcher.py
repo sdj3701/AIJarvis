@@ -7,7 +7,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.config.models import LLMContextSettings, LLMSettings, ModelPricing
+from app.config.models import (
+    OLLAMA_BASE_URL,
+    OLLAMA_MODEL_DIGEST,
+    ContextSettings,
+    LLMSettings,
+    ModelPricing,
+)
 from app.core.context import RequestContext
 from app.core.errors import LLMUnavailable
 from app.llm.base import Message
@@ -60,8 +66,9 @@ def test_launcher_timeout_raises_llm_unavailable() -> None:
 def test_ollama_client_auto_launches_on_connection_failure() -> None:
     settings = LLMSettings(
         provider="ollama",
+        base_url=OLLAMA_BASE_URL,
         model="qwen3.5:9b",
-        model_digest="sha256:d005modeldigestplaceholder1234567890abcdef1234567890abcdef12345678",
+        model_digest=OLLAMA_MODEL_DIGEST,
         temperature=0.2,
         max_output_tokens=2048,
         timeout_s=5.0,
@@ -77,11 +84,12 @@ def test_ollama_client_auto_launches_on_connection_failure() -> None:
                 output_per_1k=Decimal("0.0"),
             )
         },
-        context=LLMContextSettings(
+        context=ContextSettings(
             max_input_tokens=14336,
             reserve_output_tokens=2048,
             memory_share=0.25,
-            history_reserve_tokens=4096,
+            history_share=0.5,
+            keep_recent_turns=3,
         ),
         retry_on=["timeout", "connection_error", "server_error"],
     )
