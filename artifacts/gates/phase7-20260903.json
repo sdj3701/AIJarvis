@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "phase": 7,
+  "started_at": "2026-09-03T15:18:12.715+09:00",
+  "finished_at": "2026-09-03T15:18:42.044+09:00",
+  "exit_code": 0,
+  "commit": "b6a0edd",
+  "worktree_clean": true,
+  "marker_expr": "(phase0 or phase1 or phase2 or phase3 or phase4 or phase5 or phase6 or phase7) and not allow_network",
+  "tests": {
+    "passed": 473,
+    "failed": 0,
+    "skipped": 1,
+    "skipped_reasons": []
+  },
+  "metrics": [
+    {
+      "name": "voice.text_parity_verified",
+      "value": true,
+      "threshold": true,
+      "ok": true,
+      "note": "텍스트/음성 동일 지시 TurnOutcome 의미 일치 및 허용 앱 실행 성공"
+    },
+    {
+      "name": "voice.high_approval_blocked",
+      "value": 0,
+      "threshold": 0,
+      "ok": true,
+      "note": "음성 채널에서 High 위험 작업 승인 차단 및 텍스트 타이핑 강제 전환"
+    },
+    {
+      "name": "voice.sensitive_spoken_count",
+      "value": 0,
+      "threshold": 0,
+      "ok": true,
+      "note": "secret 및 pii_high 민감정보 음성 낭독 0건 (화면 전용 대체 안내)"
+    },
+    {
+      "name": "voice.device_failure_isolated",
+      "value": true,
+      "threshold": true,
+      "ok": true,
+      "note": "오디오 장치 오류 발생 시에도 텍스트 인터페이스 정상 동작 보존"
+    }
+  ],
+  "unmet": [],
+  "notes": [
+    "Phase 7 음성 입출력(Voice I/O) 게이트 완료.",
+    "로컬 Vosk 웨이크워드, Whisper small STT, SAPI TTS, 3단 끼어들기 및 보안 정책 통합 검증 통과."
+  ]
+}
