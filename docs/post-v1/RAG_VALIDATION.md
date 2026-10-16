@@ -15,7 +15,7 @@ Phase 직접 회귀 488개, 실제 답변 17/17, 합성 검색 11질의 비교�
 
 현재 소스는 로컬 RAG 개인 비서다. 기업용 다중 사용자 서비스나 답변 정확도가 검증된
 상용 제품을 뜻하지 않는다. 이번 변경은 실행 환경, 실제 검색 경로 평가, 인용과 답변
-보류 판단에 집중했다. 프로토타입 `D:\Jarvis`는 사용하지 않았다.
+보류 판단에 집중했다. 프로토타입 `D:\Ai\Jarvis\data`는 사용하지 않았다.
 
 ## 기록의 범위
 
@@ -62,7 +62,7 @@ Cross-Encoder 체크섬·추론을 확인했다. CLI와 GUI는 이제 첫 문서
 Ollama 연결과 답변 모델 digest를 확인한다. 문서 DB 연결도 사용 후 명시적으로 닫는다.
 
 ```powershell
-.\.venv\Scripts\python.exe -m app.rag.doctor --config-dir D:\Jarvis-v2-dev\config --start-ollama --output results\rag-current-20261014\runtime.json
+.\.venv\Scripts\python.exe -m app.rag.doctor --config-dir D:\Ai\Jarvis\data\config --start-ollama --output results\rag-current-20261014\runtime.json
 ```
 
 `--start-ollama`를 생략하면 읽기·추론 점검만 수행한다. 모델을 자동 다운로드하거나
@@ -102,7 +102,7 @@ Ollama 연결과 답변 모델 digest를 확인한다. 문서 DB 연결도 사�
 ## 검색 평가
 
 ```powershell
-.\.venv\Scripts\python.exe -m app.rag.benchmark.service --config-dir D:\Jarvis-v2-dev\config --dataset datasets/evaluation_queries.json --output-dir results\rag-current-20261014\retrieval-final --repeats 3
+.\.venv\Scripts\python.exe -m app.rag.benchmark.service --config-dir D:\Ai\Jarvis\data\config --dataset datasets/evaluation_queries.json --output-dir results\rag-current-20261014\retrieval-final --repeats 3
 ```
 
 출력 경로는 새 디렉터리를 사용한다. 원본 DB는 읽기 전용으로 열고 `documents`, `doc_chunks`만
@@ -122,7 +122,7 @@ Ollama 연결과 답변 모델 digest를 확인한다. 문서 DB 연결도 사�
 ## 답변 평가
 
 ```powershell
-.\.venv\Scripts\python.exe -m app.rag.benchmark.answers --config-dir D:\Jarvis-v2-dev\config --dataset scripts\tests\data\rag_answers.json --output-dir results\rag-current-20261014
+.\.venv\Scripts\python.exe -m app.rag.benchmark.answers --config-dir D:\Ai\Jarvis\data\config --dataset scripts\tests\data\rag_answers.json --output-dir results\rag-current-20261014
 ```
 
 임시 데이터 루트에서 사례마다 새 문서·세션을 만들고 실제 검색, 생성, 인용 검사,

@@ -27,6 +27,11 @@ Jarvis/
 │   ├── gates/               기존 Phase 게이트 증적
 │   └── portfolio-video/     영상 결과물 (로컬 보관)
 ├── config/                  배포 가능한 설정 예제
+├── data/                    실행 설정·PDF·DB·모델·대화 기록 (Git 제외)
+│   ├── config/              현재 사용하는 설정
+│   ├── docs/                검색 대상 PDF·텍스트·노트
+│   ├── memory/              DB·대화 원본·PDF 변환 Markdown
+│   └── models/              로컬 음성·검색 재정렬 모델
 ├── assets/                  아이콘 등 정적 자산
 ├── bin/                     로컬에서 빌드하는 실행 파일
 ├── local/                   백업·로그·임시 파일 (Git 제외)
@@ -73,7 +78,8 @@ GUI 실행은 `scripts/launchers/Jarvis_UI.bat`, CLI는 `Jarvis.bat`, 음성은 
   사람이 읽는 문서 링크는 새 경로로 갱신했다. 이번 폴더 정리는 답변 정답률 재평가가 아니다.
 - Git에는 코드·개발 문서·설정 예제·평가 질문·선별한 결과만 올린다.
   실제 설정·DB·로그·모델·영상 원본·별도 체크아웃·유지보수 백업은 제외한다.
-- 기존 운영 데이터 루트와 문서 인덱스는 이동하지 않는다. 폴더 정리 때문에 재색인할 필요는 없다.
+- 실행 데이터는 사용자 요청으로 `D:\Ai\Jarvis\data`에 통합했다. 문서 ID·청크·벡터와 활성 색인 세대를 보존했다.
+  상세 내용은 [데이터 통합 기록](DATA_CONSOLIDATION.md)을 따른다.
 
 ## 변경 전후
 
@@ -89,6 +95,7 @@ GUI 실행은 `scripts/launchers/Jarvis_UI.bat`, CLI는 `Jarvis.bat`, 음성은 
 | 루트 배치 파일·PyInstaller spec | `scripts/launchers/`, `scripts/packaging/` |
 | 임시 파일·로그 | `local/tmp/`, `local/logs/` |
 | 중첩 `AIJarvis/` | 기존 위치 유지 (Git 앱 경로 호환, 상위 저장소의 Git 추적 제외) |
+| 외부 `D:\Jarvis`, `D:\Jarvis-v2-dev` | `data/`로 통합, 검증 후 이전 폴더 제거 |
 
 ### 기존 Git 앱 경로 호환
 

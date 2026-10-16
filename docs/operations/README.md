@@ -20,7 +20,7 @@ python -m app
 
 확인:
 
-- 현재 v2 개발은 `D:\Jarvis-v2-dev` 트리 생성; `D:\Jarvis` 프로토타입 데이터와 분리
+- 현재 v2 개발은 `D:\Ai\Jarvis\data` 트리 생성; `D:\Ai\Jarvis\data` 프로토타입 데이터와 분리
 - 설정 example의 최초 사본 생성
 - 기존 파일 덮어쓰기 0건
 - SQLite integrity 정상

@@ -75,7 +75,7 @@ R3 추가 계산·모드·세대 계약은 [13장](#13-rag-데이터-계약--r3-
 
 ## 2. 이벤트 로그
 
-- 경로: `D:\Jarvis\logs\events-YYYY-MM-DD.jsonl`
+- 경로: `D:\Ai\Jarvis\data\logs\events-YYYY-MM-DD.jsonl`
 - 쓰기: append + `flush` (+ `settings.logging.fsync_events`가 true면 `fsync`)
 - 모든 값은 쓰기 전에 `PrivacyGate.for_log`를 통과한다.
 
@@ -155,7 +155,7 @@ R3 추가 계산·모드·세대 계약은 [13장](#13-rag-데이터-계약--r3-
 
 ## 3. 감사 로그
 
-- 경로: `D:\Jarvis\logs\audit-YYYY-MM-DD.jsonl`
+- 경로: `D:\Ai\Jarvis\data\logs\audit-YYYY-MM-DD.jsonl`
 - 도구 실행·승인·거부만 기록한다. 일반 이벤트를 섞지 않는다(감사 대상이 희석되면 검토가 무의미해짐).
 - append-only. 수정·삭제 코드 경로를 만들지 않는다. rotation은 날짜 파일 분리로만 한다.
 
@@ -176,8 +176,8 @@ R3 추가 계산·모드·세대 계약은 [13장](#13-rag-데이터-계약--r3-
   "decision": "confirm",
   "capabilities": ["fs_write"],
   "args_hash": "9f2c...e1",
-  "args_display": "새 파일 생성: D:\\Jarvis\\docs\\notes\\2026-08-10-요약.md (2,314 bytes, 덮어쓰기 아님)",
-  "normalized_args": {"path": "D:\\Jarvis\\docs\\notes\\2026-08-10-요약.md", "overwrite": false},
+  "args_display": "새 파일 생성: D:\\Ai\\Jarvis\\data\\docs\\notes\\2026-08-10-요약.md (2,314 bytes, 덮어쓰기 아님)",
+  "normalized_args": {"path": "D:\\Ai\\Jarvis\\data\\docs\\notes\\2026-08-10-요약.md", "overwrite": false},
   "approval": {
     "ticket_id": "apv_01J8Z9N00000000000000",
     "method": "user_text",
@@ -198,7 +198,7 @@ R3 추가 계산·모드·세대 계약은 [13장](#13-rag-데이터-계약--r3-
     "ok": true,
     "error": null,
     "duration_ms": 41,
-    "changed_paths": ["D:\\Jarvis\\docs\\notes\\2026-08-10-요약.md"],
+    "changed_paths": ["D:\\Ai\\Jarvis\\data\\docs\\notes\\2026-08-10-요약.md"],
     "truncated": false,
     "exit_code": 0
   }
@@ -253,7 +253,7 @@ entry_hash = sha256( prev_hash_bytes + canonical_json(레코드 - {prev_hash, en
 
 ## 4. raw 대화 로그
 
-- 경로: `D:\Jarvis\memory\raw\<session_id>.jsonl`
+- 경로: `D:\Ai\Jarvis\data\memory\raw\<session_id>.jsonl`
 - 한 줄 = 한 턴 이벤트. 이벤트 로그와 별도로 존재하는 이유는 대화 재구성(복구·요약)에 필요한 최소 정보만 담아 빠르게 읽기 위함이다.
 
 ```json
@@ -280,7 +280,7 @@ entry_hash = sha256( prev_hash_bytes + canonical_json(레코드 - {prev_hash, en
 
 ## 5. SQLite DDL
 
-경로: `D:\Jarvis\memory\jarvis.sqlite3` · 현재 `schema_version = 1`
+경로: `D:\Ai\Jarvis\data\memory\jarvis.sqlite3` · 현재 `schema_version = 1`
 
 **전제 조건:** FTS5의 `trigram` 토크나이저는 SQLite 3.34 이상에서 지원된다. 앱 시작 시 `sqlite3.sqlite_version_info`를 확인해 미달이면 `ConfigError`로 명확히 알린다(조용히 `unicode61`로 폴백하면 한국어 부분 일치가 사실상 동작하지 않으면서 원인을 찾기 어려워진다).
 

@@ -1,5 +1,5 @@
 # 자비스 도구 정책 템플릿
-# 재구축 개발 사본 위치: D:\Jarvis-v2-dev\config\tools.yaml
+# 실행 설정 위치: D:\Ai\Jarvis\data\config\tools.yaml
 # 이 파일이 이 프로젝트 보안의 핵심이다. 여기 없는 것은 실행되지 않는다.
 #
 # 규칙
@@ -210,7 +210,7 @@ tools:
     # 예:
     # registry:
     #   - skill_name: "daily_note"
-    #     path: "D:\\Jarvis-v2-dev\\skills\\daily_note.py"
+    #     path: "D:\\Ai\\Jarvis\\data\\skills\\daily_note.py"
     #     sha256: "<파일 해시>"
     #     capabilities: [fs_write]
 

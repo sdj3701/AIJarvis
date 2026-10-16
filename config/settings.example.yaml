@@ -1,5 +1,5 @@
 # 자비스 기본 설정 템플릿
-# 재구축 개발 사본 위치: D:\Jarvis-v2-dev\config\settings.yaml
+# 실행 설정 위치: D:\Ai\Jarvis\data\config\settings.yaml
 # 스키마 규칙: SCHEMAS.md 11장 / 값의 의미: DESIGN.md
 # 로컬 Ollama에는 API 키가 필요하지 않다. 다른 시크릿도 이 파일에 적지 않는다.
 
@@ -14,8 +14,8 @@ app:
 
 paths:
   # 모든 상대 경로는 data_root 기준으로 해석된다.
-  # prototype-v1의 D:\Jarvis와 섞이지 않도록 v2 개발 중에는 별도 루트를 쓴다.
-  data_root: "D:\\Jarvis-v2-dev"
+  # 코드·개발 문서와 분리된 data 폴더에 실행 데이터를 저장한다.
+  data_root: "D:\\Ai\\Jarvis\\data"
   memory_db: "memory\\jarvis.sqlite3"
   raw_dir: "memory\\raw"
   export_dir: "memory\\export"

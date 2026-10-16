@@ -4,14 +4,15 @@ import sys
 import yaml
 
 REPO = Path(__file__).resolve().parents[2]
-ROOT = Path(r'D:\Jarvis-v2-dev\portfolio-video-20261012')
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 from scripts.bootstrap import create_tree
+from app.config.defaults import DEFAULT_CONFIG_DIR, DEFAULT_DATA_ROOT  # noqa: E402
 from app.config.loader import load_config
 
+ROOT = DEFAULT_DATA_ROOT / 'portfolio-video-20261012'
 create_tree(ROOT)
-source = Path(r'D:\Jarvis-v2-dev\config')
+source = DEFAULT_CONFIG_DIR
 settings = yaml.safe_load((source / 'settings.yaml').read_text(encoding='utf-8'))
 settings['paths']['data_root'] = str(ROOT)
 settings['voice']['enabled'] = False

@@ -268,4 +268,4 @@ semantic DB는 대화 기억과 문서 사본을 담으며 사본 실패가 주 
 임베딩 장애의 FTS 복귀, 재정렬 장애의 RRF 복귀, 일반 지식 폴백은 별개의 상태다.
 일반 폴백은 검색이 정상이고 일반 지식 질문인 경우에만 허용한다.
 기본값·복구 계약은 [DESIGN](../DESIGN.md), 현재 검증은 [구현 보고](../rag/RAG_R3_IMPLEMENTATION.md)를 따른다.
-v2 개발 경로는 `D:\Jarvis-v2-dev`이며 프로토타입 `D:\Jarvis`와 구분한다.
+v2 개발 경로는 `D:\Ai\Jarvis\data`이며 프로토타입 `D:\Ai\Jarvis\data`와 구분한다.

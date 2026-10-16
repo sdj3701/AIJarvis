@@ -9,7 +9,7 @@
 > 작성 목적: 로컬 PC에서 동작하는 자비스형 비서를 **단계적으로** 만들기 위한 상세 계획서
 > 기준 환경: Windows 10/11, **NVIDIA GeForce RTX 4070 Ti (VRAM 12GB)**
 > 전략: **로컬 모델 기반** — Ollama의 임베딩·생성 모델과 로컬 하이브리드 검색, 필요한 경우에만 웹 검색
-> 개발 데이터: **D 드라이브** (`D:\Jarvis-v2-dev`), 프로토타입 `D:\Jarvis`와 분리
+> 실행 데이터: **프로젝트 내부 `data` 폴더** (`D:\Ai\Jarvis\data`), Git 추적에서 제외
 > 개발 진입점: [`README.md`](PROJECT.md) · Phase별 구현서: [`docs/`](README.md)
 > 문서 버전: **v0.6** — 2026-10-14 RAG 재설계 및 현재 구현 상태 반영
 
@@ -189,7 +189,7 @@ Phase를 완료했다는 의미는 기능이 한 번 동작했다는 뜻이 아�
 | Input | 사용자 입력 수집 | 로컬 |
 | Orchestrator | 도구 선택·루프·한도 관리 | 로컬 |
 | LLM Brain | 이해·계획·요약·생성 | 로컬 Ollama |
-| Memory | 저장·검색·세션 요약 | D:\Jarvis-v2-dev\memory |
+| Memory | 저장·검색·세션 요약 | D:\Ai\Jarvis\data\memory |
 | Tools | 실제 행동 | 로컬 |
 | Privacy | 외부 전송 허용·마스킹·보존 정책 | 로컬 |
 | Safety | 허용/거부/승인 | 로컬 |
@@ -213,12 +213,12 @@ Phase를 완료했다는 의미는 기능이 한 번 동작했다는 뜻이 아�
 
 ## 5. 저장 구조 (D 드라이브)
 
-소스는 `D:\Ai\Jarvis`, 현재 v2 개발 데이터는 **`D:\Jarvis-v2-dev`**다(D019).
-아래 `D:\Jarvis` 트리는 초기 운영/현재 프로토타입 경로의 예시이며 v2에서 접근·변경하지 않는다.
-v2는 동일한 하위 구조를 개발 루트에 사용하고 출시 후 운영 데이터 전환은 별도 결정한다.
+소스는 `D:\Ai\Jarvis`, 현재 실행 데이터는 **`D:\Ai\Jarvis\data`**다(D025).
+아래 트리는 통합한 실행 데이터 구조다. 자동 테스트는 별도 임시 폴더를 사용한다.
+이전 운영·개발 데이터의 통합과 검증은 [통합 기록](DATA_CONSOLIDATION.md)에 정리했다.
 
 ```
-D:\Jarvis\
+D:\Ai\Jarvis\data\
 ├── config\
 │   ├── settings.yaml        # 경로, 모델, 한도
 │   ├── tools.yaml           # 허용 도구·인자·권한 화이트리스트
@@ -392,10 +392,10 @@ Summarizer가 만든 사실은 바로 확정 기억이 아니라 `candidate`로 
 
 - 경로 역할 고정
   - 소스 저장소: `D:\Ai\Jarvis`
-  - 운영 데이터: `D:\Jarvis`
+  - 운영 데이터: `D:\Ai\Jarvis\data`
 - Python venv, 의존성 관리 (`requirements.txt` 또는 `pyproject.toml`)
 - API 키 로드: 운영은 Windows Credential Manager/DPAPI 등 OS 보안 저장소 우선, `.env`는 개발용으로만 사용
-- `config/settings.yaml` (memory 경로 = `D:\Jarvis\memory`)
+- `config/settings.yaml` (memory 경로 = `D:\Ai\Jarvis\data\memory`)
 - `config/privacy.yaml` (외부 전송 허용 범위, 마스킹, 보존 기간)
 - `config/tools.yaml` 정책 로더와 기본 deny 골격
 - CLI 엔트리포인트 (`python -m app`)
@@ -626,7 +626,7 @@ Summarizer(LLM) → summary + candidate facts
   - **Low:** 자동 실행
   - **Medium:** `y/n` 확인
   - **High:** 승인 + 확인 문구 타이핑
-- 쓰기 경로 sandbox (`D:\Jarvis` + 허용 폴더)
+- 쓰기 경로 sandbox (`D:\Ai\Jarvis\data` + 허용 폴더)
 - 시크릿 필터 (API 키, 비밀번호 패턴)와 API/로그/TTS별 유출 테스트
 - 도구별 capability manifest: 파일 읽기/쓰기, 네트워크, 프로세스 실행 권한을 별도 선언
 - 감사 로그 무결성, 로그 rotation, 보존·삭제 정책
@@ -836,7 +836,7 @@ Summarizer(LLM) → summary + candidate facts
 1. 단축키로 자비스 호출
 2. “내 답변은 짧게, 출처 꼭” 기억시키기
 3. 주제 하나 웹 검색 요약
-4. 요약을 `D:\Jarvis\docs\notes\`에 저장
+4. 요약을 `D:\Ai\Jarvis\data\docs\notes\`에 저장
 5. 해당 폴더 열기
 6. 프로그램 재시작 후 말투/선호가 유지되는지 확인
 7. 음성으로 “메모장 열어줘”를 실행
@@ -903,13 +903,13 @@ Summarizer(LLM) → summary + candidate facts
 | LLM | Ollama + `qwen3.5:9b` 하나만 고정 | ☑ |
 | UI | CLI → 트레이 | ☐ |
 | 음성 호출 | `--voice` opt-in 로컬 웨이크워드 “자비스” | ☑ |
-| 기억 경로 | `D:\Jarvis\memory` | ☐ |
+| 기억 경로 | `D:\Ai\Jarvis\data\memory` | ☐ |
 | 로컬 LLM | Phase 1부터 사용, 클라우드 폴백 없음 | ☑ |
 | 웹 검색 제공자 | Phase 3에서 검색 API 1개만 선택 | ☐ |
 | 운영 시크릿 저장 | Windows 보안 저장소 | ☐ |
 | API 전송 기본값 | 명시적으로 허용된 기억·문서만 | ☐ |
 | raw 로그 보존 | 기본 90일 | ☐ |
-| 허용 쓰기 경로 | `D:\Jarvis\docs`, `D:\Jarvis\memory` 등 명시 | ☐ |
+| 허용 쓰기 경로 | `D:\Ai\Jarvis\data\docs`, `D:\Ai\Jarvis\data\memory` 등 명시 | ☐ |
 | 비용 예산 | 일/월 한도와 80% 경고 | ☐ |
 | 백업 | 암호화 위치·주기·복원 책임 확정 | ☐ |
 

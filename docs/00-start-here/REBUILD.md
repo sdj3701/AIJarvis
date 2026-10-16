@@ -16,10 +16,10 @@ v2의 작업 규칙이다. 2026-10-16부터 현재 v2 구현을 `main`으로 사
 
 ## 2. 데이터 경계
 
-- 프로토타입은 기존 `D:\Jarvis`를 사용한다.
-- v2는 개발 중 `D:\Jarvis-v2-dev`만 사용한다.
+- 현재 v2는 `D:\Ai\Jarvis\data`를 실행 데이터 루트로 사용한다(D025).
+- 기존 `D:\Jarvis`와 `D:\Jarvis-v2-dev`는 사용자 요청으로 통합했다.
 - 자동 테스트는 pytest가 만든 임시 경로만 사용한다.
-- v2가 안정화되기 전에는 프로토타입 데이터의 복사·변환·마이그레이션을 하지 않는다.
+- `data` 전체는 Git에서 제외한다. 통합 검증과 정리 내역은 [통합 기록](../DATA_CONSOLIDATION.md)에 남긴다.
 
 v2 개발 환경을 처음 준비할 때는 다음 명령을 사용한다.
 
@@ -28,8 +28,8 @@ python scripts\bootstrap.py
 python -m app
 ```
 
-두 명령의 v2 기본 경로는 각각 `D:\Jarvis-v2-dev`와
-`D:\Jarvis-v2-dev\config`다.
+두 명령의 기본 경로는 각각 `D:\Ai\Jarvis\data`와
+`D:\Ai\Jarvis\data\config`다.
 
 ## 3. 기능 하나의 작업 순서
 
@@ -59,6 +59,6 @@ python -m app
 
 - 역할, 입력, 출력, 실패 경로를 설명할 수 있다.
 - 자동 테스트와 해당 Phase 게이트가 통과한다.
-- 프로토타입 데이터 `D:\Jarvis`를 읽거나 쓰지 않는다.
+- 자동 테스트가 실제 `D:\Ai\Jarvis\data`에 쓰지 않는다.
 - 설정·스키마·운영 문서가 코드와 일치한다.
 - 작은 커밋 단위로 되돌릴 수 있다.

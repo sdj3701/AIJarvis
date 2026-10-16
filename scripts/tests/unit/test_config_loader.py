@@ -126,11 +126,11 @@ def test_example_yaml_files_load(config_dir: Path) -> None:
 # pytest가 test_loader_defaults_to_v2_dev_config_dir()을 실행해 아래 상황이 기대대로 동작하는지
 # 확인합니다.
 # 반환 타입 힌트: 별도 결과 없음(None).
-def test_loader_defaults_to_v2_dev_config_dir() -> None:
+def test_loader_defaults_to_project_data_config_dir() -> None:
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
     assert inspect.signature(load_config).parameters["config_dir"].default == DEFAULT_CONFIG_DIR
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
-    assert Path(r"D:\Jarvis-v2-dev") / "config" == DEFAULT_CONFIG_DIR
+    assert Path(r"D:\Ai\Jarvis\data") / "config" == DEFAULT_CONFIG_DIR
 
 
 # pytest가 test_missing_config_directory_reports_bootstrap()을 실행해 아래 상황이 기대대로

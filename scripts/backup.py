@@ -33,6 +33,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
 
+from app.config.defaults import DEFAULT_DATA_ROOT  # noqa: E402
 from app.core.atomic import write_atomic  # noqa: E402
 from app.core.canonical import canonical_json  # noqa: E402
 
@@ -509,7 +510,9 @@ def _parser() -> argparse.ArgumentParser:
     # subparsers.add_parser()의 반환값을 create_p에 대입합니다.
     create_p = subparsers.add_parser("create", help="암호화 백업 생성")
     # create_p.add_argument()을 호출해 작업을 수행합니다.
-    create_p.add_argument("--data-root", type=Path, default=Path(r"D:\Jarvis"), help="백업할 운영 데이터 루트")
+    create_p.add_argument(
+        "--data-root", type=Path, default=DEFAULT_DATA_ROOT, help="백업할 운영 데이터 루트"
+    )
     # create_p.add_argument()을 호출해 작업을 수행합니다.
     create_p.add_argument("--target", type=Path, default=Path(r"D:\JarvisBackups"), help="백업 저장 대상 디렉터리")
     # create_p.add_argument()을 호출해 작업을 수행합니다.

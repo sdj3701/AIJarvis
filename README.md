@@ -10,6 +10,8 @@ Windows에서 실행하는 로컬 AI 비서입니다. 문서 RAG, 근거·페이
 
 실행 코드는 `scripts/app`, 테스트는 `scripts/tests`, 개발 문서는 `docs`,
 공유 가능한 평가 결과는 `artifacts/evaluations`에 있습니다.
+실행 설정·문서·DB·모델은 같은 프로젝트의 `data` 폴더에 모으며 Git에서 제외합니다.
+[기존 데이터 통합 기록](docs/DATA_CONSOLIDATION.md)을 참고하세요.
 
 ```powershell
 python -m venv .venv

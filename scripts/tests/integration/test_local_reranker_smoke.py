@@ -6,6 +6,7 @@ from time import perf_counter
 
 import pytest
 
+from app.config.defaults import DEFAULT_DATA_ROOT
 from app.config.loader import load_config
 from app.config.models import RerankSettings, SemanticSettings
 from app.core.ids import SystemIdFactory
@@ -15,7 +16,7 @@ from app.rag.reranker import Candidate, Reranker
 from app.rag.semantic import SemanticMemory
 
 pytestmark = [pytest.mark.phase3, pytest.mark.allow_network]
-MODELS_ROOT = Path(r"D:\Jarvis-v2-dev\models")
+MODELS_ROOT = DEFAULT_DATA_ROOT / "models"
 
 
 def test_real_korean_cross_encoder_and_deadline() -> None:

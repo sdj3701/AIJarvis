@@ -34,8 +34,8 @@ Office/OCR·복잡한 PDF 레이아웃·대규모 ANN·실장치 인수는 별�
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,benchmark,rerank]"
 ollama pull embeddinggemma
-.\.venv\Scripts\python.exe scripts/setup_reranker.py --config-dir D:\Jarvis-v2-dev\config
-.\.venv\Scripts\python.exe scripts/reindex_semantic.py --config-dir D:\Jarvis-v2-dev\config
+.\.venv\Scripts\python.exe scripts/setup_reranker.py --config-dir D:\Ai\Jarvis\data\config
+.\.venv\Scripts\python.exe scripts/reindex_semantic.py --config-dir D:\Ai\Jarvis\data\config
 ```
 
 기존 설정에 `rag.semantic`이 없으면 새 기본값을 사용한다. 기존 해싱 벡터를 새 모델의

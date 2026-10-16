@@ -20,7 +20,7 @@
 | 현재 단계 | R3 구현과 자동 검증 |
 | 상태 | R3-01~07 구현·R3-08 자동 평가 적용; 실장치·릴리스 검증 별도 |
 | 다음 행동 | R3 구현 보고의 적용·실장치·릴리스 인수 확인 |
-| 프로토타입 | `main` 브랜치와 `D:\Ai\Jarvis-prototype`에 동결. v2 완료로 계산하지 않는다 |
+| 프로토타입 | 보관 브랜치와 `D:\Ai\Jarvis-prototype`에 보존. v2 완료로 계산하지 않는다 |
 
 상세 상태와 게이트 증거는 [PROGRESS.md](PROGRESS.md)에서 관리한다. 이 문서의 표는 요약이며,
 값이 어긋나면 PROGRESS가 기준이다.
@@ -154,7 +154,7 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 | OS | Windows 10/11 | 진입 불가 |
 | Python | 3.11 이상 | Phase 0 진입 차단 |
 | `D:\Ai\Jarvis` | 쓰기 가능 | Phase 0 진입 차단 |
-| `D:\Jarvis-v2-dev` | 생성 권한 + 5GB 여유 | Phase 0 진입 차단 |
+| `D:\Ai\Jarvis\data` | 생성 권한 + 5GB 여유 | Phase 0 진입 차단 |
 | NVIDIA 드라이버·CUDA | Phase 7에서만 필요 | Phase 0~6은 진행 가능 |
 
 **경로 계약**
@@ -163,8 +163,8 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 |------|------|------|
 | 소스 | `D:\Ai\Jarvis` | Git 관리 대상 |
 | 프로토타입 소스 | `D:\Ai\Jarvis-prototype` | `main` 동결본, 비교 전용 |
-| 프로토타입 데이터 | `D:\Jarvis` | v2에서 접근·변경 금지 |
-| v2 개발 데이터 | `D:\Jarvis-v2-dev` | Git 관리 금지 |
+| 프로토타입 데이터 | `D:\Ai\Jarvis\data` | v2에서 접근·변경 금지 |
+| v2 개발 데이터 | `D:\Ai\Jarvis\data` | Git 관리 금지 |
 | 개발 시크릿 | `D:\Ai\Jarvis\.env` | `dev_mode=true`에서만, Git 제외 |
 | 운영 시크릿 | Windows Credential Manager | 파일 저장 금지 |
 | 테스트 | pytest `tmp_path` | 운영 경로 접근 금지 |

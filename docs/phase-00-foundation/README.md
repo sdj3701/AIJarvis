@@ -9,9 +9,9 @@
 ## 2. 진입 조건
 
 - [착수 체크리스트](../00-start-here/README.md)를 완료했다.
-- `D:\Ai\Jarvis`, `D:\Ai\Jarvis-prototype`, `D:\Jarvis-v2-dev`의 역할을 구분했다.
+- `D:\Ai\Jarvis`, `D:\Ai\Jarvis-prototype`, `D:\Ai\Jarvis\data`의 역할을 구분했다.
 - Python 3.11+를 사용할 수 있다.
-- [결정 D001~D004](../00-start-here/DECISIONS.md)가 `decided`다.
+- [결정 D001·D003·D004·D025](../00-start-here/DECISIONS.md)가 `decided`다. 데이터 경로 D002는 D025로 대체됐다.
 
 ## 3. Phase 종료 시 동작
 
@@ -75,7 +75,7 @@ py -3.13 -m venv .venv
 1. `config/*.example.yaml`에 대응하는 Pydantic 모델을 만든다.
 2. 모든 모델에 `extra="forbid"`를 적용한다.
 3. 세 파일의 `schema_version`, 경로, 예산, 비율, `default: deny`를 검증한다.
-4. `D:\Jarvis-v2-dev\config`가 없으면 bootstrap 전이라는 명확한 `ConfigError`를 낸다.
+4. `D:\Ai\Jarvis\data\config`가 없으면 bootstrap 전이라는 명확한 `ConfigError`를 낸다.
 5. 세 설정을 정규 직렬화해 `config_hash`를 계산한다.
 
 계약: [SCHEMAS 11장](../SCHEMAS.md), [설정 템플릿](../../config)
@@ -112,7 +112,7 @@ py -3.13 -m venv .venv
 
 `bootstrap.py`는 다음 순서를 지킨다.
 
-1. `D:\Jarvis-v2-dev` 하위 `config`, `memory/raw`, `memory/export`, `docs/notes`, `skills`, `state/quarantine`, `logs`, `models`, `backups` 생성
+1. `D:\Ai\Jarvis\data` 하위 `config`, `memory/raw`, `memory/export`, `docs/notes`, `skills`, `state/quarantine`, `logs`, `models`, `backups` 생성
 2. example 설정을 운영 설정으로 최초 1회 복사
 3. 기존 설정은 덮어쓰지 않음
 4. `memory/jarvis.sqlite3` 생성

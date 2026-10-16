@@ -123,12 +123,12 @@ def test_package_is_importable() -> None:
 # 반환 타입 힌트: 별도 결과 없음(None).
 # 이 pytest 마커는 테스트 분류 또는 실행 조건을 지정합니다.
 @pytest.mark.phase0
-def test_rebuild_data_is_isolated_from_prototype() -> None:
-    """The rebuild must never use the prototype's operational root by default."""
+def test_runtime_data_uses_main_project_data_directory() -> None:
+    """The main project owns runtime data without mixing it into source folders."""
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
     assert Path(r"D:\Jarvis") == PROTOTYPE_DATA_ROOT
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
-    assert Path(r"D:\Jarvis-v2-dev") == DEFAULT_DATA_ROOT
+    assert Path(r"D:\Ai\Jarvis\data") == DEFAULT_DATA_ROOT
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
     assert DEFAULT_DATA_ROOT != PROTOTYPE_DATA_ROOT
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
@@ -210,6 +210,7 @@ def test_gitignore_hides_secrets_and_keeps_gate_evidence() -> None:
         assert required in patterns
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
     assert "/Jarvis-v2-dev/" in patterns
+    assert "/data/" in patterns
     # assert 뒤의 조건이 참인지 검사합니다. 거짓이면 AssertionError가 발생합니다.
     assert not any(
         pattern.rstrip("/") in {"artifacts", "artifacts/gates"}

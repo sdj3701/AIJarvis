@@ -37,7 +37,7 @@ Ollama 또는 임베딩 모델의 가중치를 온라인으로 재학습하는 �
 ## 저장 계약
 
 저장 경로는 `settings.paths.data_root / settings.paths.memory_db`다.
-현재 개발 환경은 `D:\Jarvis-v2-dev\memory\jarvis.sqlite3`다.
+현재 개발 환경은 `D:\Ai\Jarvis\data\memory\jarvis.sqlite3`다.
 기존 기억 DB의 records/embeddings 테이블을 임의 용도로 바꾸지 않고 다음 확장 테이블을 추가한다.
 
 | 테이블 | 필드 및 규칙 |

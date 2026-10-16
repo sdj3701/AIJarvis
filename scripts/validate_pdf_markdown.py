@@ -12,6 +12,7 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
+from app.config.defaults import DEFAULT_CONFIG_DIR
 from app.config.loader import load_config
 from app.core.ids import SystemIdFactory
 from app.memory.migrations import initialize_database
@@ -25,7 +26,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pdf", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--config", type=Path, default=Path(r"D:\Jarvis-v2-dev\config"))
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_DIR)
     parser.add_argument("--apply-runtime", action="store_true")
     args = parser.parse_args()
     output = args.output.resolve()

@@ -7,7 +7,7 @@
 | ID | 상태 | 결정 | 현재 값 | 적용 시점 | 완료 조건 |
 |----|------|------|---------|-----------|-----------|
 | D001 | decided | 소스 경로 | `D:\Ai\Jarvis` | Phase 0 | 고정 |
-| D002 | decided | 운영 데이터 경로 | `D:\Jarvis` | Phase 0 | 고정 |
+| D002 | superseded | 운영 데이터 경로 | `D:\Jarvis` | Phase 0 | D025로 대체 |
 | D003 | decided | 상태 저장 | JSONL + SQLite WAL/FULL | Phase 0 | DESIGN 9장 준수 |
 | D004 | decided | 패키지 관리 | `venv`, `pip`, hash lockfile | Phase 0 | bootstrap 문서화 |
 | D005 | decided | LLM 런타임·모델 | `Ollama` + `qwen3.5:9b` | Phase 1 | 로컬 스모크·모델 식별자 검증 |
@@ -24,9 +24,10 @@
 | D016 | decided | 한국어 STT | Vosk 호출어 + `faster-whisper small` 질문 인식 | 음성 세로 기능 | 로컬 처리·한국어 실장치 인식·낮은 신뢰도 재요청 확인 |
 | D017 | decided | 답변 중 끼어들기 마이크 게이트 | Gate A+B+WebRTC VAD, AEC·빔포밍 후순위 | 음성 세로 기능 | 스피커 에코 오발동 0·근거리 “자비스” 중단 성공률·설정 키 확정 |
 | D018 | decided | 호출 오인 방지·한 문장 호출+명령·답변 중단 핫키 | `[unk]`+접두 판정, 한 문장 Whisper, 핫키+D017 | 음성 세로 기능 | 오호출 감소·한 문장 경로·`ctrl+alt+j` 중단 |
-| D019 | decided | v2 재구축 데이터 격리 | 개발 중 `D:\Jarvis-v2-dev`, 프로토타입 `D:\Jarvis` 접근 금지 | `rebuild/v2` 전체 | 기본 bootstrap·실행·테스트 경로 분리 확인 |
+| D019 | superseded | v2 재구축 데이터 격리 | 개발 중 `D:\Jarvis-v2-dev`, 프로토타입 `D:\Jarvis` 접근 금지 | `rebuild/v2` 전체 | 사용자 통합 요청에 따라 D025로 대체 |
 | D023 | decided | RAG 책임·근거 없는 답변 정책 | 문서 준비/질문 준비/검색/생성 분리, 일반 지식과 내부 사실의 폴백 분리 | 2026-10-14 설계 | R3-01~08 구현·검증은 별도 |
 | D024 | decided (개발 기본값) | RAG 청크·문맥·갱신 | 384/48토큰, 이웃 1, 문서당 6, 검색 시 5초 확인 | R3-03~08 실제 합성 비교 | 실무 최적값은 미확정; 아래 제한 참조 |
+| D025 | decided | 실행 데이터 통합 | `D:\Ai\Jarvis\data`, 전체 Git 제외 | 2026-10-16 사용자 요청 | 이전 대화 병합·중복 파일 검증·PDF 검색 확인 후 외부 데이터 루트 제거 |
 
 ## 결정 작성 양식
 

@@ -21,7 +21,7 @@ Ollama는 임베딩과 생성 모델을 실행한다. RAG가 추가하는 것은
 
 ## 2. 범위와 파일
 
-개발 소스 `D:\Ai\Jarvis`, 개발 설정 `D:\Jarvis-v2-dev\config`를 사용한다.
+개발 소스 `D:\Ai\Jarvis`, 개발 설정 `D:\Ai\Jarvis\data\config`를 사용한다.
 UTF-8 md/txt와 텍스트 PDF를 지원한다. Office/OCR, 복잡한 PDF 레이아웃, ANN, 모델 학습은 별도다.
 질문: query_plan.py / loop.py / research.py. 색인: document_parser.py / chunker.py / generations.py / indexer.py.
 모델: local_embedder.py / reranker.py. 검사: grounding.py. 화면·음성: response_presenter.py.

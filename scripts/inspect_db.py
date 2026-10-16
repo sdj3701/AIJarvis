@@ -7,9 +7,10 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from app.config.defaults import DEFAULT_DATA_ROOT
+
 # 기본 DB 경로 설정
-DEFAULT_DB = Path(r"D:\Jarvis-v2-dev\memory\jarvis.sqlite3")
-V1_DB = Path(r"D:\Jarvis\memory\jarvis.sqlite3")
+DEFAULT_DB = DEFAULT_DATA_ROOT / "memory" / "jarvis.sqlite3"
 
 
 def inspect_db(db_path: Path) -> None:
@@ -94,7 +95,7 @@ def main() -> None:
     parser.add_argument(
         "--db",
         type=Path,
-        default=DEFAULT_DB if DEFAULT_DB.exists() else V1_DB,
+        default=DEFAULT_DB,
         help="조회할 sqlite3 파일 경로",
     )
     args = parser.parse_args()

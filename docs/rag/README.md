@@ -1,5 +1,8 @@
 # RAG 개발 문서
 
+현재 실행 데이터는 `D:\Ai\Jarvis\data`다. 아래 과거 실험 기록의 `D:\Jarvis-v2-dev` 경로는
+당시 위치이며, 현재 실행 시에는 새 경로를 사용한다. [데이터 통합 기록](../DATA_CONSOLIDATION.md).
+
 - [구조 개정 기록](RAG_REDESIGN_CHANGELOG.md)
 - [R3 구현](RAG_R3_IMPLEMENTATION.md)
 - [재귀 청크](RAG_RECURSIVE_CHUNKING.md)

@@ -40,7 +40,7 @@
 
 ## 1. 원칙
 
-1. **테스트는 운영 데이터를 절대 건드리지 않는다.** `D:\Jarvis`에 접근하는 테스트는 실패로 간주한다. 7.3절의 가드가 이를 강제한다.
+1. **테스트는 운영 데이터를 절대 건드리지 않는다.** `D:\Ai\Jarvis\data`에 접근하는 테스트는 실패로 간주한다. 7.3절의 가드가 이를 강제한다.
 2. **테스트는 네트워크를 쓰지 않는다.** 실제 LLM·검색 API 호출은 기본 차단이다. 유료 API를 실수로 호출하는 테스트는 만들지 않는다.
 3. **테스트는 결정론적이다.** 같은 커밋에서 같은 결과가 나와야 한다. 시간·난수·순서 의존이 있으면 픽스처로 고정한다.
 4. **보안 테스트는 "차단됐는가"와 "이유가 기록됐는가"를 함께 본다.** 예외만 확인하고 감사 로그를 확인하지 않는 보안 테스트는 절반만 검증한 것이다.
@@ -473,8 +473,8 @@ def test_injection_corpus(app, llm, case):
 ..\..\Windows\System32\drivers\etc\hosts
 ..%5C..%5CWindows
 ....\\....\\Windows
-D:\Jarvis\docs\..\..\..\Windows\notepad.exe
-\\?\D:\Jarvis\docs\x.md
+D:\Ai\Jarvis\data\docs\..\..\..\Windows\notepad.exe
+\\?\D:\Ai\Jarvis\data\docs\x.md
 \\localhost\C$\x.md
 CON
 NUL
@@ -874,8 +874,8 @@ PowerShell에서 하위 Python 프로세스까지 UTF-8을 적용한다.
 ```powershell
 $env:PYTHONUTF8='1'
 .\.venv\Scripts\python.exe -m pytest -m "(phase0 or phase1 or phase2 or phase3 or security) and not allow_network and not slow" --tb=short
-.\.venv\Scripts\python.exe -m app.rag.benchmark.answers --config-dir D:\Jarvis-v2-dev\config --dataset scripts/tests/data/rag_r3_answers.json --output-dir artifacts/evaluations/rag-r3-new/answers
-.\.venv\Scripts\python.exe -m app.rag.benchmark.redesign --config-dir D:\Jarvis-v2-dev\config --output-dir artifacts/evaluations/rag-r3-new/retrieval
+.\.venv\Scripts\python.exe -m app.rag.benchmark.answers --config-dir D:\Ai\Jarvis\data\config --dataset scripts/tests/data/rag_r3_answers.json --output-dir artifacts/evaluations/rag-r3-new/answers
+.\.venv\Scripts\python.exe -m app.rag.benchmark.redesign --config-dir D:\Ai\Jarvis\data\config --output-dir artifacts/evaluations/rag-r3-new/retrieval
 ```
 
 새 출력 디렉터리를 사용한다. 실제 모델 평가에는 Ollama와 설치된 모델이 필요하다.

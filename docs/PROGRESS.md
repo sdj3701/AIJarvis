@@ -3,8 +3,8 @@
 현재 상태와 검증 증거를 기록한다. 상세 요구는 [PLAN](PLAN.md), 실행 순서는
 [Phase 3](phase-03-research/README.md), 전체 지도는 [개발 흐름](DEVELOPMENT_FLOW.md)을 따른다.
 
-> 마지막 정리: 2026-10-16 — v2 폴더 정리·main 전환
-> 브랜치: `main`; 개발 데이터: `D:\Jarvis-v2-dev`
+> 마지막 정리: 2026-10-16 — v2 main 전환·프로젝트 내부 데이터 통합
+> 브랜치: `main`; 실행 데이터: `D:\Ai\Jarvis\data`
 > 현재 작업: R3-01~07 구현·검증, R3-08 자동 평가·문서 적용
 > 남은 인수: 실장치 UI/음성·정식 릴리스; [구현 보고](rag/RAG_R3_IMPLEMENTATION.md)
 
@@ -17,7 +17,9 @@ RG-ANSWER-QUALITY: `implemented_verified`. 재귀 34청크/기존 벡터를 유�
 완전 정답이 60→82개(+22%p), 인용 178건 위치 오류 0건, 회귀 568개 통과다. 남은 일부 답변 5개와
 불필요한 보류 10개, 범위 밖 mypy 오류 7개를 기록했다. [변경·검증·제한](rag/RAG_ANSWER_QUALITY.md).
 
-REPO-LAYOUT: 문서는 docs, 실행 코드는 scripts/app, 테스트는 scripts/tests, 평가 결과는 artifacts/evaluations로 이동했다. Python app 모듈명과 운영 데이터 위치는 유지한다. 전체 테스트 812개 통과(외부 환경 5개 제외), 패키지·런처·문서 검증 완료. 기존 Ruff 52개 및 mypy 7개는 별도 잔여 항목이다. [폴더·검증·main 전환](REPOSITORY_LAYOUT.md).
+REPO-LAYOUT: 문서는 docs, 실행 코드는 scripts/app, 테스트는 scripts/tests, 평가 결과는 artifacts/evaluations로 이동했다. Python app 모듈명은 유지한다. 전체 테스트 812개 통과(외부 환경 5개 제외), 패키지·런처·문서 검증 완료. 기존 Ruff 52개 및 mypy 7개는 별도 잔여 항목이다. [폴더·검증·main 전환](REPOSITORY_LAYOUT.md).
+
+DATA-CONSOLIDATION: 사용자 요청으로 두 외부 데이터 루트를 `data`에 통합했다. 대화 45개·문서 21개·청크 54개를 보존하고 기존 두 폴더를 휴지통으로 옮겼다. 설정·초기화 등 62개 테스트와 PDF 검색 3건을 통과했다. [통합 내역](DATA_CONSOLIDATION.md).
 
 ## 1. 상태 값
 

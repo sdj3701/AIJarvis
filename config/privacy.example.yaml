@@ -1,5 +1,5 @@
 # 자비스 프라이버시·전송 정책 템플릿
-# 재구축 개발 사본 위치: D:\Jarvis-v2-dev\config\privacy.yaml
+# 실행 설정 위치: D:\Ai\Jarvis\data\config\privacy.yaml
 #
 # 이 파일은 네 개의 독립된 경로를 각각 통제한다 (PLAN 9.4절).
 #   api          : 외부 LLM/검색 API로 나가는 내용
@@ -189,7 +189,7 @@ deletion:
 backup:
   enabled: true
   # backups\ 는 staging 전용. 실제 사본은 아래 target으로 옮긴다.
-  staging_dir: "D:\\Jarvis-v2-dev\\backups"
+  staging_dir: "D:\\Ai\\Jarvis\\data\\backups"
   target: "<외부 드라이브 또는 별도 보안 위치 경로>"
   encryption: aes256            # 7z AES-256 또는 age
   # 암호는 파일에 적지 않는다. Windows 자격 증명 관리자에서 읽는다.

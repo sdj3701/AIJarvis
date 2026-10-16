@@ -18,8 +18,8 @@
 이 파일은 Jarvis를 구현할 때 **가장 먼저 읽는 문서**다. 아래 순서를 지키면 다른 대화나 구두 설명 없이 개발을 이어갈 수 있다.
 
 > 현재 기본 브랜치는 `main`이며 v2 구현을 기준으로 한다. 현재 작업 트리에는 대화·문서 RAG·로컬 임베딩·재정렬이 구현되어 있다.
-> 기존 프로토타입은 `main`과 `D:\Ai\Jarvis-prototype`에 동결되어 있다.
-> v2 개발 데이터는 `D:\Jarvis-v2-dev`만 사용한다. 작업 규칙은
+> 기존 프로토타입은 보관 브랜치와 `D:\Ai\Jarvis-prototype`에 남아 있다.
+> 현재 실행 데이터는 `D:\Ai\Jarvis\data`에 통합했다. 작업 규칙은
 > [v2 재구축 안내](00-start-here/REBUILD.md)를 먼저 확인한다.
 
 ## 1. 처음 시작하는 순서
@@ -35,7 +35,7 @@
 
 현재 진행 상태: [개발 진행 현황](PROGRESS.md)
 
-프로토타입과 동작을 비교할 때는 `D:\Ai\Jarvis-prototype`만 실행한다. v2 코드와 `D:\Jarvis`를 섞지 않는다.
+프로토타입 소스는 비교 자료로만 사용한다. 실행·문서 검색·대화 저장은 현재 v2와 `data` 폴더를 사용한다.
 
 Phase 0 준비·실행 명령:
 
@@ -102,9 +102,8 @@ python -m app
 ## 5. 고정된 프로젝트 경계
 
 - 소스 저장소: `D:\Ai\Jarvis`
-- 프로토타입 데이터: `D:\Jarvis` (v2에서 접근 금지)
-- v2 개발 데이터: `D:\Jarvis-v2-dev`
-- v2 출시 후 운영 데이터: 별도 마이그레이션 승인 전까지 미변경
+- 통합 실행 데이터: `D:\Ai\Jarvis\data` (Git 제외)
+- 이전 두 데이터 루트는 통합 검증 후 제거했다. [통합 기록](DATA_CONSOLIDATION.md) 참조
 - 테스트 데이터: pytest의 `tmp_path` 아래 임시 루트
 - 운영 시크릿: Windows Credential Manager
 - 개발용 `.env`: `D:\Ai\Jarvis\.env`, `dev_mode=true`에서만 허용
@@ -146,7 +145,7 @@ Vector Search, SQLite FTS5(BM25), Hybrid RRF가 같은 쿼리·top-k로 검색�
 
 ```powershell
 pip install -e ".[benchmark]"
-python -m app.rag.benchmark --config-dir D:\Jarvis-v2-dev\config
+python -m app.rag.benchmark --config-dir D:\Ai\Jarvis\data\config
 ```
 
 실행 전 [evaluation_queries.json](../datasets/evaluation_queries.json)의 문서 ID와 쿼리를 실제 코퍼스에

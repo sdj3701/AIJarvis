@@ -26,6 +26,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
 
+from app.config.defaults import DEFAULT_DATA_ROOT  # noqa: E402
 from app.core.atomic import write_atomic  # noqa: E402
 from app.core.clock import KST  # noqa: E402
 
@@ -48,7 +49,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--logs-dir",
         type=Path,
-        default=Path(r"D:\Jarvis\logs"),
+        default=DEFAULT_DATA_ROOT / "logs",
         help="검증할 감사 로그 디렉터리",
     )
     # parser.add_argument()을 호출해 작업을 수행합니다.
