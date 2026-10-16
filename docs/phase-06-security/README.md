@@ -9,7 +9,7 @@
 ## 2. 진입 조건
 
 - Phase 0~5 게이트 종료 코드 0
-- `tests/data/tasks_eval.jsonl` 50건 준비
+- `scripts/tests/data/tasks_eval.jsonl` 50건 준비
 - [D007·D008](../00-start-here/DECISIONS.md) 확정
 - 실제 백업 대상은 `D:\Jarvis`와 다른 물리 장치 또는 별도 보안 위치
 - `run_skill`은 아직 disabled
@@ -18,8 +18,8 @@
 
 ```text
 scripts/{gate.py,backup.py}
-tests/security/{test_audit_chain.py,test_secret_leakage.py,test_forbidden_actions.py}
-tests/slow/{test_demo_loop.py,test_backup_restore.py}
+scripts/tests/security/{test_audit_chain.py,test_secret_leakage.py,test_forbidden_actions.py}
+scripts/tests/slow/{test_demo_loop.py,test_backup_restore.py}
 docs/reference/THREAT_MODEL.md
 docs/operations/README.md
 ```

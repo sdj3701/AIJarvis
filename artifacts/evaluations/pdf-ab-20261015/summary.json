@@ -1,0 +1,46 @@
+{
+  "fixed": {
+    "runs": 24,
+    "answer_pass": 12,
+    "positive_runs": 22,
+    "retrieval_at_3": 18,
+    "retrieval_at_6": 18,
+    "reference_ok": 10,
+    "page_ok": 11,
+    "article_visible": 0,
+    "all_evidence_pass": 10,
+    "all_display_pass": 0,
+    "median_seconds": 5.017470400000093,
+    "reasons": {
+      "passed": 11,
+      "insufficient": 6,
+      "invalid_citation": 4,
+      "unsupported_claim": 1,
+      "unsupported_number": 2
+    },
+    "wrong_asserted": 1,
+    "unnecessary_abstentions": 11
+  },
+  "recursive": {
+    "runs": 24,
+    "answer_pass": 16,
+    "positive_runs": 22,
+    "retrieval_at_3": 22,
+    "retrieval_at_6": 22,
+    "reference_ok": 14,
+    "page_ok": 15,
+    "article_visible": 0,
+    "all_evidence_pass": 14,
+    "all_display_pass": 0,
+    "median_seconds": 4.790645699999914,
+    "reasons": {
+      "passed": 15,
+      "invalid_citation": 4,
+      "unsupported_number": 2,
+      "insufficient": 2,
+      "unsupported_claim": 1
+    },
+    "wrong_asserted": 1,
+    "unnecessary_abstentions": 7
+  }
+}

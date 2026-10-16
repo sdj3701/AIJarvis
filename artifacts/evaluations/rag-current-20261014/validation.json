@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-14",
+  "phase_0_to_3": {
+    "command": ".venv/Scripts/python.exe -m pytest -m '(phase0 or phase1 or phase2 or phase3) and not allow_network' --tb=short",
+    "passed": 408,
+    "deselected": 282,
+    "duration_s": 63.81
+  },
+  "presentation_voice_rulebook": {
+    "passed": 21,
+    "note": "Separate focused run; may overlap phase tests, do not add counts"
+  },
+  "live_local_models": {
+    "passed": 4,
+    "files": [
+      "tests/integration/test_local_embeddings_smoke.py",
+      "tests/integration/test_local_reranker_smoke.py"
+    ]
+  },
+  "ruff": {
+    "result": "passed",
+    "scope": "Files changed for this RAG work"
+  },
+  "mypy": {
+    "result": "failed",
+    "errors": 7,
+    "files": [
+      "app/voice/controller.py",
+      "app/ui/gui.py"
+    ],
+    "note": "Errors in existing voice/UI typing; no RAG errors in full app check"
+  },
+  "formal_gate": {
+    "command": "python scripts/gate.py --phase 3",
+    "result": "blocked",
+    "reason": "Pre-existing uncommitted working-tree changes; equivalent pytest marker was run directly"
+  },
+  "packaged_executable_rebuilt": false
+}

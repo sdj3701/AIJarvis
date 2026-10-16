@@ -1,0 +1,856 @@
+{
+  "schema_version": 1,
+  "dataset_sha256": "206865795aa12fc336254943000d8edf1ef88765fee663cca92ba71e91f18333",
+  "source_sha256": {
+    "app/rag/indexer.py": "81c867edd67021eac49adad32291b225032f70c4334475d3cc8fc8e1c584cd72",
+    "app/rag/semantic.py": "708e8db4db3370d9364100e8cbbc9fc642eefdd4ae890ee80fe64652ded2242f",
+    "app/rag/reranker.py": "526842c018247026c2581864f1861861cd83a2d949e0a01b714a84436edc2826",
+    "app/rag/generations.py": "29aa9263943a39c8fbdc175b5a963bdac03da3cd3df53a2bae62e2596787d4a1",
+    "app/rag/chunker.py": "e911099fae127a115fd3c6c379371eab3448b220af6ac9d09b5becd97c8fb2a0",
+    "app/orchestrator/query_plan.py": "cc9d88e35d706bba5bba4a1114e4b3205cec13d014cb0108bb770e09fbee3943",
+    "app/orchestrator/response_presenter.py": "e9ba19d181371c18b651d5087af17fdd8573c16770548880ac74110a79b22350",
+    "app/config/models.py": "603a565bca39fbded2c578a2e4712936d6a2389d873c73dd31ccf42f42739fa9",
+    "app/rag/grounding.py": "0058dab0603cf4da0867540bff72fe44c0661fc885f8898d0adca46f76b29a73",
+    "app/rag/local_embedder.py": "4e550b23661b7f4a0545fe6a3f7f972117dd36ac09a0db9c3b205b9049d6fb89",
+    "app/orchestrator/loop.py": "3f357a7c9d5e802e708734b8553c93cb433628e8f48eee9e1088d60fef158395",
+    "app/orchestrator/research.py": "8783b6c50ede10f68903e789f4dafff336b910dbb9a07aa420a476ed5064e77f",
+    "app/orchestrator/prompt.py": "d8b05154aee57783004bc8a0d111895c7eb0ba4f32605808bea9bb831a082afc",
+    "app/orchestrator/envelope.py": "15c49b49e5e8e827e96d29a72e5ae208ae3639abb142a54356f3afa4bcfa82fa",
+    "app/llm/ollama_client.py": "7a9ea9e873b2a7a6fc107d56042e3fd0eedd7755d711ab60c24ba130e8c433ed",
+    "app/rag/benchmark/service.py": "6b8e9a5acfa8056e77c3f4ca5bf55718dfcc6bad5bf876594a15bc32f47a00c1",
+    "app/rag/benchmark/answers.py": "c3f01f6c60fe52f3b683e2d75f685ea83f4f69b733a09f2c01cf47ec8715c9dc",
+    "app/rag/benchmark/redesign.py": "b1f90167a352af3e0ed18da5bb9deff775f93ba48ebea65f88fc1f807120e0dc",
+    "app/orchestrator/prompts/system_tools.md": "779549d27e79372c77e7f378ceab15b4f53cdd82596728963a4dac0489b230e3",
+    "app/orchestrator/prompts/response_rulebook.md": "96c08db2865284dd28a82a2fa1356f753136c97c0ee4a548e30fa346e060cef7"
+  },
+  "queries": [
+    {
+      "id": "token_stress",
+      "query": "정밀 점검 확인 번호는 무엇인가요?",
+      "relevant": [
+        "token_stress.md"
+      ]
+    },
+    {
+      "id": "leave_exact",
+      "query": "우리 회사 연차 신청은 며칠 전에 해야 하나요?",
+      "relevant": [
+        "leave_exact/leave.md",
+        "leave_exact/leave.md"
+      ]
+    },
+    {
+      "id": "leave_paraphrase",
+      "query": "사내 규정상 다음 주에 쉬려면 언제까지 신청해야 하나요?",
+      "relevant": [
+        "leave_paraphrase/leave.md",
+        "leave_paraphrase/leave.md"
+      ]
+    },
+    {
+      "id": "expense",
+      "query": "사내 출장 식비 한도는 얼마인가요?",
+      "relevant": [
+        "expense/expense.md",
+        "expense/expense.md"
+      ]
+    },
+    {
+      "id": "remote_condition",
+      "query": "우리 회사 재택근무는 누구의 승인이 필요한가요?",
+      "relevant": [
+        "remote_condition/remote.md",
+        "remote_condition/remote.md"
+      ]
+    },
+    {
+      "id": "negative_policy",
+      "query": "사내 규정상 고객 자료를 개인 이메일로 보내도 되나요?",
+      "relevant": [
+        "negative_policy/security.md",
+        "negative_policy/security.md"
+      ]
+    },
+    {
+      "id": "hours",
+      "query": "사내 IT 지원센터의 평일 운영 시간은?",
+      "relevant": [
+        "hours/support.md",
+        "hours/support.md"
+      ]
+    },
+    {
+      "id": "injection",
+      "query": "사내 문서에 따르면 연차 신청 기한은?",
+      "relevant": [
+        "injection/leave.md",
+        "injection/leave.md"
+      ]
+    },
+    {
+      "id": "followup_leave",
+      "query": "우리 회사 연차 신청은 며칠 전에 해야 하나요? / 그럼 어디에서 신청해?",
+      "relevant": [
+        "followup_leave/leave.md",
+        "followup_leave/leave.md"
+      ]
+    },
+    {
+      "id": "long_tail",
+      "query": "사내 비상 복구 확인 코드는 무엇인가요?",
+      "relevant": [
+        "long_tail/recovery.md",
+        "long_tail/recovery.md"
+      ]
+    },
+    {
+      "id": "derived_leave_sum",
+      "query": "내가 쓸 수 있는 연차의 기본분과 이월분을 합하면 총 며칠인가요?",
+      "relevant": [
+        "derived_leave_sum/balance.md",
+        "derived_leave_sum/balance.md"
+      ]
+    }
+  ],
+  "chunk_sweep": [
+    {
+      "token_cap": 256,
+      "chunks": 72,
+      "max_measured_tokens": 253,
+      "build_ms": 9234.09040000115,
+      "hit_at_1": 0.8181818181818182,
+      "hit_at_5": 1.0,
+      "records": [
+        {
+          "id": "token_stress",
+          "paths": [
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 1781.7537000009906
+        },
+        {
+          "id": "leave_exact",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "leave_paraphrase/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 240.937100003066
+        },
+        {
+          "id": "leave_paraphrase",
+          "paths": [
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 424.31280000164406
+        },
+        {
+          "id": "expense",
+          "paths": [
+            "expense/expense.md",
+            "leave_paraphrase/food.md",
+            "derived_leave_sum/balance.md",
+            "injection/leave.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 336.6310999990674
+        },
+        {
+          "id": "remote_condition",
+          "paths": [
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 153.49770000466378
+        },
+        {
+          "id": "negative_policy",
+          "paths": [
+            "negative_policy/security.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 138.1353000033414
+        },
+        {
+          "id": "hours",
+          "paths": [
+            "hours/support.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 303.3644000024651
+        },
+        {
+          "id": "injection",
+          "paths": [
+            "injection/leave.md",
+            "leave_exact/leave.md",
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 347.0259999958216
+        },
+        {
+          "id": "followup_leave",
+          "paths": [
+            "leave_exact/leave.md",
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 226.68049999629147
+        },
+        {
+          "id": "long_tail",
+          "paths": [
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 292.7867999969749
+        },
+        {
+          "id": "derived_leave_sum",
+          "paths": [
+            "derived_leave_sum/balance.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 201.38679999945452
+        }
+      ]
+    },
+    {
+      "token_cap": 384,
+      "chunks": 69,
+      "max_measured_tokens": 384,
+      "build_ms": 4402.512200002093,
+      "hit_at_1": 0.8181818181818182,
+      "hit_at_5": 1.0,
+      "records": [
+        {
+          "id": "token_stress",
+          "paths": [
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 1533.149200004118
+        },
+        {
+          "id": "leave_exact",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "leave_paraphrase/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 71.86290000390727
+        },
+        {
+          "id": "leave_paraphrase",
+          "paths": [
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 209.27719999599503
+        },
+        {
+          "id": "expense",
+          "paths": [
+            "expense/expense.md",
+            "leave_paraphrase/food.md",
+            "derived_leave_sum/balance.md",
+            "injection/leave.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 210.60739999666112
+        },
+        {
+          "id": "remote_condition",
+          "paths": [
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 4.576399995130487
+        },
+        {
+          "id": "negative_policy",
+          "paths": [
+            "negative_policy/security.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 3.685899995616637
+        },
+        {
+          "id": "hours",
+          "paths": [
+            "hours/support.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 163.5256000008667
+        },
+        {
+          "id": "injection",
+          "paths": [
+            "injection/leave.md",
+            "leave_exact/leave.md",
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 169.8839999953634
+        },
+        {
+          "id": "followup_leave",
+          "paths": [
+            "leave_exact/leave.md",
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 90.73000000353204
+        },
+        {
+          "id": "long_tail",
+          "paths": [
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 188.10159999702591
+        },
+        {
+          "id": "derived_leave_sum",
+          "paths": [
+            "derived_leave_sum/balance.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 92.77759999531554
+        }
+      ]
+    },
+    {
+      "token_cap": 512,
+      "chunks": 67,
+      "max_measured_tokens": 504,
+      "build_ms": 3095.0207999994745,
+      "hit_at_1": 0.8181818181818182,
+      "hit_at_5": 1.0,
+      "records": [
+        {
+          "id": "token_stress",
+          "paths": [
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "token_stress.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "token_stress.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 2008.3900000026915
+        },
+        {
+          "id": "leave_exact",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "leave_paraphrase/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 71.08240000525257
+        },
+        {
+          "id": "leave_paraphrase",
+          "paths": [
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 238.5288000004948
+        },
+        {
+          "id": "expense",
+          "paths": [
+            "expense/expense.md",
+            "leave_paraphrase/food.md",
+            "derived_leave_sum/balance.md",
+            "injection/leave.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 211.09789999900386
+        },
+        {
+          "id": "remote_condition",
+          "paths": [
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 3.299699994386174
+        },
+        {
+          "id": "negative_policy",
+          "paths": [
+            "negative_policy/security.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 2.9680000006919727
+        },
+        {
+          "id": "hours",
+          "paths": [
+            "hours/support.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 173.87630000303034
+        },
+        {
+          "id": "injection",
+          "paths": [
+            "injection/leave.md",
+            "leave_exact/leave.md",
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "derived_leave_sum/balance.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 205.47030000307132
+        },
+        {
+          "id": "followup_leave",
+          "paths": [
+            "leave_exact/leave.md",
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true,
+          "latency_ms": 59.89419999968959
+        },
+        {
+          "id": "long_tail",
+          "paths": [
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 194.127099995967
+        },
+        {
+          "id": "derived_leave_sum",
+          "paths": [
+            "derived_leave_sum/balance.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true,
+          "latency_ms": 76.11420000466751
+        }
+      ]
+    }
+  ],
+  "embedding_ablation": [
+    {
+      "input_format": "raw-v1",
+      "records": [
+        {
+          "id": "token_stress",
+          "paths": [
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "leave_exact",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true
+        },
+        {
+          "id": "leave_paraphrase",
+          "paths": [
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "expense",
+          "paths": [
+            "expense/expense.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md",
+            "derived_leave_sum/balance.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "remote_condition",
+          "paths": [
+            "remote_condition/remote.md",
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "negative_policy",
+          "paths": [
+            "negative_policy/security.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "hours",
+          "paths": [
+            "hours/support.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "injection",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true
+        },
+        {
+          "id": "followup_leave",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "long_tail",
+          "paths": [
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "derived_leave_sum",
+          "paths": [
+            "derived_leave_sum/balance.md",
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "leave_exact/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        }
+      ],
+      "hit_at_1": 0.8181818181818182,
+      "hit_at_5": 1.0
+    },
+    {
+      "input_format": "search-v1",
+      "records": [
+        {
+          "id": "token_stress",
+          "paths": [
+            "token_stress.md",
+            "token_stress.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "leave_exact",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true
+        },
+        {
+          "id": "leave_paraphrase",
+          "paths": [
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "leave_exact/leave.md",
+            "followup_leave/leave.md",
+            "remote_condition/remote.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "expense",
+          "paths": [
+            "expense/expense.md",
+            "remote_condition/remote.md",
+            "injection/leave.md",
+            "leave_paraphrase/food.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "remote_condition",
+          "paths": [
+            "remote_condition/remote.md",
+            "leave_paraphrase/leave.md",
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "injection/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "negative_policy",
+          "paths": [
+            "negative_policy/security.md",
+            "remote_condition/remote.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "hours",
+          "paths": [
+            "hours/support.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "injection",
+          "paths": [
+            "leave_exact/leave.md",
+            "followup_leave/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": false,
+          "hit_at_5": true
+        },
+        {
+          "id": "followup_leave",
+          "paths": [
+            "followup_leave/leave.md",
+            "leave_exact/leave.md",
+            "leave_paraphrase/leave.md",
+            "injection/leave.md",
+            "derived_leave_sum/balance.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "long_tail",
+          "paths": [
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md",
+            "long_tail/recovery.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        },
+        {
+          "id": "derived_leave_sum",
+          "paths": [
+            "derived_leave_sum/balance.md",
+            "injection/leave.md",
+            "leave_paraphrase/leave.md",
+            "leave_exact/leave.md",
+            "followup_leave/leave.md"
+          ],
+          "hit_at_1": true,
+          "hit_at_5": true
+        }
+      ],
+      "hit_at_1": 0.8181818181818182,
+      "hit_at_5": 1.0
+    }
+  ],
+  "limitations": "Small synthetic sample; duplicate policy wording; not a tuning optimum. Chunk sweep changes token cap only; raw/role ablation uses identical 384-token chunks and filename titles (not heading hierarchy).",
+  "model_identity": "embeddinggemma:85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1:search-v1:tokenizer-model:l2:768",
+  "complete": true
+}

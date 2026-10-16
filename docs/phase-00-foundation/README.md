@@ -31,19 +31,19 @@ requirements.lock
 .env.example
 scripts/bootstrap.py
 scripts/gate.py
-app/__init__.py
-app/__main__.py
-app/cli.py
-app/wiring.py
-app/config/{models.py,loader.py,secrets.py}
-app/core/{clock.py,ids.py,context.py,atomic.py,canonical.py,errors.py,recovery.py}
-app/telemetry/{events.py,masking.py}
-app/ui/single_instance.py
-app/memory/{schema.sql,migrations.py}
-tests/unit/test_{config_loader,atomic,canonical_hash,masking,single_instance}.py
+scripts/app/__init__.py
+scripts/app/__main__.py
+scripts/app/cli.py
+scripts/app/wiring.py
+scripts/app/config/{models.py,loader.py,secrets.py}
+scripts/app/core/{clock.py,ids.py,context.py,atomic.py,canonical.py,errors.py,recovery.py}
+scripts/app/telemetry/{events.py,masking.py}
+scripts/app/ui/single_instance.py
+scripts/app/memory/{schema.sql,migrations.py}
+scripts/tests/unit/test_{config_loader,atomic,canonical_hash,masking,single_instance}.py
 ```
 
-전체 목표 구조는 [DESIGN 2장](../../DESIGN.md)을 따른다. 이 목록 밖의 Phase 1+ 모듈은 만들지 않는다.
+전체 목표 구조는 [DESIGN 2장](../DESIGN.md)을 따른다. 이 목록 밖의 Phase 1+ 모듈은 만들지 않는다.
 
 ## 5. 구현 순서
 
@@ -67,7 +67,7 @@ py -3.13 -m venv .venv
 ```powershell
 .\.venv\Scripts\python.exe -m pytest --collect-only
 .\.venv\Scripts\python.exe -m ruff check .
-.\.venv\Scripts\python.exe -m mypy app
+.\.venv\Scripts\python.exe -m mypy
 ```
 
 ### P0-02 설정 모델과 로더
@@ -78,7 +78,7 @@ py -3.13 -m venv .venv
 4. `D:\Jarvis-v2-dev\config`가 없으면 bootstrap 전이라는 명확한 `ConfigError`를 낸다.
 5. 세 설정을 정규 직렬화해 `config_hash`를 계산한다.
 
-계약: [SCHEMAS 11장](../../SCHEMAS.md), [설정 템플릿](../../config)
+계약: [SCHEMAS 11장](../SCHEMAS.md), [설정 템플릿](../../config)
 
 필수 테스트:
 
@@ -103,7 +103,7 @@ py -3.13 -m venv .venv
 1. `Clock`, `Sleeper`, `RandomSource`와 운영·테스트 구현을 작성한다.
 2. `<prefix>_<ULID>` ID 생성기를 작성한다.
 3. `RequestContext`와 `CancelToken`을 정의한다.
-4. [DESIGN 6장](../../DESIGN.md)의 예외 계층과 종료 코드를 구현한다.
+4. [DESIGN 6장](../DESIGN.md)의 예외 계층과 종료 코드를 구현한다.
 5. `canonical_json`과 도구명 포함 `args_hash`를 작성한다.
 
 모듈 내부에서 현재 시간·난수·전역 설정을 직접 읽지 않는다.
@@ -116,7 +116,7 @@ py -3.13 -m venv .venv
 2. example 설정을 운영 설정으로 최초 1회 복사
 3. 기존 설정은 덮어쓰지 않음
 4. `memory/jarvis.sqlite3` 생성
-5. [SCHEMAS 5장](../../SCHEMAS.md)의 DDL 적용 및 `meta.schema_version=1` 기록
+5. [SCHEMAS 5장](../SCHEMAS.md)의 DDL 적용 및 `meta.schema_version=1` 기록
 6. 쓰기 권한·잔여 용량 확인
 7. 수행/건너뜀/실패 항목을 요약
 
@@ -132,7 +132,7 @@ DDL은 문서에서 아직 실행 검증된 적이 없다. 이 작업에서 다�
 
 ### P0-06 이벤트·마스킹
 
-1. [SCHEMAS 2.1](../../SCHEMAS.md)의 이벤트 봉투를 구현한다.
+1. [SCHEMAS 2.1](../SCHEMAS.md)의 이벤트 봉투를 구현한다.
 2. append → flush → 설정에 따라 fsync 순서로 JSONL을 쓴다.
 3. 기록 전 `PrivacyGate.for_log`에 해당하는 마스킹 함수를 통과시킨다.
 4. 최소 `app.start`, `app.stop`, `error`, `recovery.start`, `recovery.result` 이벤트를 지원한다.
@@ -146,7 +146,7 @@ DDL은 문서에서 아직 실행 검증된 적이 없다. 이 작업에서 다�
 4. 두 번째 인스턴스는 사용자 메시지와 종료 코드 1로 끝냄
 5. 모든 복구 결과를 이벤트로 기록
 
-계약: [DESIGN 11장](../../DESIGN.md)
+계약: [DESIGN 11장](../DESIGN.md)
 
 ### P0-08 CLI와 조립
 

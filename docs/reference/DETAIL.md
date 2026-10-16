@@ -1,6 +1,6 @@
 # 세부 개발문서 — 참조 문서 모음
 
-> 이 폴더의 [README.md](./README.md)와 그 아래 6개 문서를 배경·이유·주의점까지 풀어 쓴
+> 이 폴더의 [README.md](README.md)와 그 아래 6개 문서를 배경·이유·주의점까지 풀어 쓴
 > 세부 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 추적표·위협 모델·음성 기준값의
 > 단일 기준은 원문이며, 내용이 어긋나면 원문을 따른다.
 >
@@ -15,12 +15,12 @@ Phase 전체가 공통으로 참조하는 문서 모음이다. 게임으로 치�
 
 | 문서 | 게임 개발에서 같은 것 | 언제 보나 |
 |------|----------------------|-----------|
-| [TRACEABILITY.md](./TRACEABILITY.md) | 요구사항 추적 매트릭스 | 기능 추가·삭제할 때 |
-| [DOCUMENTATION_RULES.md](./DOCUMENTATION_RULES.md) | 문서 관리 규칙 | 문서 고칠 때마다 |
-| [THREAT_MODEL.md](./THREAT_MODEL.md) | 치팅 시나리오 목록 | Phase 6, 새 기능 검토 |
-| [VOICE_STT.md](./VOICE_STT.md) | 오디오 시스템 운영 가이드 | 음성 튜닝할 때 |
-| [VOICE_BARGE_IN_GATE.md](./VOICE_BARGE_IN_GATE.md) | 노이즈 게이트 설계서 | 끼어들기 문제 생길 때 |
-| [VOICE_WAKE_COMMAND_UX.md](./VOICE_WAKE_COMMAND_UX.md) | UX 개선 제안서 | 호출 오인 문제 생길 때 |
+| [TRACEABILITY.md](TRACEABILITY.md) | 요구사항 추적 매트릭스 | 기능 추가·삭제할 때 |
+| [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md) | 문서 관리 규칙 | 문서 고칠 때마다 |
+| [THREAT_MODEL.md](THREAT_MODEL.md) | 치팅 시나리오 목록 | Phase 6, 새 기능 검토 |
+| [VOICE_STT.md](VOICE_STT.md) | 오디오 시스템 운영 가이드 | 음성 튜닝할 때 |
+| [VOICE_BARGE_IN_GATE.md](VOICE_BARGE_IN_GATE.md) | 노이즈 게이트 설계서 | 끼어들기 문제 생길 때 |
+| [VOICE_WAKE_COMMAND_UX.md](VOICE_WAKE_COMMAND_UX.md) | UX 개선 제안서 | 호출 오인 문제 생길 때 |
 
 ## 3. TRACEABILITY.md — 요구사항 추적표
 
@@ -197,10 +197,19 @@ AEC와 빔포밍을 미룬 이유가 기술적으로 명확히 적혀 있다.
 
 ## 7. 원문에서 볼 곳
 
-- [reference README](./README.md) — 문서 목록
-- [요구사항 추적표](./TRACEABILITY.md) — R01~R26 전체
-- [문서 변경 규칙](./DOCUMENTATION_RULES.md) — 기준 문서 표와 금지 사항
-- [위협 모델](./THREAT_MODEL.md) — T01~T20 전체
-- [한국어 STT 운영 가이드](./VOICE_STT.md) — 임계값과 실장치 점검
-- [답변 중 마이크 게이트](./VOICE_BARGE_IN_GATE.md) — 게이트 설계 상세
-- [호출·한 문장 명령 UX](./VOICE_WAKE_COMMAND_UX.md) — P1~P4 문제와 해결
+- [reference README](README.md) — 문서 목록
+- [요구사항 추적표](TRACEABILITY.md) — R01~R26 전체
+- [문서 변경 규칙](DOCUMENTATION_RULES.md) — 기준 문서 표와 금지 사항
+- [위협 모델](THREAT_MODEL.md) — T01~T20 전체
+- [한국어 STT 운영 가이드](VOICE_STT.md) — 임계값과 실장치 점검
+- [답변 중 마이크 게이트](VOICE_BARGE_IN_GATE.md) — 게이트 설계 상세
+- [호출·한 문장 명령 UX](VOICE_WAKE_COMMAND_UX.md) — P1~P4 문제와 해결
+
+
+## RAG 문서 상태 읽기 (2026-10-14)
+
+[문서 변경 규칙](DOCUMENTATION_RULES.md)은 현재 구현·미구현 설계·과거 측정을 분리한다.
+R3-01~08은 적용한 개선 작업이고 RG-01~08은 그 검증 사례다. 실장치 인수는 별도로 남긴다. 추적표의 MISSING은
+작업이 끝나지 않았다는 표시다. 기존 테스트가 통과했다고 지우지 않는다.
+문서의 논리 필드는 코드 타입이나 DB 열이 실제로 추가됐다는 뜻이 아니다.
+실제 코드·검증 변경은 [R3 구현 보고](../rag/RAG_R3_IMPLEMENTATION.md), 설계 개정 이력은 [개정 기록](../rag/RAG_REDESIGN_CHANGELOG.md)에서 확인한다.

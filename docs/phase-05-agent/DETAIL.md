@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 5 멀티스텝 에이전트
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -234,7 +234,7 @@ python scripts\gate.py --phase 5
 
 ## 9. 원문에서 볼 곳
 
-- [Phase 5 README](./README.md) — 작업 ID별 상세와 필수 테스트
-- [DESIGN 5.7](../../DESIGN.md) — 오케스트레이터 루프
-- [DESIGN 13장](../../DESIGN.md) — Task·체크포인트·복구
-- [SCHEMAS 5장](../../SCHEMAS.md) — tasks / task_steps 스키마
+- [Phase 5 README](README.md) — 작업 ID별 상세와 필수 테스트
+- [DESIGN 5.7](../DESIGN.md) — 오케스트레이터 루프
+- [DESIGN 13장](../DESIGN.md) — Task·체크포인트·복구
+- [SCHEMAS 5장](../SCHEMAS.md) — tasks / task_steps 스키마

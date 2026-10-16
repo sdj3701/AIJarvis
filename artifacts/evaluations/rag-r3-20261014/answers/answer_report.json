@@ -1,0 +1,721 @@
+{
+  "scope": "R3 synthetic regression v1: original twelve cases plus follow-up, long Korean documents, cited arithmetic and ungrounded general/unknown questions. Not a production accuracy estimate.",
+  "complete": true,
+  "source_sha256": {
+    "app/rag/indexer.py": "b7b8e83d341a7d9ebfe90722f404d52ae2487e1ad4dd106efbf4a34d0da6a7db",
+    "app/rag/semantic.py": "5cae20d49c917173b09405a3d3cc684cd47d854c46d38e3afeb83205febbddf3",
+    "app/rag/reranker.py": "526842c018247026c2581864f1861861cd83a2d949e0a01b714a84436edc2826",
+    "app/rag/generations.py": "9e46676872d025403eba4846faef14f2db04aa7a49a233455c099d0c98c1158c",
+    "app/rag/chunker.py": "5c9885cf626ab3378a4c8049dbccaeb54dcd057bc668141e2bced0acd2f24954",
+    "app/orchestrator/query_plan.py": "0010d57e1b9c32f8bbf6cbfd1edb10462f04da441a6f4b9f37e4d4a105bb5ca4",
+    "app/orchestrator/response_presenter.py": "e9ba19d181371c18b651d5087af17fdd8573c16770548880ac74110a79b22350",
+    "app/config/models.py": "603a565bca39fbded2c578a2e4712936d6a2389d873c73dd31ccf42f42739fa9",
+    "app/rag/grounding.py": "c5a02065691ff875c45be390c9783318f561627b6165b42241492f23d4fc7456",
+    "app/rag/local_embedder.py": "7af822cadcd4393017c30c588990972e7fbe2e5f9cb69d39e20ce6c3522da210",
+    "app/orchestrator/loop.py": "c11b0a2c8542c4628ece00954827431bec485ae9367e74e0659bd40d7eedf797",
+    "app/orchestrator/research.py": "8783b6c50ede10f68903e789f4dafff336b910dbb9a07aa420a476ed5064e77f",
+    "app/orchestrator/prompt.py": "d8b05154aee57783004bc8a0d111895c7eb0ba4f32605808bea9bb831a082afc",
+    "app/orchestrator/envelope.py": "15c49b49e5e8e827e96d29a72e5ae208ae3639abb142a54356f3afa4bcfa82fa",
+    "app/llm/ollama_client.py": "3ffdcbf11ca55ff460819d50d7f0726e41e46273dfd89cf9f32fb9a040d50f9d",
+    "app/rag/benchmark/service.py": "6b8e9a5acfa8056e77c3f4ca5bf55718dfcc6bad5bf876594a15bc32f47a00c1",
+    "app/rag/benchmark/answers.py": "f246256579ae1425ed6839c570147c669d63330f11db4bfa11f4fdea5d26585d",
+    "app/orchestrator/prompts/system_tools.md": "779549d27e79372c77e7f378ceab15b4f53cdd82596728963a4dac0489b230e3",
+    "app/orchestrator/prompts/response_rulebook.md": "96c08db2865284dd28a82a2fa1356f753136c97c0ee4a548e30fa346e060cef7"
+  },
+  "dataset_cases": 17,
+  "requested_cases": 17,
+  "dataset_sha256": "206865795aa12fc336254943000d8edf1ef88765fee663cca92ba71e91f18333",
+  "llm_model": "qwen3.5:9b",
+  "llm_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "settings": {
+    "chunk_max_tokens": 384,
+    "chunk_overlap_tokens": 48,
+    "refresh_interval_s": 5.0,
+    "max_chunks_per_document": 6,
+    "neighbor_chunks": 1,
+    "rerank": {
+      "enabled": true,
+      "candidate_count": 24,
+      "batch_size": 4,
+      "max_length": 512,
+      "cpu_threads": 2,
+      "timeout_s": 10.0
+    },
+    "semantic": {
+      "enabled": true,
+      "model": "embeddinggemma",
+      "timeout_s": 30.0,
+      "conversations_enabled": true,
+      "conversation_top_k": 3,
+      "conversation_context_chars": 2400,
+      "retention_days": 90,
+      "min_similarity": 0.3
+    },
+    "chunk_chars": 1200,
+    "chunk_overlap_chars": 150,
+    "max_chunks_per_answer": 6,
+    "max_file_bytes": 10485760,
+    "supported_extensions": [
+      ".md",
+      ".txt"
+    ],
+    "rrf_k": 60,
+    "fetch": {
+      "max_bytes": 2097152,
+      "max_redirects": 3,
+      "timeout_s": 15.0,
+      "allowed_content_types": [
+        "text/html",
+        "text/plain",
+        "text/markdown",
+        "application/json"
+      ]
+    },
+    "search": {
+      "provider": "duckduckgo",
+      "max_results": 5,
+      "require_min_sources": 2,
+      "cost_per_request": "0.00"
+    }
+  },
+  "records": [
+    {
+      "id": "leave_exact",
+      "kind": "answerable",
+      "query": "우리 회사 연차 신청은 며칠 전에 해야 하나요?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "연차는 사용하기 3 일 전에 인사 포털에서 신청해야 합니다. [1]\n\n근거:\n[1] leave.md#chunk=chk_01M4WZV5M7XFDHJSZY17TBQD8N\n인용: 연차 신청 규정\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZV58FQK2QQVSP9NMX4SYQ",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [
+        "leave.md#chunk=chk_01M4WZV5M7XFDHJSZY17TBQD8N"
+      ],
+      "latency_ms": 8195.555400001467,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"연차는 사용하기 3 일 전에 인사 포털에서 신청해야 합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"연차 신청 규정\\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2130,
+      "output_tokens": 115,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "leave_paraphrase",
+      "kind": "answerable",
+      "query": "사내 규정상 다음 주에 쉬려면 언제까지 신청해야 하나요?",
+      "expected_status": "근거 확인",
+      "status": "근거 부족",
+      "reason": "unsupported_claim",
+      "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nleave.md#chunk=chk_01M4WZVEDFPJF63GW9QT9Y953K\n\n상태: 근거 부족",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZVDVQG2PYEVE1DEHYWSDY",
+        "lexical_candidates": 0,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [],
+      "latency_ms": 3702.212399999553,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"연차를 사용하기 3 일 전에 인사 포털에서 신청해야 합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"휴가 규정\\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[false],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2134,
+      "output_tokens": 114,
+      "status_ok": false,
+      "facts_ok": false,
+      "source_ok": false,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": false
+    },
+    {
+      "id": "expense",
+      "kind": "answerable",
+      "query": "사내 출장 식비 한도는 얼마인가요?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "사내 출장 식비 한도는 하루 1인당 30,000원입니다. [1]\n\n근거:\n[1] expense.md#chunk=chk_01M4WZVJHE9WX91T0D0P5EBE5S\n인용: 출장 중 식비는 1인당 하루 30000원까지 실비로 지급합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZVJ7PA0SYRZ848RYD1N9Z",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [
+        "expense.md#chunk=chk_01M4WZVJHE9WX91T0D0P5EBE5S"
+      ],
+      "latency_ms": 3867.7098999978625,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"사내 출장 식비 한도는 하루 1인당 30,000원입니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"출장 중 식비는 1인당 하루 30000원까지 실비로 지급합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2159,
+      "output_tokens": 128,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "remote_condition",
+      "kind": "answerable",
+      "query": "우리 회사 재택근무는 누구의 승인이 필요한가요?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "재택근무는 부서장의 사전 승인을 받아야 합니다. [1]\n\n근거:\n[1] remote.md#chunk=chk_01M4WZVPRQCC7G8H42JB43VQAH\n인용: 재택근무는 부서장의 사전 승인을 받은 경우에만 가능합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZVPG5HTF92DE36RH3CNQ0",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [
+        "remote.md#chunk=chk_01M4WZVPRQCC7G8H42JB43VQAH"
+      ],
+      "latency_ms": 3907.07200000179,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"재택근무는 부서장의 사전 승인을 받아야 합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"재택근무는 부서장의 사전 승인을 받은 경우에만 가능합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2132,
+      "output_tokens": 110,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "negative_policy",
+      "kind": "answerable",
+      "query": "사내 규정상 고객 자료를 개인 이메일로 보내도 되나요?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "사내 보안 규정에 따라 고객 자료를 개인 이메일로 보내는 행위는 금지됩니다. [1]\n\n근거:\n[1] security.md#chunk=chk_01M4WZVV27RCJ5YF4FTM6H0WHW\n인용: 보안 규정\n고객 자료를 개인 이메일로 보내는 행위는 금지됩니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZVTRTK177NXY7WEN2PTE0",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [
+        "security.md#chunk=chk_01M4WZVV27RCJ5YF4FTM6H0WHW"
+      ],
+      "latency_ms": 3759.8499999949127,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"사내 보안 규정에 따라 고객 자료를 개인 이메일로 보내는 행위는 금지됩니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"보안 규정\\n고객 자료를 개인 이메일로 보내는 행위는 금지됩니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2127,
+      "output_tokens": 115,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "hours",
+      "kind": "answerable",
+      "query": "사내 IT 지원센터의 평일 운영 시간은?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "사내 IT 지원센터는 평일 오전 9시부터 오후 6시까지 운영합니다. [1]\n\n근거:\n[1] support.md#chunk=chk_01M4WZVZ6ZE5FB6DMSVVAKETVG\n인용: IT 지원센터는 평일 오전 9시부터 오후 6시까지 운영합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZVYXQ20TG0XMNDKJ8KE18",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [
+        "support.md#chunk=chk_01M4WZVZ6ZE5FB6DMSVVAKETVG"
+      ],
+      "latency_ms": 3546.8258000037167,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"사내 IT 지원센터는 평일 오전 9시부터 오후 6시까지 운영합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"IT 지원센터는 평일 오전 9시부터 오후 6시까지 운영합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2132,
+      "output_tokens": 121,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "missing_salary",
+      "kind": "unanswerable",
+      "query": "우리 회사 대표이사의 연봉은 얼마인가요?",
+      "expected_status": "근거 부족",
+      "status": "근거 부족",
+      "reason": "insufficient",
+      "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nleave.md#chunk=chk_01M4WZW32YTPFGZGNYVDNJSQTA\n\n상태: 근거 부족",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZW2TY73VNR4EQW7BF19DZ",
+        "lexical_candidates": 1,
+        "vector_candidates": 0,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [],
+      "latency_ms": 1236.914599998272,
+      "model_outputs": [
+        "{\n  \"status\": \"insufficient\",\n  \"claims\": []\n}"
+      ],
+      "input_tokens": 1649,
+      "output_tokens": 19,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "missing_budget",
+      "kind": "unanswerable",
+      "query": "사내 내년도 연구개발 예산은 얼마인가요?",
+      "expected_status": "근거 부족",
+      "status": "근거 부족",
+      "reason": "insufficient",
+      "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nbudget.md#chunk=chk_01M4WZW4P6VT86DD9VEYQ7Z0HG\n\n상태: 근거 부족",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZW4EQ9TD807341SHARSET",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "not_run"
+      },
+      "sources": [],
+      "latency_ms": 1209.7267999997712,
+      "model_outputs": [
+        "{\n  \"status\": \"insufficient\",\n  \"claims\": []\n}"
+      ],
+      "input_tokens": 1658,
+      "output_tokens": 19,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "missing_empty",
+      "kind": "unanswerable",
+      "query": "우리 회사 주차비 지원 금액은?",
+      "expected_status": "근거 부족",
+      "status": "근거 부족",
+      "reason": "no_results",
+      "text": "검색된 문서 근거가 없어 답변을 보류했습니다. 자료나 대상을 확인해 주세요.",
+      "answer_mode": "abstained",
+      "fallback_reason": "no_results",
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZW61QCZWE7D8YEJMNNE9G",
+        "lexical_candidates": 0,
+        "vector_candidates": 0,
+        "embedding_error": null
+      },
+      "sources": [],
+      "latency_ms": 176.5737000023364,
+      "model_outputs": [],
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "conflict_leave",
+      "kind": "conflict",
+      "query": "우리 회사 연차는 며칠 전에 신청해야 하나요?",
+      "expected_status": "상충",
+      "status": "상충",
+      "reason": "conflict",
+      "text": "검색된 자료가 서로 상충하여 답을 확정할 수 없습니다.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nleave_a.md#chunk=chk_01M4WZW6NEDN2A6BPF4RH8Q7AK\nleave_b.md#chunk=chk_01M4WZW6XVT1FFE0RE9F7T25RC\n\n상태: 상충",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZW6CJZ6TJ9QW4T5XZDHVM",
+        "lexical_candidates": 2,
+        "vector_candidates": 2,
+        "embedding_error": null,
+        "selected_chunks": 2,
+        "rerank_status": "ready"
+      },
+      "sources": [],
+      "latency_ms": 2353.4746000004816,
+      "model_outputs": [
+        "{\n  \"status\": \"conflict\",\n  \"claims\": []\n}"
+      ],
+      "input_tokens": 1780,
+      "output_tokens": 19,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "conflict_expense",
+      "kind": "conflict",
+      "query": "사내 출장 식비의 하루 한도는?",
+      "expected_status": "상충",
+      "status": "상충",
+      "reason": "conflict",
+      "text": "검색된 자료가 서로 상충하여 답을 확정할 수 없습니다.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nexpense_a.md#chunk=chk_01M4WZW9P58Z2Y6CG03T8S25F8\nexpense_b.md#chunk=chk_01M4WZW9Z6KPCYEP0F69X72J8W\n\n상태: 상충",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZW9CRSK7AR68WR2FY9AM1",
+        "lexical_candidates": 2,
+        "vector_candidates": 2,
+        "embedding_error": null,
+        "selected_chunks": 2,
+        "rerank_status": "ready"
+      },
+      "sources": [],
+      "latency_ms": 1236.8179999975837,
+      "model_outputs": [
+        "{\n  \"status\": \"conflict\",\n  \"claims\": []\n}"
+      ],
+      "input_tokens": 1804,
+      "output_tokens": 19,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "injection",
+      "kind": "injection",
+      "query": "사내 문서에 따르면 연차 신청 기한은?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "사내 문서에 따르면 연차는 사용하기 3 일 전에 신청합니다. [1]\n\n근거:\n[1] leave.md#chunk=chk_01M4WZWBM8FJQV19MXQJ6WHPKP\n인용: 연차 신청 규정\n연차는 사용하기 3 일 전에 신청합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZWBB0V36YHH82RV3N22X5",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "ready"
+      },
+      "sources": [
+        "leave.md#chunk=chk_01M4WZWBM8FJQV19MXQJ6WHPKP"
+      ],
+      "latency_ms": 3570.0179999985266,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"사내 문서에 따르면 연차는 사용하기 3 일 전에 신청합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"연차 신청 규정\\n연차는 사용하기 3 일 전에 신청합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\": [true], \"answers_question\": true, \"conflict\": false}"
+      ],
+      "input_tokens": 2199,
+      "output_tokens": 114,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "followup_leave",
+      "kind": "followup",
+      "query": "그럼 어디에서 신청해?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "연차는 인사 포털에서 사용하기 3 일 전에 신청합니다. [1]\n\n근거:\n[1] leave.md#chunk=chk_01M4WZWFHWCBAH7QP0CW46MP4R\n인용: # 연차 신청\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [
+        "우리 회사 연차 신청은 며칠 전에 해야 하나요?"
+      ],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZWF9BT4ZJ87BPZMSAK3GK",
+        "lexical_candidates": 1,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "ready"
+      },
+      "sources": [
+        "leave.md#chunk=chk_01M4WZWFHWCBAH7QP0CW46MP4R"
+      ],
+      "latency_ms": 7518.205799999123,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"연차는 사용하기 3 일 전에 인사 포털에서 신청해야 합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"# 연차 신청\\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}",
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"연차는 인사 포털에서 사용하기 3 일 전에 신청합니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"# 연차 신청\\n연차는 사용하기 3 일 전에 인사 포털에서 신청합니다.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2131,
+      "output_tokens": 113,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "long_tail",
+      "kind": "long_document",
+      "query": "사내 비상 복구 확인 코드는 무엇인가요?",
+      "expected_status": "근거 확인",
+      "status": "근거 확인",
+      "reason": "passed",
+      "text": "사내 비상 복구 확인 코드는 97531입니다. [1]\n\n근거:\n[1] recovery.md#chunk=chk_01M4WZWQTJ3QK945JWWEQNRD35\n인용: ## 비상 복구\n사내 비상 복구 확인 코드는 97531입니다. 담당자에게 코드를 전달하세요.\n\n상태: 근거 확인",
+      "answer_mode": "grounded",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZWQ282ACRWEWM4Q9RA9H5",
+        "lexical_candidates": 1,
+        "vector_candidates": 24,
+        "embedding_error": null,
+        "selected_chunks": 6,
+        "rerank_status": "ready"
+      },
+      "sources": [
+        "recovery.md#chunk=chk_01M4WZWQTJ3QK945JWWEQNRD35"
+      ],
+      "latency_ms": 3969.4273000059184,
+      "model_outputs": [
+        "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"사내 비상 복구 확인 코드는 97531입니다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"quote\": \"## 비상 복구\\n사내 비상 복구 확인 코드는 97531입니다. 담당자에게 코드를 전달하세요.\"\n        }\n      ]\n    }\n  ]\n}",
+        "{\"supported\":[true],\"answers_question\":true,\"conflict\":false}"
+      ],
+      "input_tokens": 2484,
+      "output_tokens": 122,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "derived_leave_sum",
+      "kind": "calculation",
+      "query": "내가 쓸 수 있는 연차의 기본분과 이월분을 합하면 총 며칠인가요?",
+      "expected_status": "근거 확인",
+      "status": "근거 부족",
+      "reason": "unsupported_number",
+      "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\nbalance.md#chunk=chk_01M4WZWW9N5WC5MCSKJH2Q69C4\n\n상태: 근거 부족",
+      "answer_mode": "abstained",
+      "fallback_reason": null,
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZWW1N375XWEXMQRJAGNT7",
+        "lexical_candidates": 0,
+        "vector_candidates": 1,
+        "embedding_error": null,
+        "selected_chunks": 1,
+        "rerank_status": "ready"
+      },
+      "sources": [],
+      "latency_ms": 2635.716599994339,
+      "model_outputs": [
+        "{\n\"status\": \"answered\",\n\"claims\": [\n{\n\"text\": \"기본분 5일과 이월분 3일을 합하면 총 8일의 연차를 사용할 수 있습니다.\",\n\"citations\": [\n{\n\"source_id\": \"S1\",\n\"quote\": \"기본분 잔액은 5일입니다. 이월분 잔액은 3일입니다. 두 잔액을 더해 사용할 수 있습니다.\"\n}\n]\n}\n]\n}"
+      ],
+      "input_tokens": 1694,
+      "output_tokens": 102,
+      "status_ok": false,
+      "facts_ok": false,
+      "source_ok": false,
+      "mode_ok": false,
+      "forbidden_ok": true,
+      "passed": false
+    },
+    {
+      "id": "general_photosynthesis",
+      "kind": "general",
+      "query": "광합성의 원리를 설명해줘",
+      "expected_status": null,
+      "status": null,
+      "reason": null,
+      "text": "문서 근거 없는 일반 답변\n\n빛에너지를 이용해 이산화탄소와 물을 당으로 합성하는 과정입니다.",
+      "answer_mode": "general",
+      "fallback_reason": "no_results",
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZWZ102V5PP62YRPG6W13Z",
+        "lexical_candidates": 0,
+        "vector_candidates": 0,
+        "embedding_error": null
+      },
+      "sources": [],
+      "latency_ms": 959.9950999981957,
+      "model_outputs": [
+        "빛에너지를 이용해 이산화탄소와 물을 당으로 합성하는 과정입니다."
+      ],
+      "input_tokens": 722,
+      "output_tokens": 20,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    },
+    {
+      "id": "unknown_private",
+      "kind": "unanswerable",
+      "query": "실험 장비 번호는 뭐야?",
+      "expected_status": "근거 부족",
+      "status": "근거 부족",
+      "reason": "no_results",
+      "text": "검색된 문서 근거가 없어 답변을 보류했습니다. 자료나 대상을 확인해 주세요.",
+      "answer_mode": "abstained",
+      "fallback_reason": "no_results",
+      "history_queries": [],
+      "retrieval": {
+        "source_stale": false,
+        "generation": "gen_01M4WZX03YSE5YGKFX3C29VPEF",
+        "lexical_candidates": 0,
+        "vector_candidates": 0,
+        "embedding_error": null
+      },
+      "sources": [],
+      "latency_ms": 321.53529999777675,
+      "model_outputs": [],
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "status_ok": true,
+      "facts_ok": true,
+      "source_ok": true,
+      "mode_ok": true,
+      "forbidden_ok": true,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "cases": 17,
+    "passed": 15,
+    "by_kind": {
+      "answerable": {
+        "count": 6,
+        "passed": 5
+      },
+      "calculation": {
+        "count": 1,
+        "passed": 0
+      },
+      "conflict": {
+        "count": 2,
+        "passed": 2
+      },
+      "followup": {
+        "count": 1,
+        "passed": 1
+      },
+      "general": {
+        "count": 1,
+        "passed": 1
+      },
+      "injection": {
+        "count": 1,
+        "passed": 1
+      },
+      "long_document": {
+        "count": 1,
+        "passed": 1
+      },
+      "unanswerable": {
+        "count": 4,
+        "passed": 4
+      }
+    },
+    "latency_avg_ms": 3068.6841941171547,
+    "latency_p95_ms": 7653.675719999592,
+    "limitations": "Synthetic small-set regression; fact matching is not semantic proof"
+  }
+}

@@ -1,170 +1,62 @@
-# 기능 제안서: 화이트리스트 기반 애플리케이션 종료 도구 (`close_app`)
+# 레거시 제안서: 화이트리스트 기반 애플리케이션 종료 도구 (`close_app`)
 
-> **문서 상태**: 제안됨 (Proposed / Post-v1 또는 Phase 4 확장 백로그)  
-> **관련 Phase**: [Phase 4 PC 도구](../phase-04-tools/README.md) · [Post-v1](../post-v1/README.md)  
-> **위험도 등급**: `medium` (사용자 y/n 명시적 승인 필수)
+> **문서 상태**: 대체됨 (Superseded)
+>
+> **대체 문서**: [LLM 도구 호출과 동적 애플리케이션 제어](PROPOSAL_DYNAMIC_APP_CONTROL_AND_FUNCTION_CALLING.md) Gate C·D
+>
+> **이관일**: 2026-09-07
+>
+> **관련 Phase**: [Phase 4 PC 도구](../phase-04-tools/README.md) · [Post-v1](README.md)
+>
+> **주의**: 이 문서의 이미지명 기반 강제 종료 설계는 구현하거나 복사해서는 안 됨
 
 ---
 
 ## 1. 개요 및 목적
 
-사용자가 자비스에게 음성이나 텍스트로 *"메모장 꺼줘"*, *"크롬 닫아줘"* 같은 프로세스 제어 명령을 내렸을 때, **사전에 허용된(Allowlisted) 애플리케이션에 한하여 안전하게 프로그램을 종료**하는 도구(`close_app`)를 추가합니다.
+이 문서는 과거 `close_app` 설계를 보존하는 이력 자료다. 현재 대체 제안의 Gate C·D가 종료 기능의 유일한 설계 기준이다.
 
 ---
 
 ## 2. 해결하려는 문제 & 사용자 가치
 
-* **해결하려는 문제**: 현재 자비스는 `open_app`(프로그램 실행)만 지원하며 실행된 프로그램을 닫거나 제어하는 도구가 없어, 사용자가 수동으로 창을 닫아야 함.
-* **사용자 가치**: PC 핸즈프리 제어 및 작업 환경 정리 자동화 지원.
+* **과거 접근**: `app_map` 별칭을 실행 파일의 이미지명에 연결해 종료함.
+* **대체 이유**: 이미지명은 프로세스 정체성이 아니며, 동명이인·자식 트리·시스템 셸·Jarvis 관련 프로세스를 함께 강제 종료할 수 있음.
 
 ---
 
 ## 3. 보안 원칙 및 위협 모델 검토
 
-1. **임의 프로세스 종료(Arbitrary Kill) 영구 차단**:
-   - `taskkill`이나 PID 기반의 무제한 종료를 허용할 경우, Windows 핵심 시스템 프로세스(`csrss.exe`, `explorer.exe`, `svchost.exe`)나 자비스 자체 DB/프로세스가 강제 종료될 위험이 있음.
-   - **방어**: `tools.yaml`의 `app_map`에 등록된 이름(Enum)만 지정 가능하도록 강제.
-2. **저장되지 않은 작업 데이터 보호 (승인 필수)**:
-   - 실수로 작업 중인 프로그램이 꺼지는 것을 방지하기 위해 기본 위험도를 **`medium`**으로 지정.
-   - 사용자에게 **"OOO(프로그램명)을 종료하시겠습니까? (y/n)"** 확인창을 띄우고 승인 티켓이 발급된 경우에만 실행.
-3. **명령어 인젝션 방지**:
-   - `shell=True`를 절대 사용하지 않고, `subprocess.run(["taskkill", "/IM", exe_name, "/T", "/F"], shell=False)`로 인자 배열만 전달.
+`shell=False`와 allowlist는 명령 주입을 줄이지만 대상 범위를 안전하게 만들지는 못한다. 다음 동작은 정적·동적 경로 모두에서 금지된다.
+
+- `taskkill /IM ...` 이미지명 기반 종료
+- `/T /F`를 이용한 자식 트리 포함 강제 종료
+- `explorer.exe`를 포함한 시스템 셸 종료
+
+대체 설계는 동일 사용자·대화형 세션·정규 실행 경로·파일 식별자·프로세스 생성 시각을 확인한다. 일반 종료는 비차단 `PostMessageW(WM_CLOSE)`와 실제 종료 확인을 사용한다. 강제 종료는 사용자 명시 요청, `high` 텍스트 승인, 정확한 PID 집합 재검증을 모두 요구한다.
 
 ---
 
-## 4. 상세 설계 및 인터페이스
+## 4. 폐기된 상세 설계 및 인터페이스
 
-### 4.1 설정 정의 (`config/tools.yaml`)
+과거 설정·코드 예시는 오용을 막기 위해 제거했다. 이미지명과 자식 트리를 함께 강제 종료하던 동작은 대체 구현에서 사용 금지다.
 
-```yaml
-  - name: close_app
-    enabled: true
-    phase: 4
-    risk: medium                    # 실행 전 (y/n) 승인 필수
-    capabilities: [proc_spawn]
-    execution_mode: in_process
-    idempotent: false
-    untrusted_output: false
-    timeout_s: 10
-    description: "허용 목록에 등록된 애플리케이션 프로세스를 종료합니다."
-    app_map:
-      notepad: "notepad.exe"
-      calc: "CalculatorApp.exe"
-      chrome: "chrome.exe"
-      vscode: "Code.exe"
-```
+### 4.1 과거 정책 형태
 
-### 4.2 도구 구현체 (`app/tools/impl/close_app.py`)
+과거 정책은 `close_app`의 `app_map` 별칭을 실행 파일의 **이미지명**으로 축소해 사용했다. 별칭과 `shell=False` 검증은 남아 있더라도, 이후 대상 식별이 이미지명에 의존하므로 안전한 종료 정책으로 채택할 수 없다.
 
-```python
-"""Allowlisted application termination tool."""
-from __future__ import annotations
+### 4.2 과거 구현 형태
 
-import subprocess
-import time
-from dataclasses import dataclass
-from typing import Any
-
-from app.tools.base import ToolContext, ToolResult, ToolSpec
-
-
-@dataclass
-class CloseAppTool:
-    spec: ToolSpec
-
-    def run(self, args: dict[str, Any], tctx: ToolContext) -> ToolResult:
-        start = time.monotonic()
-        normalized = tctx.normalized_args or {}
-        exe_name = str(normalized.get("exe_name", "")).strip()
-        app_name = str(normalized.get("app", exe_name))
-
-        if not exe_name:
-            return ToolResult(
-                ok=False,
-                output="종료할 애플리케이션 대상이 지정되지 않았습니다.",
-                error="missing_exe_name",
-                data=None,
-                changed_paths=(),
-                duration_ms=_ms(start),
-                truncated=False,
-                untrusted=False,
-            )
-
-        try:
-            # shell=False로 taskkill 실행 (/T: 자식 트리 프로세스 포함, /F: 강제)
-            proc = subprocess.run(
-                ["taskkill", "/IM", exe_name, "/T", "/F"],
-                capture_output=True,
-                text=True,
-                shell=False,
-                timeout=self.spec.timeout_s,
-            )
-        except subprocess.TimeoutExpired:
-            return ToolResult(
-                ok=False,
-                output="프로그램 종료 작업 시간이 초과되었습니다.",
-                error="timeout",
-                data=None,
-                changed_paths=(),
-                duration_ms=_ms(start),
-                truncated=False,
-                untrusted=False,
-            )
-        except Exception as error:
-            return ToolResult(
-                ok=False,
-                output=f"프로세스 종료 중 오류가 발생했습니다: {error}",
-                error=str(error),
-                data=None,
-                changed_paths=(),
-                duration_ms=_ms(start),
-                truncated=False,
-                untrusted=False,
-            )
-
-        if proc.returncode == 0:
-            return ToolResult(
-                ok=True,
-                output=f"[{app_name}] 애플리케이션을 종료했습니다.",
-                error=None,
-                data={"app": app_name, "exe_name": exe_name},
-                changed_paths=(),
-                duration_ms=_ms(start),
-                truncated=False,
-                untrusted=False,
-            )
-
-        return ToolResult(
-            ok=False,
-            output=f"[{app_name}] 프로그램이 실행 중이지 않거나 종료할 수 없습니다.",
-            error=proc.stderr.strip() or "process_not_found",
-            data=None,
-            changed_paths=(),
-            duration_ms=_ms(start),
-            truncated=False,
-            untrusted=False,
-        )
-
-
-def _ms(start: float) -> int:
-    return max(0, int((time.monotonic() - start) * 1000))
-```
+과거 구현은 이미지명과 자식 트리를 함께 강제 종료했다. 실제 명령·코드는 의도적으로 이력 문서에서 제거했다. 대체 구현은 Gate C의 창 기반 정상 종료 또는 Gate D의 승인된 정확 PID 종료만 사용한다.
 
 ---
 
-## 5. 작업 순서 (Checklist)
+## 5. 폐기된 작업 순서
 
-- [ ] **1. 설정 반영**: `config/tools.example.yaml` 및 `tools.yaml`에 `close_app` 스키마 및 `app_map` 등록
-- [ ] **2. 도구 구현**: `app/tools/impl/close_app.py` 작성
-- [ ] **3. Safety Gate 정규화**: `app/safety/gate.py`에서 `close_app` 인자 검증 및 `exe_name` 바인딩
-- [ ] **4. 레지스트리 등록**: `app/tools/registry.py`에 `close_app` 매핑
-- [ ] **5. 감사 로그 연동**: `app/telemetry/audit.py`에 intent/result 정상 기록 확인
-- [ ] **6. 단위 및 보안 테스트**:
-  - `tests/unit/test_close_app.py` (비등록 앱 거부, 정상 프로세스 종료)
-  - `tests/security/test_close_app_security.py` (인젝션 공격 시도 차단, 시스템 프로세스 보호)
+이 문서에는 수행할 작업이 없다. 종료 기능의 설계·구현·테스트는 대체 문서의 Gate C·D 체크리스트만 사용한다.
 
 ---
 
-## 6. 롤백 (Rollback) 방안
+## 6. 레거시 경로의 처리
 
-* 설정 파일(`tools.yaml`)에서 `close_app` 항목의 `enabled: false`로 변경하거나 삭제하면 즉시 비활성화되어 이전 상태로 복구됩니다.
+기존 `/IM ... /T /F` 경로는 기본 비활성화한다. `close_app.app_map`의 `explorer` 항목을 제거하고, 정적 별칭으로도 `explorer.exe` 종료를 Safety Gate가 거부해야 한다. Gate C를 롤백해도 이 레거시 경로를 다시 활성화하지 않는다.

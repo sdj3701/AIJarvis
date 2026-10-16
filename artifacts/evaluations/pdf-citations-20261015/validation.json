@@ -1,0 +1,538 @@
+{
+  "same_pdf": true,
+  "same_questions": true,
+  "current_source_hashes": true,
+  "rendered_citations": 28,
+  "all_rendered_citations_exact": true,
+  "all_rendered_pages_exact": true,
+  "all_rendered_articles_correct": true,
+  "regression": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "545",
+    "time": "96.259",
+    "timestamp": "2026-10-15T15:21:24.964123+09:00",
+    "hostname": "SDJ"
+  },
+  "r3_cases": {
+    "cases": 17,
+    "passed": 17,
+    "by_kind": {
+      "answerable": {
+        "count": 6,
+        "passed": 6
+      },
+      "calculation": {
+        "count": 1,
+        "passed": 1
+      },
+      "conflict": {
+        "count": 2,
+        "passed": 2
+      },
+      "followup": {
+        "count": 1,
+        "passed": 1
+      },
+      "general": {
+        "count": 1,
+        "passed": 1
+      },
+      "injection": {
+        "count": 1,
+        "passed": 1
+      },
+      "long_document": {
+        "count": 1,
+        "passed": 1
+      },
+      "unanswerable": {
+        "count": 4,
+        "passed": 4
+      }
+    },
+    "latency_avg_ms": 1957.8339352943551,
+    "latency_p95_ms": 3186.8596999993306,
+    "limitations": "Synthetic small-set regression; fact matching is not semantic proof"
+  },
+  "citation_audits": [
+    {
+      "id": "purpose",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFJ&page=1",
+      "quote": "이 법은 건축에 관한 국가 및 지방자치단체와 국민의 책무를 정하고 건축정책의 수립ㆍ시행 등을 규정하여\n건축문화를 진흥함으로써 국민의 건전한 삶의 영위와 복리향상에 이바지함을 목적으로 한다.",
+      "location": "제1조(목적) · PDF 1쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        1
+      ],
+      "shown_pages": [
+        1
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "public_space",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFM&page=1",
+      "quote": "3. “공공공간(公共空間)”이란 가로ㆍ공원ㆍ광장 등의 공간과 그 안에 부속되어 공중(公衆)이 이용하는 시설물을 말\n한다.",
+      "location": "제3조(정의) 3호 · PDF 1쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        1
+      ],
+      "shown_pages": [
+        1
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "national_plan",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2",
+      "quote": "① 국토교통부장관은 건축정책에 관한 기본계획(이하 “건축정책기본계획”이라 한다\n)을 5년마다 수립ㆍ시행하여야 한다. <개정 2008. 2. 29., 2013. 3. 23.>",
+      "location": "제10조(건축정책기본계획의 수립) 제1항 · PDF 2쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        2
+      ],
+      "shown_pages": [
+        2
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_size",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG1&page=3",
+      "quote": "② 제1항에 따른 국가건축정책위원회(이하 “국가건축정책위원회”라 한다)는 위원장 1인을 포함하여 30인 이내의 위\n원으로 구성한다.",
+      "location": "제13조(국가건축정책위원회) 제2항 · PDF 3쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        3
+      ],
+      "shown_pages": [
+        3
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_functions",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG2&page=3,4",
+      "quote": "7. 건축에 관한 조사ㆍ연구 및 개발에 관한 사항",
+      "location": "제14조(국가건축정책위원회의 기능) 7호 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_functions",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG2&page=3,4",
+      "quote": "국가건축정책위원회는 다음 각 호의 사항을 심의한다. <개정 2020. 6. 9.>",
+      "location": "제14조(국가건축정책위원회의 기능) · PDF 3쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        3
+      ],
+      "shown_pages": [
+        3
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "parliament_report",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG3&page=4",
+      "quote": "① 국토교통부장관은 국가건축정책위원회의 의견을 들어 건축에 관한 주요 정책 수립 및\n시행 등에 관한 보고서를 작성하여 2년마다 국회 소관 상임위원회에 제출하여야 한다. <개정 2008. 2. 29., 2013. 3.\n23.>",
+      "location": "제15조(건축정책 국회보고) 제1항 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "public_design",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG9&page=5",
+      "quote": "② 국토교통부장관은 문화체육관광부장관 및 산업통상부장관과 협의하여 공공공간의 건축디자인 기준을 설정할\n수 있다.<개정 2008. 2. 29., 2013. 3. 23., 2025. 10. 1.>",
+      "location": "제21조(건축디자인 기준의 설정) 제2항 · PDF 5쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        5
+      ],
+      "shown_pages": [
+        5
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "delegation",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTS&page=6",
+      "quote": "③ 국토교통부장관은 제2항에 따른 한국건축규정 정보체계를 효율적으로 관리하고 대국민서비스를 제고하기 위하\n여 대통령령으로 정하는 기관 또는 단체에 한국건축규정 정보체계의 운영을 위탁할 수 있다.<신설 2021. 7. 27.>",
+      "location": "제25조(한국건축규정의 공고 등) 제3항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "ordinance",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTT&page=6",
+      "quote": "③ 시ㆍ도지사는 3년마다 한국건축규정과 관련된 소관 조례를 평가하고, 개선ㆍ보완이 필요하다고 판단되는 경우\n「건축법」 제4조에 따라 시ㆍ도지사가 두는 건축위원회의 심의를 거쳐 소관 조례의 개선ㆍ보완을 추진하여야 한다.",
+      "location": "제26조(한국건축규정의 개선 노력) 제3항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "ordinance",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTV&page=6",
+      "quote": "④ 시ㆍ도지사는 3년마다 한국건축규정과 관련된 관할 시ㆍ군ㆍ구의 조례를 평가하고, 개선ㆍ보완이 필요하다고\n판단되는 경우 「건축법」 제4조에 따라 시ㆍ도지사가 두는 건축위원회의 심의를 거쳐 관할 시장ㆍ군수ㆍ구청장에\n게 개선ㆍ보완을 요구할 수 있다. 이 경우 관할 시장ㆍ군수ㆍ구청장은 정당한 이유가 없으면 이에 따라야 한다.",
+      "location": "제26조(한국건축규정의 개선 노력) 제4항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "appendix",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTX&page=6",
+      "quote": "①부터 <436>까지 생략\n<437> 건축기본법 일부를 다음과 같이 개정한다.\n제20조 각 호 외의 부분 및 제21조제1항ㆍ제2항 중 “산업통상자원부장관”을 각각 “산업통상부장관”으로 한다.\n<438>부터 <626>까지 생략\n제8조 생략",
+      "location": "부칙 제7조(다른 법률의 개정) 제1항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "two_articles",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2",
+      "quote": "① 국토교통부장관은 건축정책에 관한 기본계획(이하 “건축정책기본계획”이라 한다\n)을 5년마다 수립ㆍ시행하여야 한다. <개정 2008. 2. 29., 2013. 3. 23.>",
+      "location": "제10조(건축정책기본계획의 수립) 제1항 · PDF 2쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        2
+      ],
+      "shown_pages": [
+        2
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "two_articles",
+      "round": 1,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG3&page=4",
+      "quote": "① 국토교통부장관은 국가건축정책위원회의 의견을 들어 건축에 관한 주요 정책 수립 및\n시행 등에 관한 보고서를 작성하여 2년마다 국회 소관 상임위원회에 제출하여야 한다. <개정 2008. 2. 29., 2013. 3.\n23.>",
+      "location": "제15조(건축정책 국회보고) 제1항 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "purpose",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFJ&page=1",
+      "quote": "이 법은 건축에 관한 국가 및 지방자치단체와 국민의 책무를 정하고 건축정책의 수립ㆍ시행 등을 규정하여\n건축문화를 진흥함으로써 국민의 건전한 삶의 영위와 복리향상에 이바지함을 목적으로 한다.",
+      "location": "제1조(목적) · PDF 1쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        1
+      ],
+      "shown_pages": [
+        1
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "public_space",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFM&page=1",
+      "quote": "3. “공공공간(公共空間)”이란 가로ㆍ공원ㆍ광장 등의 공간과 그 안에 부속되어 공중(公衆)이 이용하는 시설물을 말\n한다.",
+      "location": "제3조(정의) 3호 · PDF 1쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        1
+      ],
+      "shown_pages": [
+        1
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "national_plan",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2",
+      "quote": "① 국토교통부장관은 건축정책에 관한 기본계획(이하 “건축정책기본계획”이라 한다\n)을 5년마다 수립ㆍ시행하여야 한다. <개정 2008. 2. 29., 2013. 3. 23.>",
+      "location": "제10조(건축정책기본계획의 수립) 제1항 · PDF 2쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        2
+      ],
+      "shown_pages": [
+        2
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_size",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG1&page=3",
+      "quote": "② 제1항에 따른 국가건축정책위원회(이하 “국가건축정책위원회”라 한다)는 위원장 1인을 포함하여 30인 이내의 위\n원으로 구성한다.",
+      "location": "제13조(국가건축정책위원회) 제2항 · PDF 3쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        3
+      ],
+      "shown_pages": [
+        3
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_functions",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG2&page=3,4",
+      "quote": "7. 건축에 관한 조사ㆍ연구 및 개발에 관한 사항",
+      "location": "제14조(국가건축정책위원회의 기능) 7호 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "committee_functions",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG2&page=3,4",
+      "quote": "국가건축정책위원회는 다음 각 호의 사항을 심의한다. <개정 2020. 6. 9.>",
+      "location": "제14조(국가건축정책위원회의 기능) · PDF 3쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        3
+      ],
+      "shown_pages": [
+        3
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "parliament_report",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG3&page=4",
+      "quote": "① 국토교통부장관은 국가건축정책위원회의 의견을 들어 건축에 관한 주요 정책 수립 및\n시행 등에 관한 보고서를 작성하여 2년마다 국회 소관 상임위원회에 제출하여야 한다. <개정 2008. 2. 29., 2013. 3.\n23.>",
+      "location": "제15조(건축정책 국회보고) 제1항 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "public_design",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG9&page=5",
+      "quote": "② 국토교통부장관은 문화체육관광부장관 및 산업통상부장관과 협의하여 공공공간의 건축디자인 기준을 설정할\n수 있다.<개정 2008. 2. 29., 2013. 3. 23., 2025. 10. 1.>",
+      "location": "제21조(건축디자인 기준의 설정) 제2항 · PDF 5쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        5
+      ],
+      "shown_pages": [
+        5
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "delegation",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTS&page=6",
+      "quote": "③ 국토교통부장관은 제2항에 따른 한국건축규정 정보체계를 효율적으로 관리하고 대국민서비스를 제고하기 위하\n여 대통령령으로 정하는 기관 또는 단체에 한국건축규정 정보체계의 운영을 위탁할 수 있다.<신설 2021. 7. 27.>",
+      "location": "제25조(한국건축규정의 공고 등) 제3항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "ordinance",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTT&page=6",
+      "quote": "③ 시ㆍ도지사는 3년마다 한국건축규정과 관련된 소관 조례를 평가하고, 개선ㆍ보완이 필요하다고 판단되는 경우\n「건축법」 제4조에 따라 시ㆍ도지사가 두는 건축위원회의 심의를 거쳐 소관 조례의 개선ㆍ보완을 추진하여야 한다.",
+      "location": "제26조(한국건축규정의 개선 노력) 제3항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "ordinance",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTV&page=6",
+      "quote": "④ 시ㆍ도지사는 3년마다 한국건축규정과 관련된 관할 시ㆍ군ㆍ구의 조례를 평가하고, 개선ㆍ보완이 필요하다고\n판단되는 경우 「건축법」 제4조에 따라 시ㆍ도지사가 두는 건축위원회의 심의를 거쳐 관할 시장ㆍ군수ㆍ구청장에\n게 개선ㆍ보완을 요구할 수 있다. 이 경우 관할 시장ㆍ군수ㆍ구청장은 정당한 이유가 없으면 이에 따라야 한다.",
+      "location": "제26조(한국건축규정의 개선 노력) 제4항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "appendix",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTX&page=6",
+      "quote": "①부터 <436>까지 생략\n<437> 건축기본법 일부를 다음과 같이 개정한다.\n제20조 각 호 외의 부분 및 제21조제1항ㆍ제2항 중 “산업통상자원부장관”을 각각 “산업통상부장관”으로 한다.\n<438>부터 <626>까지 생략\n제8조 생략",
+      "location": "부칙 제7조(다른 법률의 개정) 제1항 · PDF 6쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        6
+      ],
+      "shown_pages": [
+        6
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "two_articles",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2",
+      "quote": "① 국토교통부장관은 건축정책에 관한 기본계획(이하 “건축정책기본계획”이라 한다\n)을 5년마다 수립ㆍ시행하여야 한다. <개정 2008. 2. 29., 2013. 3. 23.>",
+      "location": "제10조(건축정책기본계획의 수립) 제1항 · PDF 2쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        2
+      ],
+      "shown_pages": [
+        2
+      ],
+      "page_exact": true
+    },
+    {
+      "id": "two_articles",
+      "round": 2,
+      "source": "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMG3&page=4",
+      "quote": "① 국토교통부장관은 국가건축정책위원회의 의견을 들어 건축에 관한 주요 정책 수립 및\n시행 등에 관한 보고서를 작성하여 2년마다 국회 소관 상임위원회에 제출하여야 한다. <개정 2008. 2. 29., 2013. 3.\n23.>",
+      "location": "제15조(건축정책 국회보고) 제1항 · PDF 4쪽",
+      "exact_quote": true,
+      "article_ok": true,
+      "paragraph_ok": true,
+      "expected_pages": [
+        4
+      ],
+      "shown_pages": [
+        4
+      ],
+      "page_exact": true
+    }
+  ]
+}

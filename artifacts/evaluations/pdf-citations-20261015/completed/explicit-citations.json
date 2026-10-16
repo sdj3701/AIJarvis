@@ -1,0 +1,46 @@
+[
+  {
+    "id": "national_plan",
+    "query": "/search 제공한 건축기본법 PDF만 근거로 답해줘. 건축정책기본계획은 누가 몇 년마다 수립하나요? 근거가 되는 조·항 번호와 PDF 페이지를 답변에 명시해줘.",
+    "text": "국토교통부장관은 건축정책기본계획을 5 년마다 수립·시행하여야 한다. [1]\n\n근거:\n[1] 건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2\n위치: 제10조(건축정책기본계획의 수립) 제1항 · PDF 2쪽\n인용: ① 국토교통부장관은 건축정책에 관한 기본계획(이하 “건축정책기본계획”이라 한다\n)을 5년마다 수립ㆍ시행하여야 한다. <개정 2008. 2. 29., 2013. 3. 23.>\n\n상태: 근거 확인",
+    "status": "근거 확인",
+    "reason": "passed",
+    "sources": [
+      "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM6PHS3FM6433X7DMFV&page=2"
+    ],
+    "model_outputs": [
+      "{\n  \"status\": \"answered\",\n  \"claims\": [\n    {\n      \"text\": \"국토교통부장관은 건축정책기본계획을 5 년마다 수립·시행하여야 한다.\",\n      \"citations\": [\n        {\n          \"source_id\": \"S1\",\n          \"passage_id\": \"S1.b12d8332\"\n        }\n      ],\n      \"calculations\": []\n    }\n  ]\n}",
+      "{\"supported\": [true], \"answers_question\": true, \"conflict\": false}"
+    ],
+    "expected_article": "제10조",
+    "expected_paragraph": "제1항",
+    "expected_pages": [
+      2
+    ],
+    "article_visible": true,
+    "paragraph_visible": true,
+    "seconds": 5.36845109999922
+  },
+  {
+    "id": "delegation",
+    "query": "/search 제공한 건축기본법 PDF만 근거로 답해줘. 한국건축규정 정보체계 운영을 누구에게 위탁할 수 있나요? 근거가 되는 조·항 번호와 PDF 페이지를 답변에 명시해줘.",
+    "text": "한국건축규정 정보체계의 운영은 대통령령으로 정하는 기관 또는 단체에 위탁할 수 있습니다. [1]\n\n근거:\n[1] 건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTS&page=6\n위치: 제25조(한국건축규정의 공고 등) 제3항 · PDF 6쪽\n인용: ③ 국토교통부장관은 제2항에 따른 한국건축규정 정보체계를 효율적으로 관리하고 대국민서비스를 제고하기 위하\n여 대통령령으로 정하는 기관 또는 단체에 한국건축규정 정보체계의 운영을 위탁할 수 있다.<신설 2021. 7. 27.>\n\n상태: 근거 확인",
+    "status": "근거 확인",
+    "reason": "passed",
+    "sources": [
+      "건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4Z3QRM7RDM19Z4XHPGF0TTS&page=6"
+    ],
+    "model_outputs": [
+      "{\"status\":\"answered\",\"claims\":[{\"text\":\"한국건축규정 정보체계의 운영은 대통령령으로 정하는 기관 또는 단체에 위탁할 수 있습니다.\",\"citations\":[{\"source_id\":\"S1\",\"passage_id\":\"S1.75b28946\"}],\"calculations\":[]}]}",
+      "{\"supported\": [true], \"answers_question\": true, \"conflict\": false}"
+    ],
+    "expected_article": "제25조",
+    "expected_paragraph": "제3항",
+    "expected_pages": [
+      6
+    ],
+    "article_visible": true,
+    "paragraph_visible": true,
+    "seconds": 3.921920799999498
+  }
+]

@@ -44,25 +44,25 @@ v1은 관리자 권한 공격자나 이미 완전히 장악된 OS로부터 데�
 
 | ID | 위협 | 예방 통제 | 탐지·복구 | 검증 (테스트 연결) | 상태 |
 |----|------|-----------|-----------|-------------------|------|
-| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | `tests/security/test_prompt_injection.py` | verified |
-| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | `tests/security/test_forbidden_actions.py` | verified |
-| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | `tests/security/test_path_traversal.py`, `test_reparse_points.py` | verified |
-| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | `tests/security/test_url_schemes.py`, `test_url_schemes_open_url.py` | verified |
-| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | `tests/security/test_approval_binding.py` | verified |
-| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | `tests/unit/test_approval_flow.py` (v0.5 CLI 승인 강제) | verified |
-| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | `tests/security/test_secret_leakage.py` | verified |
-| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | `tests/security/test_secret_leakage.py` | verified |
-| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | `tests/slow/test_crash_loop.py` | verified |
-| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | `tests/integration/test_agent_recovery.py` | verified |
-| T11 | 감사 로그 변조 | hash chain, seq | verify-audit | `tests/security/test_audit_chain.py`, `gate.py --verify-audit` | verified |
-| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | `tests/slow/test_backup_restore.py`, `test_crash_loop.py` | verified |
-| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | `tests/security/test_forbidden_actions.py` | verified |
+| T01 | 웹/문서 prompt injection | untrusted 봉투, 사용자 의도 재검증 | tool intent 감사 | `scripts/tests/security/test_prompt_injection.py` | verified |
+| T02 | LLM이 임의 명령·경로 생성 | schema, root enum, Safety Gate | policy.deny | `scripts/tests/security/test_forbidden_actions.py` | verified |
+| T03 | path traversal/reparse 우회 | canonical path, 중간 reparse 검사 | deny 이유 기록 | `scripts/tests/security/test_path_traversal.py`, `test_reparse_points.py` | verified |
+| T04 | 위험 URL/SSRF | scheme·DNS·IP·redirect 검증 | fetch 오류 이벤트 | `scripts/tests/security/test_url_schemes.py`, `test_url_schemes_open_url.py` | verified |
+| T05 | 승인 후 인자 바꿔치기 | args hash, 재평가, 1회 ticket | approval.mismatch | `scripts/tests/security/test_approval_binding.py` | verified |
+| T06 | 음성 승인 위조 | voice high 금지, 화면 typed confirm | approval 이벤트 | `scripts/tests/unit/test_approval_flow.py` (v0.5 CLI 승인 강제) | verified |
+| T07 | 시크릿 API 전송 | Privacy Gate block | privacy.block | `scripts/tests/security/test_secret_leakage.py` | verified |
+| T08 | 로그·TTS·기억 시크릿 노출 | 채널별 필터 | redact 이벤트 | `scripts/tests/security/test_secret_leakage.py` | verified |
+| T09 | 크래시 입력 유실 | append+flush+fsync | recovery event | `scripts/tests/slow/test_crash_loop.py` | verified |
+| T10 | 크래시 후 부작용 중복 | task step, idempotency, running 보류 | 복구 UI | `scripts/tests/integration/test_agent_recovery.py` | verified |
+| T11 | 감사 로그 변조 | hash chain, seq | verify-audit | `scripts/tests/security/test_audit_chain.py`, `gate.py --verify-audit` | verified |
+| T12 | DB 손상 | WAL/FULL, 단일 인스턴스 | integrity+backup restore | `scripts/tests/slow/test_backup_restore.py`, `test_crash_loop.py` | verified |
+| T13 | 악성 skill | disabled, hash, manifest, high 승인 | intent/result audit | `scripts/tests/security/test_forbidden_actions.py` | verified |
 | T14 | 의존성 공급망 | hash lockfile, 최소 의존성 | 정기 검토 | `pyproject.toml` 최소 의존성 및 무결성 검증 | verified |
-| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | `tests/unit/test_budget_guard.py` | verified |
-| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | `tests/unit/test_config_loader.py` | verified |
-| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | `tests/slow/test_backup_restore.py`, `scripts/backup.py` | verified |
-| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | `tests/unit/test_file_lock.py` | verified |
-| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | `tests/unit/test_approval_flow.py` | verified |
+| T15 | 예산 폭주 | 사전 BudgetGuard, retry 한도 | 80/100% 이벤트 | `scripts/tests/unit/test_budget_guard.py` | verified |
+| T16 | 설정 완화·오타 | extra forbid, default deny 강제 | config hash | `scripts/tests/unit/test_config_loader.py` | verified |
+| T17 | 백업 유출 | 암호화, 별도 target, keyring | manifest/hash | `scripts/tests/slow/test_backup_restore.py`, `scripts/backup.py` | verified |
+| T18 | 동시 인스턴스 데이터 손상 | OS file lock | second instance 오류 | `scripts/tests/unit/test_file_lock.py` | verified |
+| T19 | UI 상태 혼동으로 잘못 승인 | 단일 상태 머신, 정책 display | UI event log | `scripts/tests/unit/test_approval_flow.py` | verified |
 | T20 | 로컬 계정 침해 | OS 계정·디스크 보안 의존 | 제한적 | 수동 검토 (OS 권한 위임) | accepted residual |
 
 ## 5. Phase 6 갱신 규칙 및 잔여 위험 승인
@@ -72,3 +72,26 @@ v1은 관리자 권한 공격자나 이미 완전히 장악된 OS로부터 데�
 - **대체 통제**: Windows BitLocker 전체 디스크 암호화 및 Windows 로그인 계정 분리 권장.
 - **재검토 시점**: v1 패키징 시 재검토.
 
+### 명령 기억 추가 통제 (D022)
+
+유사도는 실행 권한으로 쓰지 않는다. 부정/질문/인용 필터와 새 의미 확인을 적용하며
+다른 앱 이름을 유사 후보로 치환하지 않는다. 확인 대기는 120초·채널에 묶고 새 입력 시 폐기한다.
+확인된 의미도 기존 앱 허용·파일 정체성·금지 정책을 우회할 수 없다. 민감정보는 저장/임베딩에서 제외한다.
+벡터는 모델 digest별로 분리하고 로컬 Ollama의 프록시/리다이렉트 외부 전송을 금지한다.
+자연어 필터의 완전성은 보장하지 않으며 새 유사 표현 자동 실행은 허용하지 않는다.
+
+### 응답 룰북 추가 통제 (D021)
+
+룰북은 RAG/기억 및 일반 도구 쓰기 루트와 분리하며, 검증 실패 시 초기화에 실패한다.
+출력 축약으로 승인 대상·경고를 제거하지 않고 음성 안내 불가 시 pending 승인을 취소한다.
+원문은 상세로 보존하며 외부 콘텐츠의 스타일 지시는 룰북이나 상세 예외를 변경하지 못한다.
+동일 OS 계정의 소스 변조 및 모델의 사실 오류는 이 기능이 해결하지 않는 잔여 위험이다.
+
+### 앱 자동 탐색 추가 통제 (2026-09-09)
+
+- 표시 이름 위장: 이름 대신 SID·정규 exe 경로·SHA-256에 승인을 바인딩한다.
+- 승인 후 교체: 실행까지 쓰기/삭제 공유를 거부하는 핸들을 유지하고 파일 ID를 재검증한다.
+- 외부 콘텐츠의 승인 위조: 모델에는 승인 저장 도구가 없으며 소비한 승인 티켓 없이 신규 저장하지 않는다.
+- 저장소 변조: 전용 디렉터리/DB의 상속 ACL을 제거하고 현재 사용자 권한을 부여한다.
+- 재전송: 만료·새 요청·후보 세션·일회성 티켓 및 입력당 실행 중복 검사를 적용한다.
+- 잔여 위험: 동일 사용자/관리자 침해, 실행 파일이 로드하는 DLL 등의 전체 공급망은 이 해시 검사의 범위 밖이다.

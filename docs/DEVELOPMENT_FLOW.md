@@ -8,7 +8,7 @@
 
 - 각 단계의 실행 절차: 해당 폴더의 `README.md`
 - 각 단계의 배경과 이유: 같은 폴더의 `DETAIL.md` (세부 개발문서)
-- 현재 진행 위치: [PROGRESS.md](./PROGRESS.md)
+- 현재 진행 위치: [PROGRESS.md](PROGRESS.md)
 
 ---
 
@@ -16,13 +16,13 @@
 
 | 항목 | 값 |
 |------|-----|
-| 브랜치 | `rebuild/v2` |
-| 현재 단계 | Phase 0 — 기반 구축 |
-| 상태 | P0-01 ~ P0-08 구현 완료, 공식 게이트 실행 대기 |
-| 다음 행동 | `python scripts\gate.py --phase 0` 종료 코드 0 확보 → Phase 1 진입 |
+| 브랜치 | `main` |
+| 현재 단계 | R3 구현과 자동 검증 |
+| 상태 | R3-01~07 구현·R3-08 자동 평가 적용; 실장치·릴리스 검증 별도 |
+| 다음 행동 | R3 구현 보고의 적용·실장치·릴리스 인수 확인 |
 | 프로토타입 | `main` 브랜치와 `D:\Ai\Jarvis-prototype`에 동결. v2 완료로 계산하지 않는다 |
 
-상세 상태와 게이트 증거는 [PROGRESS.md](./PROGRESS.md)에서 관리한다. 이 문서의 표는 요약이며,
+상세 상태와 게이트 증거는 [PROGRESS.md](PROGRESS.md)에서 관리한다. 이 문서의 표는 요약이며,
 값이 어긋나면 PROGRESS가 기준이다.
 
 ---
@@ -31,18 +31,18 @@
 
 | 층 | 문서 | 답하는 질문 | 기준 여부 |
 |----|------|-------------|-----------|
-| 기준 | [PLAN.md](../PLAN.md) | 무엇을, 왜, 어느 릴리스까지 | 제품 범위의 단일 기준 |
-| 기준 | [DESIGN.md](../DESIGN.md) | 모듈·인터페이스·의존 방향 | 코드 구조의 단일 기준 |
-| 기준 | [SCHEMAS.md](../SCHEMAS.md) | 파일·DB·이벤트·도구 데이터 모양 | 저장 형식의 단일 기준 |
-| 기준 | [TESTING.md](../TESTING.md) | 완료를 어떻게 증명하는가 | 테스트·게이트의 단일 기준 |
+| 기준 | [PLAN.md](PLAN.md) | 무엇을, 왜, 어느 릴리스까지 | 제품 범위의 단일 기준 |
+| 기준 | [DESIGN.md](DESIGN.md) | 모듈·인터페이스·의존 방향 | 코드 구조의 단일 기준 |
+| 기준 | [SCHEMAS.md](SCHEMAS.md) | 파일·DB·이벤트·도구 데이터 모양 | 저장 형식의 단일 기준 |
+| 기준 | [TESTING.md](TESTING.md) | 완료를 어떻게 증명하는가 | 테스트·게이트의 단일 기준 |
 | 실행 | `docs/*/README.md` | 어떤 파일을 어떤 순서로 구현하는가 | 작업 순서의 기준 |
 | 세부 | `docs/*/DETAIL.md` | 그 규칙이 왜 필요한가 | 설명 전용, 기준 아님 |
 | 흐름 | 이 문서 | 단계가 어떻게 이어지는가 | 지도, 기준 아님 |
-| 상태 | [PROGRESS.md](./PROGRESS.md) | 지금 어디까지 왔는가 | 진행 상태의 기준 |
-| 결정 | [DECISIONS.md](./00-start-here/DECISIONS.md) | 사람이 골라야 하는 값 | 미결정 값의 기준 |
+| 상태 | [PROGRESS.md](PROGRESS.md) | 지금 어디까지 왔는가 | 진행 상태의 기준 |
+| 결정 | [DECISIONS.md](00-start-here/DECISIONS.md) | 사람이 골라야 하는 값 | 미결정 값의 기준 |
 
 충돌이 생기면 위쪽 문서를 먼저 고친 뒤 아래를 동기화한다. 절차는
-[문서 변경 규칙](./reference/DOCUMENTATION_RULES.md)에 있다.
+[문서 변경 규칙](reference/DOCUMENTATION_RULES.md)에 있다.
 
 ---
 
@@ -83,7 +83,7 @@ Post-v1 선택 기능                          기능별 개별 릴리스
 | v0.5 | 4 ~ 6 | 안전하게 PC 작업을 수행하는 텍스트 에이전트 | Critical/High 보안 결함 0건 |
 | v1 | 7 ~ 8 | 음성·단축키로 호출하는 상주형 비서 | 1주 안정화와 최종 데모 통과 |
 
-출처: [PLAN 2.3](../PLAN.md)
+출처: [PLAN 2.3](PLAN.md)
 
 ### 이 순서인 이유
 
@@ -143,9 +143,9 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 
 ## 5. 단계별 상세
 
-### 착수 준비 — [00-start-here](./00-start-here/README.md)
+### 착수 준비 — [00-start-here](00-start-here/README.md)
 
-코드를 만들기 전 한 번만 수행한다. 세부: [착수 준비 세부 개발문서](./00-start-here/DETAIL.md)
+코드를 만들기 전 한 번만 수행한다. 세부: [착수 준비 세부 개발문서](00-start-here/DETAIL.md)
 
 **환경 조건**
 
@@ -173,22 +173,22 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 
 ---
 
-### Phase 0 — 기반 구축 · [README](./phase-00-foundation/README.md) · [세부](./phase-00-foundation/DETAIL.md)
+### Phase 0 — 기반 구축 · [README](phase-00-foundation/README.md) · [세부](phase-00-foundation/DETAIL.md)
 
 **목표**: 외부 API도 PC 도구도 없이 안전하게 시작·종료하는 빈 CLI 골격. 설정 오류, 시크릿
 노출, 중복 실행, 부분 파일을 여기서 전부 차단한다.
 
-**진입 조건**: 착수 체크리스트 완료 · Python 3.11+ · [D001~D004](./00-start-here/DECISIONS.md) `decided`
+**진입 조건**: 착수 체크리스트 완료 · Python 3.11+ · [D001~D004](00-start-here/DECISIONS.md) `decided`
 
 | ID | 작업 | 핵심 내용 | 계약 |
 |----|------|-----------|------|
 | P0-01 | 프로젝트와 품질 도구 | `pyproject.toml`, `.venv`, 해시 포함 `requirements.lock`, `.gitignore`. `artifacts\gates\`는 제외하지 않는다 | — |
-| P0-02 | 설정 모델과 로더 | Pydantic `extra="forbid"`, `schema_version`·경로·예산·비율·`default: deny` 검증, `config_hash` 계산 | [SCHEMAS 11장](../SCHEMAS.md) |
+| P0-02 | 설정 모델과 로더 | Pydantic `extra="forbid"`, `schema_version`·경로·예산·비율·`default: deny` 검증, `config_hash` 계산 | [SCHEMAS 11장](SCHEMAS.md) |
 | P0-03 | 시크릿 로더 | 운영은 Credential Manager만. `.env`는 `dev_mode=true`에서만 허용하고 `secrets.dev_fallback` 이벤트 기록. 읽는 즉시 마스킹 등록 | — |
-| P0-04 | 공통 타입 | `Clock`·`Sleeper`·`RandomSource` 주입, `<prefix>_<ULID>` ID, `RequestContext`·`CancelToken`, 예외 계층, `canonical_json`·`args_hash` | [DESIGN 6장](../DESIGN.md) |
-| P0-05 | 데이터 트리와 SQLite | `bootstrap.py` 멱등 실행, DDL 적용, FTS5 `trigram` 부재 시 `ConfigError`, 트리거 6개 생성, 상태 전이 후 `integrity-check` 통과 | [SCHEMAS 5장](../SCHEMAS.md) |
-| P0-06 | 이벤트·마스킹 | 이벤트 봉투, append → flush → fsync, 기록 전 마스킹 통과, `app.start`/`app.stop`/`error`/`recovery.*` | [SCHEMAS 2.1](../SCHEMAS.md) |
-| P0-07 | 원자적 쓰기·복구·단일 인스턴스 | `write_atomic`(tmp → fsync → `os.replace`), 시작 시 `*.tmp`·깨진 꼬리를 `state/quarantine`으로 격리, `msvcrt.locking` 락, 두 번째 인스턴스는 종료 코드 1 | [DESIGN 11장](../DESIGN.md) |
+| P0-04 | 공통 타입 | `Clock`·`Sleeper`·`RandomSource` 주입, `<prefix>_<ULID>` ID, `RequestContext`·`CancelToken`, 예외 계층, `canonical_json`·`args_hash` | [DESIGN 6장](DESIGN.md) |
+| P0-05 | 데이터 트리와 SQLite | `bootstrap.py` 멱등 실행, DDL 적용, FTS5 `trigram` 부재 시 `ConfigError`, 트리거 6개 생성, 상태 전이 후 `integrity-check` 통과 | [SCHEMAS 5장](SCHEMAS.md) |
+| P0-06 | 이벤트·마스킹 | 이벤트 봉투, append → flush → fsync, 기록 전 마스킹 통과, `app.start`/`app.stop`/`error`/`recovery.*` | [SCHEMAS 2.1](SCHEMAS.md) |
+| P0-07 | 원자적 쓰기·복구·단일 인스턴스 | `write_atomic`(tmp → fsync → `os.replace`), 시작 시 `*.tmp`·깨진 꼬리를 `state/quarantine`으로 격리, `msvcrt.locking` 락, 두 번째 인스턴스는 종료 코드 1 | [DESIGN 11장](DESIGN.md) |
 | P0-08 | CLI와 조립 | `wiring.py` 한 곳에서 조립, `/help`·`/bye`·echo, Ctrl+C는 종료 코드 130, 스택 트레이스는 개발 모드에서만 | — |
 
 **권장 커밋 경계**: (1) pyproject·lock·gitignore → (2) config → (3) core 타입 →
@@ -210,12 +210,12 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 
 ---
 
-### Phase 1 — 대화와 raw 저장 · [README](./phase-01-chat/README.md) · [세부](./phase-01-chat/DETAIL.md)
+### Phase 1 — 대화와 raw 저장 · [README](phase-01-chat/README.md) · [세부](phase-01-chat/DETAIL.md)
 
 **목표**: 로컬 Ollama로 멀티턴 대화. 사용자 입력을 **모델 호출 전에** 저장하고 재시도·비용·
 컨텍스트 한도를 통제한다.
 
-**진입 조건**: Phase 0 게이트 0 · [D005](./00-start-here/DECISIONS.md) `decided` ·
+**진입 조건**: Phase 0 게이트 0 · [D005](00-start-here/DECISIONS.md) `decided` ·
 `settings.yaml`의 provider·model·digest·pricing이 placeholder가 아님 · Ollama 실행 중이고
 `qwen3.5:9b` digest 일치
 
@@ -232,13 +232,13 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 
 | ID | 작업 | 핵심 내용 | 계약 |
 |----|------|-----------|------|
-| P1-01 | LLM 계약과 가짜 클라이언트 | `Message`·`ToolCall`·`LLMUsage`·`LLMResponse`·`LLMClient`. `FakeLLMClient`를 **먼저** 만들어 네트워크 없이 이후 작업을 테스트. tool call은 `LLMBadResponse` | [DESIGN 5.1](../DESIGN.md) |
+| P1-01 | LLM 계약과 가짜 클라이언트 | `Message`·`ToolCall`·`LLMUsage`·`LLMResponse`·`LLMClient`. `FakeLLMClient`를 **먼저** 만들어 네트워크 없이 이후 작업을 테스트. tool call은 `LLMBadResponse` | [DESIGN 5.1](DESIGN.md) |
 | P1-02 | Ollama 클라이언트 | base URL은 `http://127.0.0.1:11434`만 허용. 연결 실패·timeout·5xx만 지수 backoff+jitter 재시도, 잘못된 요청·digest 불일치는 재시도 금지. `llm.request`/`llm.retry`/`llm.response` 기록 | — |
-| P1-03 | 세션과 raw 로그 | `sessions` 행 생성, raw JSONL 기록, 깨진 꼬리 분리. `/clear`는 프롬프트만 비우고 감사 기록은 보존 | [SCHEMAS 4장](../SCHEMAS.md) |
-| P1-04 | 프롬프트와 컨텍스트 예산 | `system_core.md`에 한국어 응답·추측 금지·검색 전 단정 금지. 최근 3턴 유지, 상한 초과 시 오래된 턴부터 압축, 입력 자체가 한도 초과면 호출하지 않음 | [DESIGN 7.1](../DESIGN.md) |
-| P1-05 | 비용 예산 | `BudgetGuard`. 금액은 `Decimal` 계산·문자열 저장. 요청 전 최악 비용 검사, 80% 세션당 1회 경고, 100%에서 신규 요청 차단, `/budget` | [DESIGN 12장](../DESIGN.md) |
+| P1-03 | 세션과 raw 로그 | `sessions` 행 생성, raw JSONL 기록, 깨진 꼬리 분리. `/clear`는 프롬프트만 비우고 감사 기록은 보존 | [SCHEMAS 4장](SCHEMAS.md) |
+| P1-04 | 프롬프트와 컨텍스트 예산 | `system_core.md`에 한국어 응답·추측 금지·검색 전 단정 금지. 최근 3턴 유지, 상한 초과 시 오래된 턴부터 압축, 입력 자체가 한도 초과면 호출하지 않음 | [DESIGN 7.1](DESIGN.md) |
+| P1-05 | 비용 예산 | `BudgetGuard`. 금액은 `Decimal` 계산·문자열 저장. 요청 전 최악 비용 검사, 80% 세션당 1회 경고, 100%에서 신규 요청 차단, `/budget` | [DESIGN 12장](DESIGN.md) |
 | P1-06 | 대화 오케스트레이터와 CLI | 도구 없는 `handle_turn`, 취소 토큰 확인, 오류를 사용자 메시지로 변환, 명령 디스패처 분리 | — |
-| P1-07 | 크래시·재시도 테스트 | 5개 종료 지점 × 4회. 강제 종료 후 입력 유실 0건, 주입한 sleeper로 backoff 검증, 운영 모드에서 kill hook 무효 | [TESTING 8장](../TESTING.md) |
+| P1-07 | 크래시·재시도 테스트 | 5개 종료 지점 × 4회. 강제 종료 후 입력 유실 0건, 주입한 sleeper로 backoff 검증, 운영 모드에서 kill hook 무효 | [TESTING 8장](TESTING.md) |
 
 **필수 이벤트**: `session.start`/`session.end`, `user.input`, `llm.request`/`llm.retry`/`llm.response`,
 `budget.warn`/`budget.stop`, `error`
@@ -255,7 +255,7 @@ python scripts\gate.py --integrity   # 운영 중 일일 점검
 
 ---
 
-### Phase 2 — 장기 기억과 세션 복구 · [README](./phase-02-memory/README.md) · [세부](./phase-02-memory/DETAIL.md)
+### Phase 2 — 장기 기억과 세션 복구 · [README](phase-02-memory/README.md) · [세부](phase-02-memory/DETAIL.md)
 
 **목표**: 명시적 기억·교정·세션 요약 후보를 SQLite에 저장하고 다음 세션에서 검색한다.
 사용자가 생성 이유를 확인하고 수정·삭제·내보낼 수 있어야 한다.
@@ -276,10 +276,10 @@ confirmed/candidate → /forget → deleted
 
 | ID | 작업 | 핵심 내용 | 계약 |
 |----|------|-----------|------|
-| P2-01 | 모델과 DB 저장소 | `MemoryStore` 계약, WAL·synchronous FULL·foreign keys·busy timeout, `put_record` ID 기준 멱등, 같은 key의 confirmed 하나 제약을 트랜잭션과 인덱스로 이중 보장 | [DESIGN 5.2](../DESIGN.md), [SCHEMAS 5장](../SCHEMAS.md) |
-| P2-02 | FTS와 검색 랭킹 | 시작 시 FTS5 trigram 검사, key exact + FTS 후보 수집(임베딩 비활성), 가중치·반감기·tie-break를 순수 함수로, deleted·superseded 제외 | [DESIGN 8장](../DESIGN.md) |
-| P2-03 | 명시적 기억과 교정 | `기억해:`, `틀림: A → B`, `/memory` 하위 명령(`list`·`confirm`·`edit`·`export`), `/forget`. key를 확실히 못 찾으면 저장하지 말고 되묻는다 | [SCHEMAS 6장](../SCHEMAS.md) |
-| P2-04 | 세션 요약 | `/bye`에서 raw 유효 줄을 Privacy Gate 통과 후 Summarizer로. fact는 전부 candidate, 각 candidate에 `evidence_turn_ids` 필수. 구조 위반 시 세션 종료를 실패시키지 말고 `session.summary_failed` 기록 | [SCHEMAS 7장](../SCHEMAS.md) |
+| P2-01 | 모델과 DB 저장소 | `MemoryStore` 계약, WAL·synchronous FULL·foreign keys·busy timeout, `put_record` ID 기준 멱등, 같은 key의 confirmed 하나 제약을 트랜잭션과 인덱스로 이중 보장 | [DESIGN 5.2](DESIGN.md), [SCHEMAS 5장](SCHEMAS.md) |
+| P2-02 | FTS와 검색 랭킹 | 시작 시 FTS5 trigram 검사, key exact + FTS 후보 수집(임베딩 비활성), 가중치·반감기·tie-break를 순수 함수로, deleted·superseded 제외 | [DESIGN 8장](DESIGN.md) |
+| P2-03 | 명시적 기억과 교정 | `기억해:`, `틀림: A → B`, `/memory` 하위 명령(`list`·`confirm`·`edit`·`export`), `/forget`. key를 확실히 못 찾으면 저장하지 말고 되묻는다 | [SCHEMAS 6장](SCHEMAS.md) |
+| P2-04 | 세션 요약 | `/bye`에서 raw 유효 줄을 Privacy Gate 통과 후 Summarizer로. fact는 전부 candidate, 각 candidate에 `evidence_turn_ids` 필수. 구조 위반 시 세션 종료를 실패시키지 말고 `session.summary_failed` 기록 | [SCHEMAS 7장](SCHEMAS.md) |
 | P2-05 | 프롬프트 기억 주입 | confirmed 검색 후 주입, candidate는 별도 블록에 미확정 명시, 예산 초과 시 낮은 점수부터 제외, 주입 ID를 `llm.request.memory_record_ids`에 기록 | — |
 | P2-06 | 체크포인트와 시작 복구 | N턴마다 `session_checkpoints` 커밋. 시작 시 tmp/quarantine → DB integrity → 미완료 세션 → running task 순 검사. `prompt`/`auto`/`discard` 정책 | — |
 | P2-07 | 삭제·인덱스 일관성 | `/forget`은 한 트랜잭션에서 상태 변경 + tombstone + FTS 제거 + 임베딩 제거 + `memory.delete`. 실패 시 전체 rollback | — |
@@ -296,55 +296,41 @@ confirmed/candidate → /forget → deleted
 
 ---
 
-### Phase 3 — 검색과 근거 · [README](./phase-03-research/README.md) · [세부](./phase-03-research/DETAIL.md)
+### Phase 3 — 검색과 근거 · [README](phase-03-research/README.md) · [세부](phase-03-research/DETAIL.md)
 
-> ★ **이 Phase 완료가 MVP 경계다.**
+현재 기반: 문서 문자 청크 → embeddinggemma/FTS5 → sqlite-vec/RRF/Cross-Encoder →
+원문을 Qwen에 제공 → 인용·주장 검사. Ollama는 임베딩·생성에 이미 사용한다.
 
-**목표**: 외부 API 없이 **FTS5 키워드 + 로컬 벡터 임베딩 + RRF 융합의 <하이브리드 RAG>**를 구현한다. 질문 시 하이브리드 서고를 1차 선조회(0.01초)하고, 없을 때만 Ollama 및 웹 검색으로 확장하며, 새 답변을 지식베이스에 자동 누적한다.
+| 기존 ID | 유지하는 책임 |
+|---|---|
+| P3-01 | 목적별 개인정보 검사 |
+| P3-02 | 도구 공통 계약·레지스트리 |
+| P3-03 | 문서 읽기·색인·삭제 |
+| P3-04 | 하이브리드 검색·재정렬 |
+| P3-05 | 허용된 웹 검색 |
+| P3-06 | 안전한 fetcher, 답변 경로 연결 여부 별도 |
+| P3-07 | 검색 원문의 신뢰 경계 |
+| P3-08 | 답변 생성·근거 검사·미검증 대화 저장 |
 
-**진입 조건**: Phase 2 게이트 0 + 기억 정확도 90% 이상 · [D006](./00-start-here/DECISIONS.md)
-`decided` · `privacy.yaml` 문서 전송 등급 검토 · D012가 `pending`이면 `.md`·`.txt`만 지원
+추가 개선을 다음 순서로 구현했다. 자동 평가와 남은 실장치 인수는 PROGRESS를 따른다.
 
-| ID | 작업 | 핵심 내용 | 계약 |
-|----|------|-----------|------|
-| P3-01 | Privacy Gate 완성 | 탐지기 컴파일, 잘못된 정규식은 시작 시 거부. `for_api`·`for_log`·`for_tts`·`for_memory_write`를 독립 경로로. Finding에 원문 미저장. **`secret`은 사용자가 승인해도 외부 전송 금지** | [DESIGN 5.3](../DESIGN.md) |
-| P3-02 | 도구 공통 계약과 레지스트리 | `ToolSpec`·`ToolResult`·`Tool`. 현재 Phase 이하 + enabled만 등록. `additionalProperties=false`·required·길이 제한 검사. LLM에는 이름·설명·인자 스키마만 노출하고 risk·capability·실제 경로는 숨김. 검색 결과는 항상 `untrusted=true` | — |
-| P3-03 | 로컬 문서 인덱싱 | 허용 확장자·최대 크기, canonical path가 docs root 아래인지 확인, `content_hash` 변경분만 재색인, chunk `start_char`/`end_char`/ordinal, 문서·chunk·FTS를 한 트랜잭션으로. PDF parser 미정이면 `.pdf`를 제거하고 "지원하지 않는 형식"을 명시 | — |
-| P3-04 | 하이브리드 검색과 RRF 융합 | FTS5(BM25)와 로컬 벡터 임베딩 순위를 RRF 알고리즘으로 융합. 1차 완결 시 즉시 응답, 부재 시 2단계 Ollama/웹 확장. chunk 병합·토큰 예산. `local_only` 원문은 외부 전송 차단 | — |
-| P3-05 | 웹 검색 제공자 | query를 `for_external_text(purpose="search_query")` 통과 후 전송. `SearchHit`에 title·URL·snippet·published_at·fetched_at. 요청 전 `BudgetGuard.check`, 성공 후 `record_charge`. **검색 오류를 빈 성공으로 위장 금지**. 자동 테스트는 `FakeSearchProvider`만 | — |
-| P3-06 | 안전한 fetcher | http/https만, 자격증명 URL·loopback·사설/link-local IP·`.local`·장치 스킴 차단, DNS 해석 전후 IP 모두 검사(rebinding 완화), redirect마다 재검증 최대 3회, 헤더와 누적 크기 모두 2MB, Content-Type 확인, 비본문 제거 후 `untrusted_content` 봉투 | — |
-| P3-07 | 신뢰 경계와 프롬프트 | 본문 안의 봉투 종료 태그 이스케이프, 외부 본문에서 나온 URL·경로·명령을 도구 인자로 자동 승격 금지, 현재 요청과 무관한 부작용 도구 call 거부 | [SCHEMAS 9장](../SCHEMAS.md) |
-| P3-08 | 근거 조립과 지식 자동 누적 | 주장마다 근거 ID, 독립 출처 2개 미만 시 `근거 부족`, 출처 충돌 시 `상충`. 새로 발견·도출된 지식은 로컬 RAG 저장소에 자동 색인·보관하여 자가 성장 체계 구축 | — |
+| 작업 | 결과 | 선행 |
+|---|---|---|
+| R3-01 | 질문 경로·후속 질문 QueryPlan | 기존 대화·검색 |
+| R3-02 | query/document 임베딩 입력·버전 | 기준선 확보 |
+| R3-03 | 문맥·토큰 청크와 원문 위치 | 임베딩 입력 계약 |
+| R3-04 | 설정 변경 감지·색인 세대/복구 | R3-02·03 |
+| R3-05 | 재정렬·생성 예산과 인접 문맥 | R3-04 |
+| R3-06 | 근거/일반/보류 답변 모드 | R3-01·05 |
+| R3-07 | 계산 근거와 검사 개선 | R3-05·06 |
+| R3-08 | 대표 평가·운영 인수 | 자료 준비는 초반, 최종 판정은 R3-01~07 이후 |
 
-**응답 최소 형식**
-
-```text
-핵심 요약
-- 주장 A [1]
-- 주장 B [2]
-
-근거
-[1] 제목 — URL 또는 파일명 (YYYY-MM-DD 확인)
-[2] 제목 — URL 또는 파일명 (YYYY-MM-DD 확인)
-
-상태: 확실 | 상충 | 근거 부족
-```
-
-**2026-08-11 보안 검토 반영**: redirect 자동 추적 금지(매 단계 재검사), DNS 검사에서 허용한
-IP를 소켓 연결에 고정, 신뢰도는 청크 수가 아니라 정규화 URL·`doc_id`의 독립 개수로 계산,
-독립 출처 2개 미만이면 `확실`을 `근거 부족`으로 강등.
-
-**완료 게이트**: `python scripts\gate.py --phase 3`
-
-- Phase 3·security 테스트 통과 / prompt injection 코퍼스 전부 차단
-- `local_only` 외부 전송 0건 / 검색형 핵심 주장 근거 표기
-- 웹·문서 검색 실패 처리 구분 / MVP 데모 20회 연속 성공(수동)
-
-**하지 않는 것**: 파일 쓰기 도구, 검색 결과가 지시한 행동 자동 실행, 임베딩 필수화
+구현 단계마다 TESTING의 RG-01~08과 추적표를 갱신한다. 신규 수치·갱신 정책은 D024에
+평가 근거를 남긴다. 기존 gate 통과만으로 새 요구 완료를 선언하지 않는다.
 
 ---
 
-### Phase 4 — 안전한 PC 도구 · [README](./phase-04-tools/README.md) · [세부](./phase-04-tools/DETAIL.md)
+### Phase 4 — 안전한 PC 도구 · [README](phase-04-tools/README.md) · [세부](phase-04-tools/DETAIL.md)
 
 **목표**: 화이트리스트에 등록된 앱·폴더·URL·텍스트 파일 생성만 수행한다. LLM 출력은 실행
 요청일 뿐이며 스키마 검증 → 정규화 → 정책 판정 → 승인 → 감사 기록을 모두 통과해야 한다.
@@ -366,12 +352,12 @@ LLM ToolCall → registry 조회 → JSON Schema 검증
 
 | ID | 작업 | 핵심 내용 | 계약 |
 |----|------|-----------|------|
-| P4-01 | 경로 정규화 | 설정 경로 함수와 도구 인자 경로 함수를 분리. 도구는 root enum + relative path만 수용. 환경 변수·절대 경로·UNC·장치 경로·NTFS ADS·Windows 예약어·끝 공백/점 거부. **중간 요소마다** reparse point 검사, `commonpath` 대소문자 무시 비교 | [DESIGN 11.4](../DESIGN.md) |
-| P4-02 | Safety Gate | `Verdict` 구현, normalized args에서 정책 엔진이 display 생성, 기본 risk + 조건별 escalation 합산, forbidden은 승인과 무관하게 deny, `interactive=false`에서 승인 필요 작업은 `ApprovalRequired` | [DESIGN 5.4](../DESIGN.md) |
+| P4-01 | 경로 정규화 | 설정 경로 함수와 도구 인자 경로 함수를 분리. 도구는 root enum + relative path만 수용. 환경 변수·절대 경로·UNC·장치 경로·NTFS ADS·Windows 예약어·끝 공백/점 거부. **중간 요소마다** reparse point 검사, `commonpath` 대소문자 무시 비교 | [DESIGN 11.4](DESIGN.md) |
+| P4-02 | Safety Gate | `Verdict` 구현, normalized args에서 정책 엔진이 display 생성, 기본 risk + 조건별 escalation 합산, forbidden은 승인과 무관하게 deny, `interactive=false`에서 승인 필요 작업은 `ApprovalRequired` | [DESIGN 5.4](DESIGN.md) |
 | P4-03 | 승인 ticket | request·tool·args hash·risk·channel·TTL 결합, 1회용이며 프로세스 재시작 시 자동 무효, medium은 y/n·high는 고정 문구 입력, **voice channel은 high ticket 발급 불가**, 실행 직전 재정규화 후 hash 비교 | — |
-| P4-04 | 감사 로그 | intent/result/denied 레코드. intent를 **실행 전에** flush. 단조 seq + 이전 entry hash로 날짜 파일 연결. 실행 전에 끝난 요청도 `phase="denied"` 한 줄과 `cause`. 일반 대화 내용은 미포함 | [SCHEMAS 3장](../SCHEMAS.md) |
-| P4-05 | Secure Tool Runner | Phase 3에서 전용 경로로 돌던 `web_search`·`doc_search`·`fetch_url`을 Runner로 이관(실행 경로가 둘이면 정책·감사가 한쪽만 적용). `shell=True`·`os.system`·문자열 명령 조립 금지. 최소 환경 변수와 고정 cwd. `managed_process`는 Job Object로 자식 트리 묶고 timeout에 전체 종료, `detached_allowlisted`는 PID 기록 후 유지 | [DESIGN 5.6](../DESIGN.md) |
-| P4-06 | 개별 도구 | `open_app`(low), `open_folder`(low), `open_url`(low/medium), `create_file`(신규 medium / overwrite high). 실패를 성공 메시지로 바꾸지 않는다 | [SCHEMAS 8장](../SCHEMAS.md) |
+| P4-04 | 감사 로그 | intent/result/denied 레코드. intent를 **실행 전에** flush. 단조 seq + 이전 entry hash로 날짜 파일 연결. 실행 전에 끝난 요청도 `phase="denied"` 한 줄과 `cause`. 일반 대화 내용은 미포함 | [SCHEMAS 3장](SCHEMAS.md) |
+| P4-05 | Secure Tool Runner | Phase 3에서 전용 경로로 돌던 `web_search`·`doc_search`·`fetch_url`을 Runner로 이관(실행 경로가 둘이면 정책·감사가 한쪽만 적용). `shell=True`·`os.system`·문자열 명령 조립 금지. 최소 환경 변수와 고정 cwd. `managed_process`는 Job Object로 자식 트리 묶고 timeout에 전체 종료, `detached_allowlisted`는 PID 기록 후 유지 | [DESIGN 5.6](DESIGN.md) |
+| P4-06 | 개별 도구 | `open_app`(low), `open_folder`(low), `open_url`(low/medium), `create_file`(신규 medium / overwrite high). 실패를 성공 메시지로 바꾸지 않는다 | [SCHEMAS 8장](SCHEMAS.md) |
 | P4-07 | CLI 승인 흐름 | `pending_approval` display 그대로 표시, 거부 시 `approval.deny` 후 미실행 종료, 승인 시 ticket을 `resume_after_approval`로 전달, 대기 중 새 입력·Ctrl+C·timeout은 ticket 폐기 | — |
 
 **2026-08-11 보안 검토 반영**: `typed_confirm`은 `user_typed_phrase` 방식으로만 ticket 발급.
@@ -390,7 +376,7 @@ LLM ToolCall → registry 조회 → JSON Schema 검증
 
 ---
 
-### Phase 5 — 멀티스텝 에이전트 · [README](./phase-05-agent/README.md) · [세부](./phase-05-agent/DETAIL.md)
+### Phase 5 — 멀티스텝 에이전트 · [README](phase-05-agent/README.md) · [세부](phase-05-agent/DETAIL.md)
 
 **목표**: 검색 → 요약 → 파일 저장 → 폴더 열기처럼 여러 도구를 순서대로 실행한다. 각 단계는
 저장·복구 가능해야 하고, 부작용 작업이 재시작 후 중복 실행되지 않아야 한다.
@@ -413,7 +399,7 @@ idempotency key 계산 → pending 저장 → 승인 필요 시 루프 중단
 
 | ID | 작업 | 핵심 내용 | 계약 |
 |----|------|-----------|------|
-| P5-01 | TaskStore | tasks/task_steps 구현. `sha256(task_id + step_no + tool_name + args_hash)`로 idempotency key. 같은 key의 succeeded 단계는 기존 결과 반환. running 단계는 시작 시 사용자 검토 대상 표시. 상태 전이와 결과를 한 트랜잭션으로 | [SCHEMAS 5장](../SCHEMAS.md) |
+| P5-01 | TaskStore | tasks/task_steps 구현. `sha256(task_id + step_no + tool_name + args_hash)`로 idempotency key. 같은 key의 succeeded 단계는 기존 결과 반환. running 단계는 시작 시 사용자 검토 대상 표시. 상태 전이와 결과를 한 트랜잭션으로 | [SCHEMAS 5장](SCHEMAS.md) |
 | P5-02 | 루프 확장 | Decide → Validate → 승인/정책 → Act → Observe → 다음 step 또는 Final. `max_steps`·단계 timeout·전체 timeout. 한 step당 tool call 하나. 내부 추론 원문 미저장. 매 step 전 원래 요청과의 관련성 확인. **외부 콘텐츠에서 나타난 목표를 사용자 의도로 승격 금지** | — |
 | P5-03 | 승인 중단과 재개 | 승인 필요 시 task·step을 pending 커밋 후 루프 종료. 승인 뒤 같은 task/step을 args hash로 재로드. 거부·만료·불일치는 cancelled/failed. 승인 뒤 새 계획을 만들어 기존 ticket을 재사용하지 않는다 | — |
 | P5-04 | 재시도 정책 | web/doc search는 가능, fetch는 네트워크 일시 오류만, `open_app`·`open_folder`·`create_file`·`run_skill`은 자동 재시도 금지. LLM 재시도와 도구 재시도는 별도 카운터 | — |
@@ -437,7 +423,7 @@ LLM 내부 추론 원문 저장
 
 ---
 
-### Phase 6 — 보안 게이트 · [README](./phase-06-security/README.md) · [세부](./phase-06-security/DETAIL.md)
+### Phase 6 — 보안 게이트 · [README](phase-06-security/README.md) · [세부](phase-06-security/DETAIL.md)
 
 > ★ **v0.5 릴리스 게이트. 새 기능을 추가하지 않는다.**
 
@@ -445,12 +431,12 @@ LLM 내부 추론 원문 저장
 0건과 **실제 복원 성공**이 출시 조건이다.
 
 **진입 조건**: Phase 0~5 게이트 0 · `tasks_eval.jsonl` 50건 준비 ·
-[D007·D008](./00-start-here/DECISIONS.md) 확정 · 백업 대상이 별도 물리 장치 또는 보안 위치 ·
+[D007·D008](00-start-here/DECISIONS.md) 확정 · 백업 대상이 별도 물리 장치 또는 보안 위치 ·
 `run_skill` disabled
 
 | ID | 작업 | 핵심 내용 |
 |----|------|-----------|
-| P6-01 | 위협 모델 검토 | [위협 모델](./reference/THREAT_MODEL.md)의 자산·경계·시나리오를 코드와 연결. 각 위협에 예방 통제·탐지 통제·테스트·잔여 위험. **테스트 없는 High 위협은 릴리스 차단** |
+| P6-01 | 위협 모델 검토 | [위협 모델](reference/THREAT_MODEL.md)의 자산·경계·시나리오를 코드와 연결. 각 위협에 예방 통제·탐지 통제·테스트·잔여 위험. **테스트 없는 High 위협은 릴리스 차단** |
 | P6-02 | 보안 코퍼스 완성 | prompt injection·envelope escape·memory exfiltration 확장. path 코퍼스에 인코딩·대소문자·8.3 short name·ADS·UNC·장치 경로. URL 코퍼스에 IPv4 변형·IPv6·redirect-to-private·mixed-script IDN. ticket 만료·재사용·도구명 변경·args 변경 검증 |
 | P6-03 | 시크릿 유출 매트릭스 | 같은 테스트 시크릿을 LLM 메시지·검색 query·events/raw/audit·memory·TTS·예외 traceback·백업 산출물에 넣고 원문 0건 검증. 탐지기의 false positive/negative 샘플도 기록 |
 | P6-04 | 감사 로그 검증기 | 날짜 파일을 seq 순서로 읽고 파일 경계에서도 prev hash 연결 확인. canonical JSON으로 entry hash 재계산. 누락·중복 seq·변조 line·깨진 마지막 줄을 구분 보고. **검증은 로그를 수정하지 않는다** (`gate.py --verify-audit`) |
@@ -480,7 +466,7 @@ Medium/High 결함의 무문서 예외 처리
 
 ---
 
-### Phase 7 — 음성 입출력 · [README](./phase-07-voice/README.md) · [세부](./phase-07-voice/DETAIL.md)
+### Phase 7 — 음성 입출력 · [README](phase-07-voice/README.md) · [세부](phase-07-voice/DETAIL.md)
 
 **목표**: 명시적으로 시작한 `--voice` 모드에서 로컬 웨이크워드 "자비스"로 한국어 음성 대화를
 시작하고 짧은 응답을 안전하게 낭독한다. 기존 Orchestrator를 재사용하며 **음성 경로가 승인
@@ -489,8 +475,8 @@ Medium/High 결함의 무문서 예외 처리
 > 사용자 요청으로 Phase 1 직후 로컬 음성 세로 기능을 먼저 구현했다. 이는 Phase 7 정식 완료를
 > 뜻하지 않는다. Phase 2~6과 음성 승인 정책을 마친 뒤 전체 게이트를 다시 수행한다.
 
-**진입 조건**: v0.5/Phase 6 게이트 통과 · [D009](./00-start-here/DECISIONS.md) TTS 확정 ·
-[D016](./00-start-here/DECISIONS.md) STT 모델·오디오 장치 사전 확인 · text channel에서 Phase
+**진입 조건**: v0.5/Phase 6 게이트 통과 · [D009](00-start-here/DECISIONS.md) TTS 확정 ·
+[D016](00-start-here/DECISIONS.md) STT 모델·오디오 장치 사전 확인 · text channel에서 Phase
 4~5가 안정 동작
 
 **상태 흐름**
@@ -509,9 +495,9 @@ Idle → WakeListening → "무엇을 도와드릴까요." → Recording
 |----|------|-----------|
 | P7-01 | 음성 계약 | `AudioFrame`·`Transcript`·`STTEngine`·`TTSEngine`. mono PCM, sample rate·dtype 명시. 빈 음성·너무 짧은 음성·timeout을 정상 실패로 구분. 엔진 타입은 `voice` 모듈 밖으로 미노출 |
 | P7-02 | 웨이크워드 controller와 PTT | `--voice`에서만 마이크 개방. **호출 전 PCM은 제한된 메모리 버퍼에만 두고 디스크·API에 저장하지 않는다.** 호출 시 정확히 "무엇을 도와드릴까요." 재생 후 녹음. 최대 녹음 시간·무음 제한. 녹음 중임을 상태와 UI 이벤트로 즉시 알림. 장치 오류 시에도 text UI 유지 |
-| P7-03 | STT | 호출어는 `vosk-model-small-ko-0.22`를 SHA-256 검증 후 CPU 제한 문법으로. 질문은 고정 revision `Systran/faster-whisper-small`로 `language="ko"`·`beam_size=5`·VAD. CUDA `int8_float16` 우선, 실패 시 CPU `int8` 폴백을 화면에 명시. 빈 결과·낮은 log probability·높은 no-speech probability는 인식 실패로 분류해 LLM에 전달하지 않음. raw 저장 전 Privacy Gate 적용. 세부는 [VOICE_STT](./reference/VOICE_STT.md) |
+| P7-03 | STT | 호출어는 `vosk-model-small-ko-0.22`를 SHA-256 검증 후 CPU 제한 문법으로. 질문은 고정 revision `Systran/faster-whisper-small`로 `language="ko"`·`beam_size=5`·VAD. CUDA `int8_float16` 우선, 실패 시 CPU `int8` 폴백을 화면에 명시. 빈 결과·낮은 log probability·높은 no-speech probability는 인식 실패로 분류해 LLM에 전달하지 않음. raw 저장 전 Privacy Gate 적용. 세부는 [VOICE_STT](reference/VOICE_STT.md) |
 | P7-04 | Orchestrator 연결 | Transcript를 기존 `handle_turn`에 전달, `RequestContext.channel="voice"`를 정책 엔진까지 유지. 인식 결과를 먼저 표시해 취소 기회 제공. low는 text와 동일 결과. **high는 음성으로 승인 불가하고 화면 typed confirmation으로 전환** |
-| P7-05 | TTS | 최종 답변만 낭독하고 tool 원문·감사 로그·승인 token은 읽지 않음. 모든 문자열이 `for_tts` 통과. secret/pii_high는 화면 전용 fallback 문장. 최대 글자 수 초과 시 요약만 낭독. Windows SAPI `Microsoft Heami Desktop` 고정(`rate=4`, 약 1.55배), 온라인 TTS 폴백 없음. [D017](./00-start-here/DECISIONS.md) 게이트와 [D018](./00-start-here/DECISIONS.md) 한 문장 명령·중단 핫키 적용 |
+| P7-05 | TTS | 최종 답변만 낭독하고 tool 원문·감사 로그·승인 token은 읽지 않음. 모든 문자열이 `for_tts` 통과. secret/pii_high는 화면 전용 fallback 문장. 최대 글자 수 초과 시 요약만 낭독. Windows SAPI `Microsoft Heami Desktop` 고정(`rate=4`, 약 1.55배), 온라인 TTS 폴백 없음. [D017](00-start-here/DECISIONS.md) 게이트와 [D018](00-start-here/DECISIONS.md) 한 문장 명령·중단 핫키 적용 |
 | P7-06 | 자원 관리 | Vosk 호출어는 CPU, Whisper small은 질문 처리 중에만 GPU. 녹음 buffer 상한. 장시간 idle이면 선택적 모델 unload |
 
 **완료 게이트**: `python scripts\gate.py --phase 7`
@@ -525,14 +511,14 @@ High 승인, 긴 문서 전체 낭독
 
 ---
 
-### Phase 8 — 상주 UI와 패키징 · [README](./phase-08-resident-ui/README.md) · [세부](./phase-08-resident-ui/DETAIL.md)
+### Phase 8 — 상주 UI와 패키징 · [README](phase-08-resident-ui/README.md) · [세부](phase-08-resident-ui/DETAIL.md)
 
 > ★ **v1 후보.**
 
 **목표**: 터미널을 직접 열지 않고 트레이·전역 단축키로 호출한다. 승인 대기와 마이크 상태를
 숨기지 않고, Windows 재시작 뒤에도 데이터 손상 없이 복구 상태를 표시한다.
 
-**진입 조건**: Phase 7 게이트 통과 · [D013~D015](./00-start-here/DECISIONS.md) 확정 ·
+**진입 조건**: Phase 7 게이트 통과 · [D013~D015](00-start-here/DECISIONS.md) 확정 ·
 CLI 경로에서 모든 기능·승인·복구 동작 · UI가 Orchestrator 내부를 직접 호출하지 않음
 
 **UI 상태 머신**
@@ -559,7 +545,7 @@ Error → Idle | ShuttingDown
 | P8-06 | 자동 시작 | 사용자 opt-in이며 agent tool이 아니라 설치/UI 설정 기능. 레지스트리 직접 수정 금지. enable/disable 대칭 제공. 제거 시 자동 시작 항목도 제거. 자동 시작 실패가 수동 실행을 막지 않음 |
 | P8-07 | 패키징 | `scripts/build.ps1` 한 명령으로 재현 가능한 빌드. 앱·schema·prompt·설정 template version을 manifest에. **시크릿·운영 설정·운영 DB·raw 로그는 패키지에 미포함.** 새 Windows 프로필에서 bootstrap부터 테스트. 기존 데이터는 덮어쓰지 않고 migration. rollback 시 DB schema 호환 여부 선검사 |
 
-**완료 게이트**: `python scripts\gate.py --phase 8` + `pytest tests\slow\test_packaged_bootstrap.py`
+**완료 게이트**: `python scripts\gate.py --phase 8` + `pytest scripts\tests\slow\test_packaged_bootstrap.py`
 
 - 단축키로 입력 창·PTT 호출 / 단일 인스턴스·중복 단축키 차단
 - 마이크 상태 항상 표시 / 승인 상태와 실제 실행 상태 일치
@@ -571,7 +557,7 @@ Error → Idle | ShuttingDown
 
 ---
 
-### 운영과 릴리스 · [README](./operations/README.md) · [세부](./operations/DETAIL.md)
+### 운영과 릴리스 · [README](operations/README.md) · [세부](operations/DETAIL.md)
 
 > ★ **7일 안정화 통과가 v1 릴리스다.**
 
@@ -615,52 +601,65 @@ Error → Idle | ShuttingDown
 
 ---
 
-### Post-v1 — 선택 고도화 · [README](./post-v1/README.md) · [세부](./post-v1/DETAIL.md)
+### Post-v1 — 선택 고도화 · [README](post-v1/README.md) · [세부](post-v1/DETAIL.md)
 
-v1의 7일 안정화가 끝나기 전에는 시작하지 않는다. 아래를 **한 릴리스에 묶지 않고** 각각 별도
-branch·결정·게이트로 진행한다.
+새 선택 기능의 릴리스는 v1 안정화와 별도 결정·게이트를 따른다. `post-v1` 폴더에는 현재 구현된
+로컬 임베딩·재정렬의 운영 문서도 있으므로 폴더명으로 기능 상태를 판단하지 않는다.
 
 | 후보 | 범위 |
 |------|------|
 | 로컬 LLM 고도화 | 다중 모델 라우팅·모델 교체·더 큰 문맥. 교체마다 hash·출처·라이선스를 새 결정으로 기록 |
-| 임베딩 검색 | 현재 FTS 정확도를 먼저 저장하고, 혼합 시 평가셋 정확도가 실제로 오를 때만 기본 활성화 |
+| 검색 고도화 | 임베딩·RRF·재정렬은 현재 기반. 기본 품질 개선은 R3, 대규모 ANN 등은 별도 평가·제안 |
 | 외부 서비스 연동 | 캘린더·메일은 읽기 전용부터. 응답은 untrusted content. 쓰기·발송은 별도 High 기능 |
 | Wakeword 고도화 | 사용자별 호출어. 호출 전 오디오는 계속 미저장. false activation 장기 테스트 |
 | 피드백 통계 | 평가 데이터로만 저장하고 프롬프트·도구 정책을 자동 변경하지 않음 |
 | 파인튜닝 | 마지막 선택지. 동의·삭제·익명화·license를 먼저 정의 |
 
-각 제안은 [기능 제안 문서 양식](./post-v1/README.md)을 채우고 결정 ID를 받아야 한다.
+각 제안은 [기능 제안 문서 양식](post-v1/README.md)을 채우고 결정 ID를 받아야 한다.
 
 ---
 
 ## 6. 결정 의존 맵
 
 코드가 대신 정할 수 없는 값이다. `pending`인 항목은 해당 Phase를 막는다. 전체 목록과 근거는
-[DECISIONS.md](./00-start-here/DECISIONS.md)에 있다.
+[DECISIONS.md](00-start-here/DECISIONS.md)에 있다.
 
 | Phase | 결정 | 상태 | 미결정 시 영향 |
 |-------|------|------|----------------|
 | Phase 0 | D001~D004 경로·저장·패키지 관리 | decided | — |
 | Phase 1 | D005 LLM 런타임·모델 (Ollama + `qwen3.5:9b`) | decided | 구현 시작 불가였음 |
 | Phase 3 | D006 검색 제공자 (DuckDuckGo `ddgs`) | decided | 웹 검색 구현 불가였음 |
-| Phase 3 | D012 PDF parser | **pending** | `.pdf` 비활성, `.md`·`.txt`만 지원 |
-| Phase 6 | D007 백업 대상 · D008 암호화 도구 | **pending** | v0.5 릴리스 게이트 통과 불가 |
+| Phase 3 | D012 PDF parser | decided | 텍스트 PDF 직접 추출·구조/페이지 보존; OCR 별도 |
+| Phase 6 | D007 백업 대상 · D008 암호화 도구 | decided | 복원·릴리스 검증 별도 |
 | Phase 7 | D009 TTS · D010 음성 호출 · D016 한국어 STT | decided | — |
 | Phase 7 | D017 끼어들기 게이트 · D018 호출·한 문장 명령 | decided | — |
 | Phase 8 | D011 상주 시작 (autostart 기본 false) | decided | — |
 | Phase 8 | D013 패키징 · D014 트레이·단축키 · D015 자동 시작 방식 | **pending** | Phase 8 구현 시작 불가 |
 | 전체 | D019 v2 재구축 데이터 격리 | decided | — |
 
-**지금 막혀 있는 것은 없다.** D007·D008·D012·D013~D015는 해당 Phase 진입 전에 확정하면 된다.
+R3 코드·자동 평가를 적용했다. D024는 개발 기본값이며 실무 튜닝은 별도다.
+2026-10-15 R3-02·03·04 보완: 질문 전체 입력 계약 → 문서 재귀 분할 → 정책 버전 재색인 →
+회귀·실제 모델 검증. [재귀 청크 적용 보고](rag/RAG_RECURSIVE_CHUNKING.md)를 따른다.
+2026-10-15 PDF 후속: 추출 → 여백 제거 → 법령 구조화 → 재귀 청크 → 출처 저장 → 실제 PDF 검증.
+[PDF 적용 보고](rag/RAG_PDF_INGESTION.md)를 따른다. D013~D015는 배포 작업 전에 확인한다.
 
 ---
 
 ## 7. 관련 문서
 
-- [문서 지도](./README.md) — 폴더 색인과 릴리스 경계
-- [세부 개발문서 전체 지도](./DETAIL.md) — 배경 설명 모음
-- [개발 진행 현황](./PROGRESS.md) — 현재 상태와 게이트 증거
-- [결정 기록](./00-start-here/DECISIONS.md) — 미결정 값
-- [요구사항 추적표](./reference/TRACEABILITY.md) — 요구 → 설계 → 데이터 → 테스트
-- [위협 모델](./reference/THREAT_MODEL.md) — 자산·경계·공격·통제
-- [문서 변경 규칙](./reference/DOCUMENTATION_RULES.md) — 어떤 문서를 먼저 고치는가
+- [문서 지도](README.md) — 폴더 색인과 릴리스 경계
+- [세부 개발문서 전체 지도](DETAIL.md) — 배경 설명 모음
+- [개발 진행 현황](PROGRESS.md) — 현재 상태와 게이트 증거
+- [결정 기록](00-start-here/DECISIONS.md) — 미결정 값
+- [요구사항 추적표](reference/TRACEABILITY.md) — 요구 → 설계 → 데이터 → 테스트
+- [위협 모델](reference/THREAT_MODEL.md) — 자산·경계·공격·통제
+- [문서 변경 규칙](reference/DOCUMENTATION_RULES.md) — 어떤 문서를 먼저 고치는가
+
+2026-10-15 인용 보완: 재귀 v4 → 원문 ID·조항/페이지 렌더링 → 복합 질문별 검증 → TC 1·2 및 동일 PDF 재시험. [변경과 이유](rag/RAG_CITATION_FIXES.md).
+
+RG-PDF-MD 후속: PDF DB 게시 → 전체 Markdown 파일 저장 → 중복 색인 제외 → 갱신/복구/삭제 회귀 →
+동일 PDF 독립 DB 시험 → 개발 DB 소급 파일 생성. [Phase 3](phase-03-research/README.md), [실행 증거](rag/RAG_PDF_INGESTION.md).
+
+RG-ANSWER-QUALITY 후속: 검증 오판 수정 → 질문별 생성 → 문서 구조 조회/계수 → 동일 조문·
+참조 문맥 보강 → 주체·의무 검증 → 동일 PDF 100문항 수동 대조·인용 감사·그래프 비교.
+[Phase 3 작업](phase-03-research/README.md), [결과](rag/RAG_ANSWER_QUALITY.md).

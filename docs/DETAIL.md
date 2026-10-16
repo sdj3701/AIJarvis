@@ -1,6 +1,6 @@
 # 세부 개발문서 — 전체 지도
 
-> 이 문서는 [docs/README.md](./README.md)와 [루트 README](../README.md)의 내용을 배경·이유
+> 이 문서는 [docs/README.md](README.md)와 [루트 README](PROJECT.md)의 내용을 배경·이유
 > 까지 풀어 쓴 세부 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·
 > 완료 기준이 어긋나면 **항상 원문이 기준**이다. 실제 구현은 각 폴더의 `README.md`를 보고
 > 한다.
@@ -8,7 +8,7 @@
 > 각 폴더에는 같은 이름의 `DETAIL.md`가 하나씩 있다. 원문을 읽기 전에 세부 개발문서를 먼저
 > 읽으면 "왜 이런 규칙이 있는지"가 먼저 이해된다.
 >
-> 작업 ID 단위의 전체 순서와 의존 관계는 [개발 흐름](./DEVELOPMENT_FLOW.md)에 있다.
+> 작업 ID 단위의 전체 순서와 의존 관계는 [개발 흐름](DEVELOPMENT_FLOW.md)에 있다.
 
 ## 1. 이 프로젝트가 뭘 만드는 건가
 
@@ -86,30 +86,31 @@ post-v1            추가 기능은 여기로 미룸
 
 ## 5. 지금 어디까지 왔나
 
-- 브랜치: `rebuild/v2`
-- 상태: Phase 0 구현 완료 (P0-01~P0-08), 공식 게이트 실행 대기
+- 브랜치: `main`
+- 상태: 대화·RAG·임베딩·재정렬 기반 구현 존재; R3-01~07 구현·R3-08 자동 평가 적용, 실장치 인수 별도
+- 현재 읽을 문서: [RAG 개발 실행서](phase-03-research/README.md)와 [개정 기록](rag/RAG_REDESIGN_CHANGELOG.md)
 - 기존 프로토타입은 `main` 브랜치와 `D:\Ai\Jarvis-prototype`에 얼려 두었다
 
-실시간 상태는 항상 [PROGRESS.md](./PROGRESS.md)를 본다. 이 파일은 "이번 주 스프린트 보드"에
+실시간 상태는 항상 [PROGRESS.md](PROGRESS.md)를 본다. 이 파일은 "이번 주 스프린트 보드"에
 해당한다. Phase 문서는 계획, PROGRESS는 현재 위치다.
 
 ## 6. 폴더별 세부 개발문서
 
 | 폴더 | 한 줄 설명 | 세부 개발문서 |
 |------|------------|---------------|
-| [00-start-here](./00-start-here/README.md) | 착수 전 결정과 폴더 경계 | [세부](./00-start-here/DETAIL.md) |
-| [phase-00-foundation](./phase-00-foundation/README.md) | 안 깨지는 빈 골격 | [세부](./phase-00-foundation/DETAIL.md) |
-| [phase-01-chat](./phase-01-chat/README.md) | AI와 대화하고 기록 | [세부](./phase-01-chat/DETAIL.md) |
-| [phase-02-memory](./phase-02-memory/README.md) | 장기 기억 | [세부](./phase-02-memory/DETAIL.md) |
-| [phase-03-research](./phase-03-research/README.md) | 검색과 근거 | [세부](./phase-03-research/DETAIL.md) |
-| [phase-04-tools](./phase-04-tools/README.md) | 승인 받고 PC 조작 | [세부](./phase-04-tools/DETAIL.md) |
-| [phase-05-agent](./phase-05-agent/README.md) | 여러 단계 자동 수행 | [세부](./phase-05-agent/DETAIL.md) |
-| [phase-06-security](./phase-06-security/README.md) | 보안 점검·백업 | [세부](./phase-06-security/DETAIL.md) |
-| [phase-07-voice](./phase-07-voice/README.md) | 음성 입출력 | [세부](./phase-07-voice/DETAIL.md) |
-| [phase-08-resident-ui](./phase-08-resident-ui/README.md) | 트레이·패키징 | [세부](./phase-08-resident-ui/DETAIL.md) |
-| [operations](./operations/README.md) | 운영·장애 대응 | [세부](./operations/DETAIL.md) |
-| [post-v1](./post-v1/README.md) | v1 이후 기능 | [세부](./post-v1/DETAIL.md) |
-| [reference](./reference/README.md) | 공통 참조 문서 | [세부](./reference/DETAIL.md) |
+| [00-start-here](00-start-here/README.md) | 착수 전 결정과 폴더 경계 | [세부](00-start-here/DETAIL.md) |
+| [phase-00-foundation](phase-00-foundation/README.md) | 안 깨지는 빈 골격 | [세부](phase-00-foundation/DETAIL.md) |
+| [phase-01-chat](phase-01-chat/README.md) | AI와 대화하고 기록 | [세부](phase-01-chat/DETAIL.md) |
+| [phase-02-memory](phase-02-memory/README.md) | 장기 기억 | [세부](phase-02-memory/DETAIL.md) |
+| [phase-03-research](phase-03-research/README.md) | 검색과 근거 | [세부](phase-03-research/DETAIL.md) |
+| [phase-04-tools](phase-04-tools/README.md) | 승인 받고 PC 조작 | [세부](phase-04-tools/DETAIL.md) |
+| [phase-05-agent](phase-05-agent/README.md) | 여러 단계 자동 수행 | [세부](phase-05-agent/DETAIL.md) |
+| [phase-06-security](phase-06-security/README.md) | 보안 점검·백업 | [세부](phase-06-security/DETAIL.md) |
+| [phase-07-voice](phase-07-voice/README.md) | 음성 입출력 | [세부](phase-07-voice/DETAIL.md) |
+| [phase-08-resident-ui](phase-08-resident-ui/README.md) | 트레이·패키징 | [세부](phase-08-resident-ui/DETAIL.md) |
+| [operations](operations/README.md) | 운영·장애 대응 | [세부](operations/DETAIL.md) |
+| [post-v1](post-v1/README.md) | 후속 제안과 현재 구현 운영 문서 | [세부](post-v1/DETAIL.md) |
+| [reference](reference/README.md) | 공통 참조 문서 | [세부](reference/DETAIL.md) |
 
 ## 7. 문서 읽는 요령
 
@@ -137,8 +138,8 @@ Phase 문서는 전부 같은 7개 절로 되어 있다. 티켓 템플릿이라�
 
 ## 8. 원문에서 볼 곳
 
-- [개발 흐름](./DEVELOPMENT_FLOW.md) — 작업 ID 단위 전체 순서와 게이트
-- [docs/README.md](./README.md) — 폴더 색인과 릴리스 경계
-- [루트 README](../README.md) — 문서 우선순위와 프로젝트 경계
-- [PROGRESS.md](./PROGRESS.md) — 현재 상태
-- [문서 변경 규칙](./reference/DOCUMENTATION_RULES.md) — 어떤 문서를 먼저 고치는가
+- [개발 흐름](DEVELOPMENT_FLOW.md) — 작업 ID 단위 전체 순서와 게이트
+- [docs/README.md](README.md) — 폴더 색인과 릴리스 경계
+- [루트 README](PROJECT.md) — 문서 우선순위와 프로젝트 경계
+- [PROGRESS.md](PROGRESS.md) — 현재 상태
+- [문서 변경 규칙](reference/DOCUMENTATION_RULES.md) — 어떤 문서를 먼저 고치는가

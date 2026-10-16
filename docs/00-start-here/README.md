@@ -1,6 +1,7 @@
 # 착수 안내
 
-이 문서는 코드를 만들기 전에 한 번만 수행한다. 완료되지 않은 결정이 현재 Phase를 막으면 구현을 시작하지 않는다.
+이 문서는 새 환경의 착수 조건을 확인한다. 기존 작업을 이어갈 때는 [PROGRESS](../PROGRESS.md)를 먼저 본다.
+현재 RAG 개선은 [Phase 3](../phase-03-research/README.md)의 R3-01~08을 따른다.
 
 ## 1. 목표
 
@@ -46,12 +47,12 @@ GPU 확인 실패는 Phase 0~6을 막지 않는다. Python 또는 D 드라이브
 
 ## 4. 읽어야 할 문서
 
-1. [루트 README](../../README.md)
-2. [PLAN 1~2장](../../PLAN.md) — 목표·비목표·릴리스 경계
-3. [DESIGN 1~3장](../../DESIGN.md) — 설계 원칙·모듈·의존 규칙
-4. [TESTING 1장](../../TESTING.md) — 테스트 원칙
-5. [결정 기록](./DECISIONS.md)
-6. [v2 재구축 안내](./REBUILD.md)
+1. [루트 README](../PROJECT.md)
+2. [PLAN 1~2장](../PLAN.md) — 목표·비목표·릴리스 경계
+3. [DESIGN 1~3장](../DESIGN.md) — 설계 원칙·모듈·의존 규칙
+4. [TESTING 1장](../TESTING.md) — 테스트 원칙
+5. [결정 기록](DECISIONS.md)
+6. [v2 재구축 안내](REBUILD.md)
 
 ## 5. 착수 체크리스트
 
@@ -62,4 +63,6 @@ GPU 확인 실패는 Phase 0~6을 막지 않는다. Python 또는 D 드라이브
 - [x] LLM·검색·백업의 미결정 값을 DECISIONS에 기록했다.
 - [x] Phase를 건너뛰지 않고 게이트 종료 코드 0으로 완료를 판단하기로 했다.
 
-완료 후 [Phase 0](../phase-00-foundation/README.md)으로 이동한다.
+새 프로젝트의 기반 구축은 [Phase 0](../phase-00-foundation/README.md)부터 진행한다.
+현재 저장소에서 작업을 이어갈 때는 [PROGRESS](../PROGRESS.md)의 다음 작업을 따른다.
+RAG 책임 결정은 D023, 적용한 개발 기본값과 평가 근거는 D024에 기록한다.

@@ -18,12 +18,12 @@
 ## 3. 만들 파일
 
 ```text
-app/voice/{base.py,stt.py,tts.py,controller.py}
-app/voice/microphone.py
+scripts/app/voice/{base.py,stt.py,tts.py,controller.py}
+scripts/app/voice/microphone.py
 scripts/setup_voice.py
-tests/fakes/audio.py
-tests/integration/test_voice_parity.py
-tests/data/audio/                 # 직접 제작한 짧은 테스트 음성만
+scripts/tests/fakes/audio.py
+scripts/tests/integration/test_voice_parity.py
+scripts/tests/data/audio/                 # 직접 제작한 짧은 테스트 음성만
 ```
 
 ## 4. 상태 흐름
@@ -47,7 +47,7 @@ Idle → WakeListening → “무엇을 도와드릴까요.” → Recording
 4. 빈 음성·너무 짧은 음성·timeout을 정상 실패로 구분한다.
 5. 엔진 타입은 `voice` 모듈 밖으로 노출하지 않는다.
 
-계약은 [DESIGN의 음성·UI 계약](../../DESIGN.md)을 따른다.
+계약은 [DESIGN의 음성·UI 계약](../DESIGN.md)을 따른다.
 
 ### P7-02 웨이크워드 controller와 PTT 보조 입력
 

@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 8 상주 UI와 패키징
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -173,7 +173,7 @@ DB를 읽지 못한다. 게임에서 세이브 포맷을 올린 뒤 이전 패�
 
 ```powershell
 python scripts\gate.py --phase 8
-pytest tests\slow\test_packaged_bootstrap.py
+pytest scripts\tests\slow\test_packaged_bootstrap.py
 ```
 
 - [ ] 단축키로 입력 창과 PTT 호출
@@ -196,7 +196,7 @@ pytest tests\slow\test_packaged_bootstrap.py
 
 ## 8. 원문에서 볼 곳
 
-- [Phase 8 README](./README.md) — 작업 ID별 상세와 테스트 목록
-- [DESIGN 17장](../../DESIGN.md) — 음성·UI 계약
+- [Phase 8 README](README.md) — 작업 ID별 상세와 테스트 목록
+- [DESIGN 17장](../DESIGN.md) — 음성·UI 계약
 - [D013~D015](../00-start-here/DECISIONS.md) — 진입을 막고 있는 미결정 항목
 - [운영 문서](../operations/README.md) — v1 릴리스 체크리스트

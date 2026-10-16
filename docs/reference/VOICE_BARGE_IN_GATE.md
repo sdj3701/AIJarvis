@@ -3,7 +3,7 @@
 이 문서는 TTS 재생 중 “자비스” 끼어들기가 스피커 에코에 막히거나 오인되는 문제를
 줄이는 **게이트 강화 설계와 운영 기준**이다. 결정은
 [D017](../00-start-here/DECISIONS.md)이며, 전체 음성 동작 설명은
-[VOICE_STT.md 9절](./VOICE_STT.md)을 기준으로 한다.
+[VOICE_STT.md 9절](VOICE_STT.md)을 기준으로 한다.
 
 상태: `implemented (S1)` — Gate A+B+WebRTC VAD 구현과 설정 반영 완료, S2 실장치 검증 대기.
 
@@ -140,15 +140,15 @@ AEC를 넣을 경우에도 PCM은 메모리에만 두고, loopback·마이크 �
 
 ## 5. 모듈 경계
 
-기준 인터페이스는 [DESIGN 음성·UI 계약](../../DESIGN.md)을 따른다. 새 공개 엔진
+기준 인터페이스는 [DESIGN 음성·UI 계약](../DESIGN.md)을 따른다. 새 공개 엔진
 타입을 `voice` 밖으로 노출하지 않는다.
 
 구현 파일:
 
 ```text
-app/voice/barge_in_gate.py   # onset·임계값·pre-roll·WebRTC VAD 순수 로직
-app/voice/controller.py      # wait_for_barge_in에서 gate 경유 feed
-tests/unit/test_barge_in_gate.py
+scripts/app/voice/barge_in_gate.py   # onset·임계값·pre-roll·WebRTC VAD 순수 로직
+scripts/app/voice/controller.py      # wait_for_barge_in에서 gate 경유 feed
+scripts/tests/unit/test_barge_in_gate.py
 ```
 
 `LocalVoiceListener.wait_for_barge_in`은 게이트가 통과시킨 PCM만 recognizer에 넣는다.
@@ -160,10 +160,10 @@ D017 결정에 따라 아래 항목을 함께 동기화했다.
 
 1. `config/settings.example.yaml`의 `voice.barge_in.*`
 2. 설정 모델·로더 검증
-3. [SCHEMAS.md](../../SCHEMAS.md)의 `voice.barge_in` payload 확장
+3. [SCHEMAS.md](../SCHEMAS.md)의 `voice.barge_in` payload 확장
    필드: `gate`, `onset`, `level_dbfs`, `baseline_dbfs`, `gate_frames`, `voice_frames`
-4. [TESTING.md](../../TESTING.md) / Phase 7 게이트 항목
-5. [VOICE_STT.md 9절](./VOICE_STT.md) 운영 문구
+4. [TESTING.md](../TESTING.md) / Phase 7 게이트 항목
+5. [VOICE_STT.md 9절](VOICE_STT.md) 운영 문구
 
 ## 7. 검증 계획
 
@@ -207,7 +207,7 @@ S2에서 목표 성공률이 나오면 AEC는 기본 경로에 넣지 않는다.
 
 ## 10. 관련 문서
 
-- [VOICE_STT.md](./VOICE_STT.md) — 현재 STT·끼어들기 운영
+- [VOICE_STT.md](VOICE_STT.md) — 현재 STT·끼어들기 운영
 - [Phase 7](../phase-07-voice/README.md) — 음성 Phase 체크리스트
 - [DECISIONS D017](../00-start-here/DECISIONS.md) — 게이트 채택 여부
-- [DOCUMENTATION_RULES.md](./DOCUMENTATION_RULES.md) — 기준 문서 수정 순서
+- [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md) — 기준 문서 수정 순서

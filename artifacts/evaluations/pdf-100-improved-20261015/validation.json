@@ -1,0 +1,41 @@
+{
+  "complete": true,
+  "questions": 100,
+  "same_pdf_hash": true,
+  "same_question_hash": true,
+  "same_questions": true,
+  "same_llm_settings": true,
+  "rag_setting_changes": {
+    "max_structured_chunks": [
+      null,
+      16
+    ]
+  },
+  "source_frozen": true,
+  "unchanged_chunker_and_parser": true,
+  "same_markdown": true,
+  "identical_chunks": true,
+  "chunk_count": 34,
+  "max_chunk_tokens": 381,
+  "development_generation": "gen_01M4Z290SG0DRSDNJ31MX9YWAC",
+  "development_vector_count": 34,
+  "development_vector_dimensions": [
+    768
+  ],
+  "development_vector_sha256": "3552bb15e3dcbef006d41fe4f481666a3ba24d7c61181aae002e11a9d83ffa34",
+  "development_vectors_unchanged": true,
+  "tests": 568,
+  "test_failures": 0,
+  "same_rubric": true,
+  "mypy_remaining_errors": [
+    "app\\voice\\controller.py:683: error: Argument \"min_avg_logprob\" to \"transcript_passes_quality\" has incompatible type \"float | None\"; expected \"float\"  [arg-type]",
+    "app\\voice\\controller.py:684: error: Argument \"max_no_speech_probability\" to \"transcript_passes_quality\" has incompatible type \"float | None\"; expected \"float\"  [arg-type]",
+    "app\\voice\\controller.py:752: error: \"FasterWhisperSTTEngine\" has no attribute \"language\"; maybe \"_language\"?  [attr-defined]",
+    "app\\voice\\controller.py:843: error: Argument \"min_avg_logprob\" to \"transcript_passes_quality\" has incompatible type \"float | None\"; expected \"float\"  [arg-type]",
+    "app\\voice\\controller.py:844: error: Argument \"max_no_speech_probability\" to \"transcript_passes_quality\" has incompatible type \"float | None\"; expected \"float\"  [arg-type]",
+    "app\\ui\\gui.py:461: error: Argument 1 to \"set_window\" of \"JarvisWebviewBridge\" has incompatible type \"Window | None\"; expected \"Window\"  [arg-type]",
+    "app\\ui\\gui.py:498: error: Argument \"reason\" to \"end\" of \"ChatOrchestrator\" has incompatible type \"Literal['shutdown']\"; expected \"Literal['bye', 'crash_recovered', 'discarded', 'timeout']\"  [arg-type]"
+  ],
+  "benchmark_scope": "One supplied PDF, development questions reused, one final run per question; not an independent held-out evaluation.",
+  "example_config_valid": true
+}

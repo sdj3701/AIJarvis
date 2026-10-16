@@ -6,9 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "jarvis-assistant"
 version = "0.0.0"
 description = "A privacy-conscious personal AI assistant for Windows."
-readme = "README.md"
+readme = "docs/PROJECT.md"
 requires-python = ">=3.11"
 dependencies = [
+    "pdfplumber==0.11.9",
+    "sqlite-vec==0.1.6",
     "keyring>=25.5",
     "pydantic>=2.10",
     "python-ulid>=3.0",
@@ -16,6 +18,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+gui = [
+    "pywebview==6.2.1",
+]
+rerank = [
+    "onnxruntime==1.29.0",
+    "tokenizers==0.23.1",
+    "numpy>=1.26,<3",
+]
 # Phase 3/7 extras stay declared so later phases can opt in.
 # The Phase 0 lock is compiled with --extra=dev only.
 voice = [
@@ -27,6 +37,10 @@ voice = [
 search = [
     "ddgs>=9.0.0",
 ]
+benchmark = [
+    "matplotlib>=3.9",
+    "psutil>=6.1",
+]
 dev = [
     "mypy>=1.14",
     "pytest>=8.3",
@@ -37,16 +51,19 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
+where = ["scripts"]
 include = ["app*"]
 
 [tool.setuptools.package-data]
 "app.memory" = ["schema.sql"]
+"app.ui" = ["web/*.html", "web/*.css", "web/*.js"]
 "app.orchestrator" = ["prompts/*.md"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --timeout=60"
 timeout_func_only = false
-testpaths = ["tests"]
+testpaths = ["scripts/tests"]
+pythonpath = ["scripts"]
 markers = [
     "phase0: Phase 0 완료 기준",
     "phase1: Phase 1 완료 기준",
@@ -67,16 +84,22 @@ markers = [
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-src = ["."]
+src = ["scripts"]
+extend-exclude = ["scripts/archive", "local", "artifacts"]
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scripts", "tests"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_unreachable = true
-files = ["app"]
+files = ["scripts/app"]
+mypy_path = ["scripts"]
+explicit_package_bases = true
 
 # Later-phase libraries are optional extras. Leftover prototype modules import
 # them lazily; mypy must not require those packages in the Phase 0 environment.
@@ -92,3 +115,7 @@ module = [
     "webrtcvad",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["pdfplumber", "pdfplumber.*"]
+follow_imports = "skip"

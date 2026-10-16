@@ -155,11 +155,11 @@ cd D:\Ai\Jarvis
 음성으로 판정한 구간만 500ms pre-roll과 함께 Vosk에 전달한다. 부분 또는 최종 결과에
 `자비스`가 나타나면 즉시 중단한다. 현재 읽는 답변 자체에 `자비스`가 포함된 경우에는
 스피커 소리 오인을 막기 위해 부분·긴 최종 결과를 사용하지 않고 정확한 최종 호출만
-인정한다. 상세 기준은 [마이크 게이트 운영 문서](./VOICE_BARGE_IN_GATE.md)와
+인정한다. 상세 기준은 [마이크 게이트 운영 문서](VOICE_BARGE_IN_GATE.md)와
 [D017](../00-start-here/DECISIONS.md)을 따른다.
 
 호출 오인 방지·한 문장 “자비스 …질문”·답변 중 `ctrl+alt+j` 중단은
-[VOICE_WAKE_COMMAND_UX.md](./VOICE_WAKE_COMMAND_UX.md)와
+[VOICE_WAKE_COMMAND_UX.md](VOICE_WAKE_COMMAND_UX.md)와
 [D018](../00-start-here/DECISIONS.md)을 따른다. 호출이 확정된 뒤에는 Vosk 미리보기를
 멈추고 PCM만 모아 Whisper로 인식한다. “자비스 가나다”가 “자비스 자비스”로 강제되지
 않아야 한다.

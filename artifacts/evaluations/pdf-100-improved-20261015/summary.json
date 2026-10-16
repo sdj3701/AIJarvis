@@ -1,0 +1,28 @@
+{
+  "complete": true,
+  "total": 100,
+  "reviewed": 100,
+  "grades": {
+    "정답": 82,
+    "일부 답변": 5,
+    "불필요한 보류": 10,
+    "안전한 보류": 3
+  },
+  "app_status": {
+    "근거 확인": 87,
+    "근거 부족": 13
+  },
+  "app_reasons": {
+    "passed": 87,
+    "invalid_location": 1,
+    "uncited_query_subject": 3,
+    "unsupported_claim": 3,
+    "insufficient": 4,
+    "unsupported_number": 1,
+    "invalid_citation": 1
+  },
+  "rendered_citations": 178,
+  "invalid_citation_locations": 0,
+  "total_seconds": 671.1427878000031,
+  "errors": 0
+}

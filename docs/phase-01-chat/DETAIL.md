@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 1 대화
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -184,8 +184,8 @@ python scripts\gate.py --phase 1
 
 ## 9. 원문에서 볼 곳
 
-- [Phase 1 README](./README.md) — 작업 ID별 상세와 필수 이벤트 목록
-- [DESIGN 5.1](../../DESIGN.md) — AI 클라이언트 인터페이스
-- [DESIGN 7.1](../../DESIGN.md) — 프롬프트 메시지 순서
-- [DESIGN 12장](../../DESIGN.md) — 예산 관리
+- [Phase 1 README](README.md) — 작업 ID별 상세와 필수 이벤트 목록
+- [DESIGN 5.1](../DESIGN.md) — AI 클라이언트 인터페이스
+- [DESIGN 7.1](../DESIGN.md) — 프롬프트 메시지 순서
+- [DESIGN 12장](../DESIGN.md) — 예산 관리
 - [D005 상세](../00-start-here/DECISIONS.md) — 모델 선정 근거와 해시

@@ -16,10 +16,10 @@
 ## 3. 만들 파일
 
 ```text
-app/ui/{base.py,tray.py,hotkey.py,single_instance.py,notifications.py}
+scripts/app/ui/{base.py,tray.py,hotkey.py,single_instance.py,notifications.py}
 scripts/build.ps1
-tests/integration/test_ui_state.py
-tests/slow/test_packaged_bootstrap.py
+scripts/tests/integration/test_ui_state.py
+scripts/tests/slow/test_packaged_bootstrap.py
 ```
 
 ## 4. UI 상태 머신
@@ -118,7 +118,7 @@ Error → Idle | ShuttingDown
 
 ```powershell
 python scripts\gate.py --phase 8
-pytest tests\slow\test_packaged_bootstrap.py
+pytest scripts\tests\slow\test_packaged_bootstrap.py
 ```
 
 - [ ] 단축키로 입력 창과 PTT 호출
@@ -135,4 +135,3 @@ pytest tests\slow\test_packaged_bootstrap.py
 - 숨겨진 상시 녹음
 - UI 전용 정책 예외
 - 운영 데이터를 설치 패키지에 포함
-

@@ -16,11 +16,11 @@
 ## 3. 만들 파일
 
 ```text
-app/memory/{models.py,store.py,retrieval.py,summarizer.py,commands.py,migrations.py}
-app/orchestrator/recovery.py
-tests/unit/test_{memory_store,retrieval_ranking}.py
-tests/integration/test_{session_summary,memory_across_sessions,recovery}.py
-tests/data/memory_eval.jsonl
+scripts/app/memory/{models.py,store.py,retrieval.py,summarizer.py,commands.py,migrations.py}
+scripts/app/orchestrator/recovery.py
+scripts/tests/unit/test_{memory_store,retrieval_ranking}.py
+scripts/tests/integration/test_{session_summary,memory_across_sessions,recovery}.py
+scripts/tests/data/memory_eval.jsonl
 ```
 
 ## 4. 기억 lifecycle
@@ -38,18 +38,18 @@ confirmed/candidate → /forget → deleted
 
 ### P2-01 모델과 DB 저장소
 
-1. [DESIGN 5.2](../../DESIGN.md)의 모델과 `MemoryStore` 계약을 구현한다.
-2. [SCHEMAS 5장](../../SCHEMAS.md)의 DDL과 실제 `schema.sql`을 동일하게 유지한다.
+1. [DESIGN 5.2](../DESIGN.md)의 모델과 `MemoryStore` 계약을 구현한다.
+2. [SCHEMAS 5장](../SCHEMAS.md)의 DDL과 실제 `schema.sql`을 동일하게 유지한다.
 3. SQLite에 WAL, synchronous FULL, foreign keys, busy timeout을 설정한다.
 4. `put_record`를 ID 기준 멱등으로 만든다.
-5. 상태 전이는 [SCHEMAS 6.2](../../SCHEMAS.md)에 허용된 경우만 수행한다.
+5. 상태 전이는 [SCHEMAS 6.2](../SCHEMAS.md)에 허용된 경우만 수행한다.
 6. 같은 key의 confirmed 레코드 하나 제약을 트랜잭션과 DB 인덱스로 함께 보장한다.
 
 ### P2-02 FTS와 검색 랭킹
 
 1. 앱 시작 시 SQLite 버전과 FTS5 trigram 지원을 검사한다.
 2. key exact, FTS 후보를 수집한다. 임베딩은 아직 비활성이다.
-3. [DESIGN 8장](../../DESIGN.md)의 가중치·반감기·tie-break를 순수 함수로 구현한다.
+3. [DESIGN 8장](../DESIGN.md)의 가중치·반감기·tie-break를 순수 함수로 구현한다.
 4. 같은 key 안에서 최신 confirmed correction/fact 하나만 남긴다.
 5. deleted·superseded 레코드는 검색에서 제외한다.
 6. candidate는 별도 리스트로 최대 설정 개수만 반환한다.
@@ -66,7 +66,7 @@ confirmed/candidate → /forget → deleted
 | `/memory confirm <id>` | candidate를 confirmed로 전이 |
 | `/memory edit <id>` | 기존 것을 superseded하고 새 레코드 생성 |
 | `/forget <id>` | soft delete + FTS/embedding 제거 |
-| `/memory export` | [SCHEMAS 6장](../../SCHEMAS.md) JSON으로 원자적 내보내기 |
+| `/memory export` | [SCHEMAS 6장](../SCHEMAS.md) JSON으로 원자적 내보내기 |
 
 key를 확실히 찾을 수 없으면 저장하지 말고 사용자에게 되묻는다.
 
@@ -74,7 +74,7 @@ key를 확실히 찾을 수 없으면 저장하지 말고 사용자에게 되묻
 
 1. `/bye`에서 raw 유효 줄을 읽는다.
 2. Privacy Gate를 거친 내용만 Summarizer에 보낸다.
-3. [SCHEMAS 7장](../../SCHEMAS.md)의 구조화 응답을 검증한다.
+3. [SCHEMAS 7장](../SCHEMAS.md)의 구조화 응답을 검증한다.
 4. summary는 레코드로 저장하고 fact는 모두 candidate로 저장한다.
 5. 각 candidate에 `evidence_turn_ids`를 요구한다.
 6. 구조 위반 시 세션 종료 자체를 실패시키지 말고 `session.summary_failed` 이벤트를 남긴다.
@@ -140,4 +140,3 @@ python scripts\gate.py --report
 - 임베딩 검색 활성화
 - 자동 fact 확정
 - 여러 사용자 프로필
-

@@ -16,13 +16,13 @@
 ## 3. 만들 파일
 
 ```text
-app/safety/{paths.py,gate.py,approval.py}
-app/tools/runner.py
-app/tools/impl/{open_app.py,open_folder.py,open_url.py,create_file.py}
-app/telemetry/audit.py
-tests/integration/test_tool_execution.py
-tests/security/test_{path_traversal,reparse_points,url_schemes,approval_binding,forbidden_actions}.py
-tests/data/paths/{traversal.txt,url_schemes.txt}
+scripts/app/safety/{paths.py,gate.py,approval.py}
+scripts/app/tools/runner.py
+scripts/app/tools/impl/{open_app.py,open_folder.py,open_url.py,create_file.py}
+scripts/app/telemetry/audit.py
+scripts/tests/integration/test_tool_execution.py
+scripts/tests/security/test_{path_traversal,reparse_points,url_schemes,approval_binding,forbidden_actions}.py
+scripts/tests/data/paths/{traversal.txt,url_schemes.txt}
 ```
 
 ## 4. 실행 파이프라인
@@ -54,11 +54,11 @@ LLM ToolCall
 5. `commonpath`를 대소문자 무시로 비교한다.
 6. 허용/금지 확장자를 최종 경로에 적용한다.
 
-계약: [DESIGN 11.4](../../DESIGN.md), [tools.example.yaml](../../config/tools.example.yaml)
+계약: [DESIGN 11.4](../DESIGN.md), [tools.example.yaml](../../config/tools.example.yaml)
 
 ### P4-02 Safety Gate
 
-1. [DESIGN 5.4](../../DESIGN.md)의 `Verdict`를 구현한다.
+1. [DESIGN 5.4](../DESIGN.md)의 `Verdict`를 구현한다.
 2. normalized args에서 정책 엔진이 display를 만든다.
 3. 도구 기본 risk와 조건별 escalation을 합친다.
 4. forbidden 요청은 승인 여부와 관계없이 deny한다.
@@ -74,7 +74,7 @@ LLM ToolCall
 
 ### P4-04 감사 로그
 
-1. [SCHEMAS 3장](../../SCHEMAS.md)의 intent/result/denied 레코드를 쓴다.
+1. [SCHEMAS 3장](../SCHEMAS.md)의 intent/result/denied 레코드를 쓴다.
 2. intent를 실행 전에 flush한다.
 3. 단조 seq와 이전 entry hash로 전체 날짜 파일을 연결한다.
 4. 승인·거부·불일치도 이벤트와 감사 로그 양쪽에 남긴다. 스키마 검증 실패나 정책 거부처럼 실행 전에 끝난 요청은 `phase="denied"` 한 줄과 `cause`를 남긴다.
@@ -85,7 +85,7 @@ LLM ToolCall
 ### P4-05 Secure Tool Runner
 
 0. Phase 3에서 전용 경로로 실행하던 `web_search`·`doc_search`·`fetch_url`도 이 Runner를 거치게 옮긴다. 도구 실행 경로가 두 개 남으면 정책·감사가 한쪽만 적용된다.
-1. [DESIGN 5.6](../../DESIGN.md)의 8단계 순서를 그대로 구현한다. 거부로 끝나는 경로도 감사 로그 한 줄을 남긴다.
+1. [DESIGN 5.6](../DESIGN.md)의 8단계 순서를 그대로 구현한다. 거부로 끝나는 경로도 감사 로그 한 줄을 남긴다.
 2. `shell=True`, `os.system`, 문자열 명령 조립을 금지한다.
 3. 프로세스에는 최소 환경 변수와 고정 cwd만 전달한다.
 4. timeout, 출력 크기, 동시 실행 수를 제한한다.

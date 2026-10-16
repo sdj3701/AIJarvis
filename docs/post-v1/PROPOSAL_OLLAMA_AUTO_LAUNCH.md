@@ -1,7 +1,7 @@
 # 기능 제안서: Ollama 서버 자동 실행 및 자가 치유 (Auto-Launch & Self-Healing)
 
-> **문서 상태**: 제안됨 (Proposed / Post-v1 또는 런타임 안정화 확장)  
-> **관련 모듈**: [`app/llm/ollama_client.py`](../../app/llm/ollama_client.py) · [`app/orchestrator/loop.py`](../../app/orchestrator/loop.py)  
+> **문서 상태**: 제안됨 (Proposed / Post-v1 또는 런타임 안정화 확장)
+> **관련 모듈**: [`app/llm/ollama_client.py`](../../scripts/app/llm/ollama_client.py) · [`app/orchestrator/loop.py`](../../scripts/app/orchestrator/loop.py)
 > **목적**: Ollama 서비스 미실행 상태에서 질의/도구 호출 인입 시, 자동으로 Ollama를 부트스트랩하여 무중단 응답 보장
 
 ---
@@ -63,7 +63,7 @@ llm:
     poll_interval_s: 1.0            # 헬스체크 폴링 주기
 ```
 
-### 4.2 오토 런처 구현체 (`app/llm/launcher.py`)
+### 4.2 오토 런처 구현체 (`scripts/app/llm/launcher.py`)
 
 ```python
 """Ollama process launcher and healthcheck manager."""
@@ -130,7 +130,7 @@ class OllamaLauncher:
         )
 ```
 
-### 4.3 `OllamaClient` 연동 (`app/llm/ollama_client.py`)
+### 4.3 `OllamaClient` 연동 (`scripts/app/llm/ollama_client.py`)
 
 ```python
 # OllamaClient.complete() 내부
@@ -154,6 +154,6 @@ except OllamaConnectionFailure as error:
 ## 6. 구현 체크리스트
 
 - [ ] **1. 설정 모델 확장**: `LLMSettings`에 `auto_launch` 필드 추가
-- [ ] **2. 런처 모듈 작성**: `app/llm/launcher.py` 작성
+- [ ] **2. 런처 모듈 작성**: `scripts/app/llm/launcher.py` 작성
 - [ ] **3. 클라이언트 연동**: `OllamaClient`의 연결 실패 예외 핸들러에 `launcher.ensure_running()` 결합
-- [ ] **4. 단위 테스트 작성**: `tests/unit/test_ollama_launcher.py` (프로세스 기동 Mock, 헬스체크 성공/타임아웃 테스트)
+- [ ] **4. 단위 테스트 작성**: `scripts/tests/unit/test_ollama_launcher.py` (프로세스 기동 Mock, 헬스체크 성공/타임아웃 테스트)

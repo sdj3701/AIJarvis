@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 0 기반 구축
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -180,6 +180,6 @@ python scripts\gate.py --phase 0   # 자동 통과 판정
 
 ## 7. 원문에서 볼 곳
 
-- [Phase 0 README](./README.md) — 작업 ID별 상세 순서와 명령
-- [DESIGN 2장](../../DESIGN.md) — 목표 디렉터리 구조
-- [SCHEMAS 5·11장](../../SCHEMAS.md) — DB 스키마와 설정 스키마
+- [Phase 0 README](README.md) — 작업 ID별 상세 순서와 명령
+- [DESIGN 2장](../DESIGN.md) — 목표 디렉터리 구조
+- [SCHEMAS 5·11장](../SCHEMAS.md) — DB 스키마와 설정 스키마

@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 4 PC 도구
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -246,9 +246,9 @@ pytest -m "phase4 and security"
 
 ## 7. 원문에서 볼 곳
 
-- [Phase 4 README](./README.md) — 작업 ID별 상세와 보안 테스트 전체
-- [DESIGN 5.4~5.6](../../DESIGN.md) — Safety Gate, 승인, Runner 인터페이스
-- [DESIGN 10장](../../DESIGN.md) — 승인·인자 해시 바인딩
-- [DESIGN 11.4](../../DESIGN.md) — Windows 경로 정규화 구현 지침
-- [SCHEMAS 3장](../../SCHEMAS.md) — 감사 로그 형식
+- [Phase 4 README](README.md) — 작업 ID별 상세와 보안 테스트 전체
+- [DESIGN 5.4~5.6](../DESIGN.md) — Safety Gate, 승인, Runner 인터페이스
+- [DESIGN 10장](../DESIGN.md) — 승인·인자 해시 바인딩
+- [DESIGN 11.4](../DESIGN.md) — Windows 경로 정규화 구현 지침
+- [SCHEMAS 3장](../SCHEMAS.md) — 감사 로그 형식
 - [tools.example.yaml](../../config/tools.example.yaml) — 도구 화이트리스트 설정

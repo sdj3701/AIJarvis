@@ -1,0 +1,45 @@
+{
+  "created_at": "2026-10-14T10:37:08.754132+00:00",
+  "python": "3.13.15",
+  "checks": {
+    "ollama": {
+      "ok": true,
+      "started_by_check": false
+    },
+    "answer_model": {
+      "ok": true,
+      "name": "qwen3.5:9b",
+      "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "size_bytes": 6594474711,
+      "parameter_size": "9.7B",
+      "quantization": "Q4_K_M"
+    },
+    "embedding": {
+      "ok": true,
+      "dimensions": 768,
+      "identity": "embeddinggemma:85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1:raw-v1"
+    },
+    "sqlite": {
+      "ok": true,
+      "sqlite_version": "3.50.4",
+      "sqlite_vec_version": "v0.1.6",
+      "fts5": true
+    },
+    "reranker": {
+      "ok": true,
+      "scores": [
+        -0.8207908868789673,
+        -4.570626735687256
+      ],
+      "checksums_verified": true
+    }
+  },
+  "ok": true,
+  "scope": "Local embedding inference, reranker inference, SQLite and answer-model identity",
+  "versions": {
+    "sqlite-vec": "0.1.6",
+    "onnxruntime": "1.29.0",
+    "tokenizers": "0.23.1",
+    "pydantic": "2.13.4"
+  }
+}

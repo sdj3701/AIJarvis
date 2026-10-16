@@ -43,3 +43,30 @@ config/tools.yaml
 /backups/
 
 # artifacts/gates is intentionally tracked as Phase-gate evidence.
+
+# Local maintenance, historical experiments and generated launchers.
+/local/
+/scripts/archive/
+/bin/
+/Jarvis.exe
+*.lnk
+*.log
+
+# Evaluation runtime data is never source code.
+/artifacts/evaluations/**/runtime/
+/artifacts/evaluations/**/config/
+/artifacts/evaluations/**/memory/
+/artifacts/evaluations/**/logs/
+/artifacts/evaluations/**/state/
+/artifacts/evaluations/**/models/
+/artifacts/evaluations/**/backup/
+/artifacts/evaluations/**/backups/
+/artifacts/evaluations/**/indexes/
+/artifacts/evaluations/**/fixtures/
+/artifacts/evaluations/**/docs/
+/artifacts/evaluations/**/*.sqlite3*
+/artifacts/evaluations/**/*.pdf
+/artifacts/evaluations/**/*.jsonl
+/artifacts/evaluations/**/pilot*/
+/artifacts/evaluations/**/before/
+/artifacts/portfolio-video/

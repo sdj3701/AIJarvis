@@ -2,7 +2,7 @@
 
 이 문서는 사용자가 보고한 음성 UX 문제 세 가지의 원인 가설, 목표 동작,
 구현 방향이다. 착수 전 결정은 [D018](../00-start-here/DECISIONS.md)이다.
-답변 중 에코 게이트의 세부 설계는 [VOICE_BARGE_IN_GATE.md](./VOICE_BARGE_IN_GATE.md)
+답변 중 에코 게이트의 세부 설계는 [VOICE_BARGE_IN_GATE.md](VOICE_BARGE_IN_GATE.md)
 (D017)를 따른다.
 
 상태: `implemented (S1–S3)` + `P4 fix` — D018 decided. 호출 확정 후 Vosk 중단으로
@@ -35,7 +35,7 @@ Idle
 - 질문: `_capture_and_transcribe_command` + Whisper
 - 답변 중 감시: `wait_for_barge_in` + D017 게이트
 
-운영 설명: [VOICE_STT.md](./VOICE_STT.md)
+운영 설명: [VOICE_STT.md](VOICE_STT.md)
 
 ## 3. 원인 가설
 
@@ -53,7 +53,7 @@ Idle
 
 D017 S1(게이트 A+B+WebRTC VAD)이 있어도 스피커 에코·거리·TTS 음량이 크면
 사용자 “자비스”가 가려진다. S2 실장치 검증과, 필요 시 AEC/핫키 보조가 남아 있다.
-상세는 [VOICE_BARGE_IN_GATE.md](./VOICE_BARGE_IN_GATE.md).
+상세는 [VOICE_BARGE_IN_GATE.md](VOICE_BARGE_IN_GATE.md).
 
 ### P3 — 두 단계 강제
 
@@ -86,10 +86,10 @@ Whisper `initial_prompt`에 호출어가 반복되면 최종 문장도 비슷하
 다음을 **모두** 만족할 때만 호출로 인정한다.
 
 1. 입력이 사람 음성 후보이다 (레벨·선택적 VAD).
-2. Vosk 결과가 호출어와 충분히 가깝다.  
-   - 제한 문법을 쓸 경우 `[unk]`를 포함하거나  
+2. Vosk 결과가 호출어와 충분히 가깝다.
+   - 제한 문법을 쓸 경우 `[unk]`를 포함하거나
    - 문법을 쓰지 않고 자유 인식 후 정규화 일치만 허용
-3. “자비스”만 단독이거나, 호출어로 **시작하는** 문장이다.  
+3. “자비스”만 단독이거나, 호출어로 **시작하는** 문장이다.
    문장 중간의 우연한 부분 일치는 호출로 쓰지 않는다(정책은 D018에서 확정).
 
 오발동 목표(초안, D018에서 확정): 임의 한국어 문장 20회 중 잘못된 호출 0.
@@ -171,7 +171,7 @@ D018 구현이 P1/P3를 다루더라도 P2의 게이트 파라미터·AEC는 D01
 ### 6.3 P2
 
 D017 S2 실장치 튜닝을 먼저 하고, 목표 미달 시 핫키 중단·AEC 실험을
-[VOICE_BARGE_IN_GATE.md](./VOICE_BARGE_IN_GATE.md) 8절 단계에 따라 진행한다.
+[VOICE_BARGE_IN_GATE.md](VOICE_BARGE_IN_GATE.md) 8절 단계에 따라 진행한다.
 
 ## 7. D010과의 관계
 
@@ -191,11 +191,11 @@ D010 문구를 바꾸려면 D018이 `decided`된 뒤 새 결정으로 `supersede
 제안 변경 지점:
 
 ```text
-app/voice/controller.py     # 한 세션 wake→command, acknowledgement 조건부 생략
-app/voice/stt.py            # 호출 문법·[unk]·접두 판정 헬퍼
-app/voice/wake_match.py     # (신규 후보) 정규화·접두·단독 호출 판정 순수 함수
-tests/unit/test_wake_match.py
-tests/unit/test_voice_controller.py
+scripts/app/voice/controller.py     # 한 세션 wake→command, acknowledgement 조건부 생략
+scripts/app/voice/stt.py            # 호출 문법·[unk]·접두 판정 헬퍼
+scripts/app/voice/wake_match.py     # (신규 후보) 정규화·접두·단독 호출 판정 순수 함수
+scripts/tests/unit/test_wake_match.py
+scripts/tests/unit/test_voice_controller.py
 ```
 
 설정 키는 D018 확정 전에는 `settings.example.yaml`에 넣지 않는다. 후보:
@@ -209,7 +209,7 @@ tests/unit/test_voice_controller.py
 
 이벤트 후보는 기존 `voice.recording` / `stt.result`에
 `wake_mode=standalone|inline_command` 정도만 추가하는 것을 검토한다.
-스키마 변경은 [SCHEMAS.md](../../SCHEMAS.md)와 동기화한다.
+스키마 변경은 [SCHEMAS.md](../SCHEMAS.md)와 동기화한다.
 
 ## 9. 검증 계획
 
@@ -249,8 +249,8 @@ S1 없이 S2만 넣으면 오호출된 상태에서 긴 문장까지 Whisper로 
 
 ## 12. 관련 문서
 
-- [VOICE_STT.md](./VOICE_STT.md) — 현재 STT 운영
-- [VOICE_BARGE_IN_GATE.md](./VOICE_BARGE_IN_GATE.md) — 답변 중 게이트 (P2)
+- [VOICE_STT.md](VOICE_STT.md) — 현재 STT 운영
+- [VOICE_BARGE_IN_GATE.md](VOICE_BARGE_IN_GATE.md) — 답변 중 게이트 (P2)
 - [Phase 7](../phase-07-voice/README.md) — 음성 Phase
 - [DECISIONS D018](../00-start-here/DECISIONS.md) — 본 제안 채택 여부
-- [DOCUMENTATION_RULES.md](./DOCUMENTATION_RULES.md) — 기준 문서 수정 순서
+- [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md) — 기준 문서 수정 순서

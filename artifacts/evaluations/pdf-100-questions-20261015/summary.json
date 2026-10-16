@@ -1,0 +1,34 @@
+{
+  "complete": true,
+  "total": 100,
+  "reviewed": 100,
+  "grades": {
+    "불필요한 보류": 31,
+    "정답": 60,
+    "오답": 2,
+    "일부 답변": 4,
+    "안전한 보류": 3
+  },
+  "app_status": {
+    "근거 부족": 33,
+    "근거 확인": 65,
+    "상충": 1,
+    "None": 1
+  },
+  "app_reasons": {
+    "invalid_location": 9,
+    "passed": 65,
+    "conflict": 1,
+    "incomplete_questions": 1,
+    "invalid_calculation": 1,
+    "None": 1,
+    "uncited_query_subject": 12,
+    "insufficient": 7,
+    "unsupported_number": 1,
+    "unsupported_claim": 2
+  },
+  "rendered_citations": 91,
+  "invalid_citation_locations": 0,
+  "total_seconds": 626.9212274999954,
+  "errors": 0
+}

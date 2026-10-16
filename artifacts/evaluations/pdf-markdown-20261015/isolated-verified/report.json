@@ -1,0 +1,225 @@
+{
+  "passed": true,
+  "tested_at": "2026-10-15T15:52:50.479413+09:00",
+  "source": "C:\\Users\\djthe\\Downloads\\건축기본법(법률)(제21065호)(20251001).pdf",
+  "source_sha256": "b25f8073d1ecbb1dc268f322593e444af5cdf524aa2beee2d8949206c248ce11",
+  "source_fingerprints": {
+    "app/rag/indexer.py": "3c7757a9cc1bcdf8a69f52429838b286efb8e797483c03fbf3ffdcb36975577f",
+    "app/rag/semantic.py": "708e8db4db3370d9364100e8cbbc9fc642eefdd4ae890ee80fe64652ded2242f",
+    "app/rag/reranker.py": "526842c018247026c2581864f1861861cd83a2d949e0a01b714a84436edc2826",
+    "app/rag/generations.py": "1daac4046da3dd50ed1e136f20bec4c3db358f0d317dbf8d26c3233a99095143",
+    "app/rag/markdown_exports.py": "ab5a2cc23bfbea1597932b158a28a5a48fc6d905d3ccda0519592837dbdb4fd0",
+    "app/rag/chunker.py": "19cbb8442ebfa23e5f88169ad616a5f41cff3235e892370475635308a0336f0b",
+    "app/rag/document_parser.py": "10d453ec97564f95a09ad41fa9f33f61fa90df241c1afc991e0d4f46c0eec541",
+    "app/rag/passages.py": "51ce5438ca284b9630e0b57970f01a987be51e68edaeaa7f7bfaf5d7d1fa48a7",
+    "app/rag/models.py": "bc43aae7b84ded8b0a1ee97629814fd0364bc2488234bc5b10fb0188712aeb44",
+    "app/tools/impl/web_search.py": "02a519a798e2c4a74915eec252c73b6f58d049d3569c83ba4d38593e886630a0",
+    "app/orchestrator/query_plan.py": "cc9d88e35d706bba5bba4a1114e4b3205cec13d014cb0108bb770e09fbee3943",
+    "app/orchestrator/response_presenter.py": "e9ba19d181371c18b651d5087af17fdd8573c16770548880ac74110a79b22350",
+    "app/config/models.py": "3408ab89be0306a6490f344d8026254e5963fe19476c0f8b727e0f3fc0eb12af",
+    "app/rag/grounding.py": "3c244cbf39e66d6f56b235c0e9fa34c83843b1fe0dd065c21867d302e4768e8e",
+    "app/rag/local_embedder.py": "c5eb8d4e8716d327c0a82fe77482c3b90413169fb9bb671c61d414ab3aef2034",
+    "app/orchestrator/loop.py": "135379fde9ba5322226cac8e948fcb6da1973be29f3a10fff29b0085b1d56c24",
+    "app/orchestrator/research.py": "5af0e3e77bd2057b28fcd0a91c25062f0e9e84dca72def2108ecb453062903cf",
+    "app/orchestrator/prompt.py": "d8b05154aee57783004bc8a0d111895c7eb0ba4f32605808bea9bb831a082afc",
+    "app/orchestrator/envelope.py": "15c49b49e5e8e827e96d29a72e5ae208ae3639abb142a54356f3afa4bcfa82fa",
+    "app/llm/ollama_client.py": "7a9ea9e873b2a7a6fc107d56042e3fd0eedd7755d711ab60c24ba130e8c433ed",
+    "app/rag/benchmark/service.py": "6b8e9a5acfa8056e77c3f4ca5bf55718dfcc6bad5bf876594a15bc32f47a00c1",
+    "app/rag/benchmark/answers.py": "c3f01f6c60fe52f3b683e2d75f685ea83f4f69b733a09f2c01cf47ec8715c9dc",
+    "app/rag/benchmark/redesign.py": "b1f90167a352af3e0ed18da5bb9deff775f93ba48ebea65f88fc1f807120e0dc",
+    "app/orchestrator/prompts/system_tools.md": "779549d27e79372c77e7f378ceab15b4f53cdd82596728963a4dac0489b230e3",
+    "app/orchestrator/prompts/response_rulebook.md": "96c08db2865284dd28a82a2fa1356f753136c97c0ee4a548e30fa346e060cef7"
+  },
+  "backup": null,
+  "database": "D:\\Ai\\Jarvis\\results\\pdf-markdown-20261015\\isolated-verified\\memory\\jarvis.sqlite3",
+  "markdown_file": "D:\\Ai\\Jarvis\\results\\pdf-markdown-20261015\\isolated-verified\\memory\\jarvis-pdf-markdown\\doc_01M4Z5ARWWBFN5Z8PG500YWWM0\\건축기본법(법률)(제21065호)(20251001).md",
+  "markdown_sha256": "bc04ee45e1b77363e61ab11e0861d877d14a671609b57a55ec9f995d04ff320b",
+  "markdown_bytes": 24046,
+  "exact_db_match": true,
+  "pages": 6,
+  "removed_margin_lines": 12,
+  "pdf_chunks": 34,
+  "pdf_vectors": 34,
+  "max_tokens": 381,
+  "counts": {
+    "documents": 1,
+    "doc_chunks": 34,
+    "rag_document_content": 1,
+    "rag_markdown_exports": 1
+  },
+  "integrity": "ok",
+  "initial_sync": {
+    "indexed": 1,
+    "updated": 0,
+    "removed": 0,
+    "skipped": 0,
+    "errors": []
+  },
+  "repeat_sync": {
+    "indexed": 0,
+    "updated": 0,
+    "removed": 0,
+    "skipped": 1,
+    "errors": []
+  },
+  "restored_sync": {
+    "indexed": 0,
+    "updated": 0,
+    "removed": 0,
+    "skipped": 1,
+    "errors": []
+  },
+  "previous_generation": null,
+  "active_generation": "gen_01M4Z5ARXKMKWW699ZVAQET7MJ",
+  "retrieval": [
+    {
+      "question": "건축정책기본계획은 누가 몇 년마다 수립하나요?",
+      "expected_page": 2,
+      "rank": 1,
+      "hits": [
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            2
+          ],
+          "structure": [
+            "제3장 건축정책의 수립",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ①",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ②",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ③"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            3
+          ],
+          "structure": [
+            "제3장 건축정책의 수립 > 제12조(지역건축기본계획의 수립 등) > ①"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            4
+          ],
+          "structure": [
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ①",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ②",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 1호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 2호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 3호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 4호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 5호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 6호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 7호"
+          ]
+        }
+      ]
+    },
+    {
+      "question": "국가건축정책위원회는 위원장을 포함해 몇 명 이내로 구성하나요?",
+      "expected_page": 3,
+      "rank": 1,
+      "hits": [
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            3
+          ],
+          "structure": [
+            "제4장 건축정책위원회",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ①",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ②",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③ > 1호",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③ > 2호",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ④",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ⑤"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            4
+          ],
+          "structure": [
+            "제4장 건축정책위원회 > 제18조(지역건축위원회) > ①",
+            "제4장 건축정책위원회 > 제18조(지역건축위원회) > ②"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            3,
+            4
+          ],
+          "structure": [
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능)",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 1호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 2호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 3호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 4호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 5호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 6호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 7호",
+            "제4장 건축정책위원회 > 제14조(국가건축정책위원회의 기능) > 8호"
+          ]
+        }
+      ]
+    },
+    {
+      "question": "국가건축정책위원회는 건축정책 보고서를 몇 년마다 누구에게 제출하나요?",
+      "expected_page": 4,
+      "rank": 1,
+      "hits": [
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            4
+          ],
+          "structure": [
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ①",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ②",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 1호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 2호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 3호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 4호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 5호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 6호",
+            "제4장 건축정책위원회 > 제15조(건축정책 국회보고) > ② > 7호"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            2
+          ],
+          "structure": [
+            "제3장 건축정책의 수립",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ①",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ②",
+            "제3장 건축정책의 수립 > 제10조(건축정책기본계획의 수립) > ③"
+          ]
+        },
+        {
+          "source": "건축기본법(법률)(제21065호)(20251001).pdf",
+          "pages": [
+            3
+          ],
+          "structure": [
+            "제4장 건축정책위원회",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ①",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ②",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③ > 1호",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ③ > 2호",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ④",
+            "제4장 건축정책위원회 > 제13조(국가건축정책위원회) > ⑤"
+          ]
+        }
+      ]
+    }
+  ],
+  "scope": "Export, DB, embeddings, three retrieval checks; no answer-generation evaluation"
+}

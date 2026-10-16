@@ -1,0 +1,48 @@
+{
+  "source_sha256": {
+    "app/rag/indexer.py": "25fdd8c640eb362382a9bec9b2b91ac4fc90f7504e85a2c25a1c63e8a3239f3a",
+    "app/rag/semantic.py": "708e8db4db3370d9364100e8cbbc9fc642eefdd4ae890ee80fe64652ded2242f",
+    "app/rag/reranker.py": "526842c018247026c2581864f1861861cd83a2d949e0a01b714a84436edc2826",
+    "app/rag/generations.py": "9f5b6e2419aa607db0bef1c9d99319fbbba54c49c3d62d590bfd642bf618e6f7",
+    "app/rag/chunker.py": "e8ce1d6c3862a9c08a76d0ea64f877eccff4d8722d39d918553ff5342b5f29a3",
+    "app/orchestrator/query_plan.py": "cc9d88e35d706bba5bba4a1114e4b3205cec13d014cb0108bb770e09fbee3943",
+    "app/orchestrator/response_presenter.py": "e9ba19d181371c18b651d5087af17fdd8573c16770548880ac74110a79b22350",
+    "app/config/models.py": "603a565bca39fbded2c578a2e4712936d6a2389d873c73dd31ccf42f42739fa9",
+    "app/rag/grounding.py": "0058dab0603cf4da0867540bff72fe44c0661fc885f8898d0adca46f76b29a73",
+    "app/rag/local_embedder.py": "c5eb8d4e8716d327c0a82fe77482c3b90413169fb9bb671c61d414ab3aef2034",
+    "app/orchestrator/loop.py": "3f357a7c9d5e802e708734b8553c93cb433628e8f48eee9e1088d60fef158395",
+    "app/orchestrator/research.py": "8783b6c50ede10f68903e789f4dafff336b910dbb9a07aa420a476ed5064e77f",
+    "app/orchestrator/prompt.py": "d8b05154aee57783004bc8a0d111895c7eb0ba4f32605808bea9bb831a082afc",
+    "app/orchestrator/envelope.py": "15c49b49e5e8e827e96d29a72e5ae208ae3639abb142a54356f3afa4bcfa82fa",
+    "app/llm/ollama_client.py": "7a9ea9e873b2a7a6fc107d56042e3fd0eedd7755d711ab60c24ba130e8c433ed",
+    "app/rag/benchmark/service.py": "6b8e9a5acfa8056e77c3f4ca5bf55718dfcc6bad5bf876594a15bc32f47a00c1",
+    "app/rag/benchmark/answers.py": "c3f01f6c60fe52f3b683e2d75f685ea83f4f69b733a09f2c01cf47ec8715c9dc",
+    "app/rag/benchmark/redesign.py": "b1f90167a352af3e0ed18da5bb9deff775f93ba48ebea65f88fc1f807120e0dc",
+    "app/orchestrator/prompts/system_tools.md": "779549d27e79372c77e7f378ceab15b4f53cdd82596728963a4dac0489b230e3",
+    "app/orchestrator/prompts/response_rulebook.md": "96c08db2865284dd28a82a2fa1356f753136c97c0ee4a548e30fa346e060cef7"
+  },
+  "model_identity": "embeddinggemma:85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1:search-v1:tokenizer-model:l2:768",
+  "records": [
+    {
+      "case": "rare_unicode",
+      "characters": 1200,
+      "chunks": 13,
+      "max_tokens": 381,
+      "complete": true
+    },
+    {
+      "case": "korean",
+      "characters": 3000,
+      "chunks": 8,
+      "max_tokens": 384,
+      "complete": true
+    },
+    {
+      "case": "emoji",
+      "characters": 1500,
+      "chunks": 4,
+      "max_tokens": 384,
+      "complete": true
+    }
+  ]
+}

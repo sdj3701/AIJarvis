@@ -1,0 +1,4 @@
+# Optional packages used by the local RAG benchmark pipeline.
+# Install the project plus this file with: pip install -e ".[benchmark]"
+matplotlib>=3.9
+psutil>=6.1

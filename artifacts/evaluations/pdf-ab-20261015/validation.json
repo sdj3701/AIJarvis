@@ -1,0 +1,45 @@
+{
+  "complete": true,
+  "answers": 48,
+  "extra_explicit_citation_questions": 2,
+  "two_rounds_balanced": true,
+  "source_hashes_unchanged": {
+    "app/rag/indexer.py": true,
+    "app/rag/semantic.py": true,
+    "app/rag/reranker.py": true,
+    "app/rag/generations.py": true,
+    "app/rag/chunker.py": true,
+    "app/rag/document_parser.py": true,
+    "app/rag/models.py": true,
+    "app/tools/impl/web_search.py": true,
+    "app/orchestrator/query_plan.py": true,
+    "app/orchestrator/response_presenter.py": true,
+    "app/config/models.py": true,
+    "app/rag/grounding.py": true,
+    "app/rag/local_embedder.py": true,
+    "app/orchestrator/loop.py": true,
+    "app/orchestrator/research.py": true,
+    "app/orchestrator/prompt.py": true,
+    "app/orchestrator/envelope.py": true,
+    "app/llm/ollama_client.py": true,
+    "app/rag/benchmark/service.py": true,
+    "app/rag/benchmark/answers.py": true,
+    "app/rag/benchmark/redesign.py": true,
+    "app/orchestrator/prompts/system_tools.md": true,
+    "app/orchestrator/prompts/response_rulebook.md": true
+  },
+  "benchmark_script_hash_matches": true,
+  "original_pdf_hash_matches": true,
+  "token_caps_verified": true,
+  "manual_review": "All 48 final fact assertions reviewed against supplied PDF; automatic pass/fail unchanged.",
+  "charts_visually_checked": [
+    "document-comparison.png",
+    "answer-comparison.png",
+    "answer-outcomes.png"
+  ],
+  "generator_scripts": {
+    "compare.py": "6c10a88136804a37faa130b56de1e5fcac9b25b3cf20b577ad5af565d625ef7a",
+    "visualize_results.py": "f45d36844a4fe3bec6815db66453508bc132fa512b7ca49287fbcbde131a47be",
+    "check_explicit_citations.py": "db34374ce0787ce04d090d2a5c09ffd2ddd81b76daa3290dad80560ceb3aff13"
+  }
+}

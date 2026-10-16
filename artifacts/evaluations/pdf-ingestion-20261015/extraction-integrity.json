@@ -1,0 +1,14 @@
+{
+  "source_sha256": "b25f8073d1ecbb1dc268f322593e444af5cdf524aa2beee2d8949206c248ce11",
+  "retained_pdf_text_matches_markdown_ignoring_layout_whitespace": true,
+  "removed_lines": 12,
+  "removed_per_page": {
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2
+  },
+  "characters_without_layout_whitespace": 7844
+}

@@ -112,6 +112,10 @@ tools:
     description: "사용자 문서 폴더를 검색해 관련 문단과 파일명을 돌려준다."
 
   - name: open_app
+    dynamic_discovery_enabled: true
+    saved_permissions_enabled: true
+    catalog_ttl_s: 300
+    catalog_max_entries: 2000
     enabled: true
     phase: 4
     risk: low
@@ -136,7 +140,7 @@ tools:
     enabled: true
     phase: 4
     risk: medium
-    capabilities: [proc_spawn]
+    capabilities: [proc_terminate]
     execution_mode: in_process
     idempotent: false
     untrusted_output: false
@@ -145,7 +149,8 @@ tools:
     app_map:
       notepad: "C:\\Windows\\System32\\notepad.exe"
       calc: "C:\\Windows\\System32\\calc.exe"
-      explorer: "C:\\Windows\\explorer.exe"
+      # 설치되어 있으면 실제 경로를 확인해 등록한다.
+      # kakaotalk: "C:\\Program Files (x86)\\Kakao\\KakaoTalk\\KakaoTalk.exe"
 
   - name: open_folder
     enabled: true

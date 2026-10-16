@@ -20,7 +20,7 @@ python -m app
 
 확인:
 
-- `D:\Jarvis` 운영 트리 생성
+- 현재 v2 개발은 `D:\Jarvis-v2-dev` 트리 생성; `D:\Jarvis` 프로토타입 데이터와 분리
 - 설정 example의 최초 사본 생성
 - 기존 파일 덮어쓰기 0건
 - SQLite integrity 정상
@@ -192,3 +192,19 @@ python scripts\backup.py restore --archive <latest> --target <empty-test-root>
 - [ ] 7일간 매일 integrity 기록
 - [ ] 데이터 손상·금지 동작·시크릿 유출 0건
 
+
+
+## RAG 운영 확인 (2026-10-14 R3 적용)
+
+1. 수정 소스를 적용하려면 앱을 재시작한다. 시작 또는 `/index`에서 새 청크/임베딩 정책의 세대를 준비한다.
+2. 파일 변경은 다음 검색의 주기 확인(기본 5초) 또는 `/index`로 반영한다. 설정 파일 변경은 재시작 후 `/index`한다.
+3. 주 DB의 활성 generation과 원문·FTS·벡터가 함께 전환된다. 준비 실패는 이전 완전한 세대를 유지한다.
+4. 원문이 바뀌었는데 새 세대를 만들지 못했다면 source_stale로 표시하고 최신 근거 답변을 보류한다.
+5. semantic DB의 문서 사본은 generation marker로 복구한다. `/recall status`는 사본·대화·reranker 상태이며 주 색인만의 상태는 아니다.
+6. 두 DB와 원문을 백업 범위에 포함하고 복원 후 `/index`로 현재 파일/모델/설정과의 정합성을 확인한다.
+   온라인 백업 또는 앱 종료 후 일관된 사본을 사용한다. DB를 임의 삭제해 재색인을 강제하지 않는다.
+7. 모델/형식 변경은 새 identity로 전환한다. 명령 기억의 별도 embedder와 기존 사용자 대화 원문은 유지한다.
+
+일반 지식에 문서 근거가 없으면 general 표시·빈 sources로 답한다. 내부/unknown·오류·상충은 추측으로 덮지 않는다.
+운영 예제: [LOCAL_SEMANTIC_MEMORY](../post-v1/LOCAL_SEMANTIC_MEMORY.md).
+검증·적용 범위: [R3 구현 보고](../rag/RAG_R3_IMPLEMENTATION.md). 물리 UI/음성·깨끗한 설치 인수는 별도다.

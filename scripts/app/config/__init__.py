@@ -1,0 +1,24 @@
+# 파이썬 공부 | scripts/app/config/__init__.py
+# scripts/app/config 폴더를 패키지로 구성하는 파일입니다. 공개할 이름을 모아 둘 수도 있습니다.
+# 읽는 법: # 뒤는 실행되지 않는 설명입니다. 들여쓰기는 실행할 코드의 묶음을 나타냅니다.
+# name: Type과 -> Type은 타입 힌트이며, 일반 파이썬에서는 그 자체로 타입을 강제하지 않습니다.
+# 기초 문법과 추천 읽기 순서: docs/PYTHON_STUDY.md
+# import는 다른 모듈을 불러옵니다. from ... import는 사용할 이름을 골라 가져옵니다.
+
+"""Strict configuration models and loading helpers."""
+
+from app.config.loader import load_config, load_policies, load_settings
+from app.config.models import Policies, PrivacyPolicy, Settings, ToolPolicy
+from app.config.secrets import SecretLoader
+
+# __all__에 리스트(순서가 있고 수정 가능)을 대입합니다.
+__all__ = [
+    "Policies",
+    "PrivacyPolicy",
+    "SecretLoader",
+    "Settings",
+    "ToolPolicy",
+    "load_config",
+    "load_policies",
+    "load_settings",
+]

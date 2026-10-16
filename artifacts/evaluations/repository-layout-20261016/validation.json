@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-16",
+  "scope": "Repository layout and v2 main promotion; answer accuracy was not re-evaluated",
+  "branch": "main",
+  "previous_main": "3a64be95b725881f75bb66b898010d86aa5cf4cd",
+  "source_base": "4d1c8cb956a71a9ebc746af56213823e02cabd90",
+  "pytest": {
+    "passed": 812,
+    "failures": 0,
+    "errors": 0,
+    "deselected": 5,
+    "seconds": 283.041,
+    "command": "python -m pytest -m 'not allow_network and not needs_gpu and not needs_admin'"
+  },
+  "fixture_repairs": "Three existing test fixtures now construct Sandbox through build_sandbox(settings, policy); 9 focused tests passed",
+  "documentation": {
+    "relative_links_checked": 785,
+    "missing_links": [],
+    "invalid_json_blocks": []
+  },
+  "package": {
+    "wheel_resources": "passed",
+    "isolated_wheel_import": "passed",
+    "ruff_baseline": 52,
+    "ruff_current": 52,
+    "ruff_added": 0
+  },
+  "launcher_build": "bin/Jarvis.exe compiled successfully",
+  "mypy": {
+    "existing_errors": 7,
+    "files": [
+      "scripts/app/voice/controller.py",
+      "scripts/app/ui/gui.py"
+    ],
+    "new_layout_errors": 0
+  },
+  "git_policy": {
+    "runtime_db_logs_models_excluded": true,
+    "historical_results_allowlisted": true,
+    "force_push": false
+  }
+}

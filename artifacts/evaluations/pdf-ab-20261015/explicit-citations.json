@@ -1,0 +1,40 @@
+[
+  {
+    "id": "national_plan",
+    "query": "/search 제공한 건축기본법 PDF만 근거로 답해줘. 건축정책기본계획은 누가 몇 년마다 수립하나요? 근거가 되는 조·항 번호와 PDF 페이지를 답변에 명시해줘.",
+    "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFWYKR9G9HTSYPDCJTC&page=1\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFX70BS9VAS285038NB&page=2\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFX70BS9VAS285038NF&page=3\n\n상태: 근거 부족",
+    "status": "근거 부족",
+    "reason": "insufficient",
+    "sources": [],
+    "model_outputs": [
+      "{\n  \"status\": \"insufficient\",\n  \"claims\": []\n}"
+    ],
+    "expected_article": "제10조",
+    "expected_paragraph": "제1항",
+    "expected_pages": [
+      2
+    ],
+    "article_visible": false,
+    "paragraph_visible": false,
+    "seconds": 3.1772027000006346
+  },
+  {
+    "id": "delegation",
+    "query": "/search 제공한 건축기본법 PDF만 근거로 답해줘. 한국건축규정 정보체계 운영을 누구에게 위탁할 수 있나요? 근거가 되는 조·항 번호와 PDF 페이지를 답변에 명시해줘.",
+    "text": "검색된 근거로 답변을 검증하지 못했습니다. 문서나 질문을 구체화해 주세요.\n\n검토할 검색 자료 (답변 근거로 확정하지 않음):\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFWYKR9G9HTSYPDCJTC&page=1\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFX70BS9VAS285038NB&page=2\n건축기본법(법률)(제21065호)(20251001).pdf#chunk=chk_01M4YZXXFX70BS9VAS285038NF&page=3\n\n상태: 근거 부족",
+    "status": "근거 부족",
+    "reason": "insufficient",
+    "sources": [],
+    "model_outputs": [
+      "{ \"status\": \"insufficient\", \"claims\": [] }"
+    ],
+    "expected_article": "제25조",
+    "expected_paragraph": "제3항",
+    "expected_pages": [
+      6
+    ],
+    "article_visible": false,
+    "paragraph_visible": false,
+    "seconds": 2.338062099999661
+  }
+]

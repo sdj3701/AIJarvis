@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 2 장기 기억
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -195,7 +195,7 @@ python scripts\gate.py --report
 
 ## 8. 원문에서 볼 곳
 
-- [Phase 2 README](./README.md) — 작업 ID별 상세와 필수 테스트
-- [DESIGN 5.2](../../DESIGN.md) — 기억 모델과 저장소 인터페이스
-- [DESIGN 8장](../../DESIGN.md) — 검색 랭킹 규칙
-- [SCHEMAS 5·6장](../../SCHEMAS.md) — DB 스키마와 상태 전이 표
+- [Phase 2 README](README.md) — 작업 ID별 상세와 필수 테스트
+- [DESIGN 5.2](../DESIGN.md) — 기억 모델과 저장소 인터페이스
+- [DESIGN 8장](../DESIGN.md) — 검색 랭킹 규칙
+- [SCHEMAS 5·6장](../SCHEMAS.md) — DB 스키마와 상태 전이 표

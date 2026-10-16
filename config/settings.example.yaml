@@ -36,6 +36,8 @@ llm:
   model_digest: "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
   runtime_context_tokens: 16384
   think: false
+  # Gate A 실제 모델 평가를 통과한 뒤에만 true로 전환한다.
+  native_tool_calling_enabled: false
   temperature: 0.3
   max_output_tokens: 2000
   timeout_s: 120
@@ -69,6 +71,13 @@ budget:
   # 않는다 — 비용 한도는 PLAN 12.1의 정량 기준이므로 설정으로 끌 수 있으면 기준이 아니다.
   # 진행 중 요청은 한도 초과 시에도 완료시킨다(중간 종료가 데이터 손상을 만들 수 있음).
   on_exceed: block_new_requests   # 이 값만 허용. 다른 값은 로더가 ConfigError
+
+command_memory:
+  enabled: false  # embeddinggemma 설치 후 활성화; 기존 memory.embedding과 별개
+  embedding_model: embeddinggemma
+  similarity_threshold: 0.60  # 후보 제안 기준이며 자동 실행 기준이 아님
+  timeout_s: 10
+  max_examples: 2000
 
 memory:
   retrieval:
@@ -109,12 +118,41 @@ memory:
     dim: 0
 
 rag:
+  rerank:
+    enabled: true
+    candidate_count: 24
+    batch_size: 4
+    max_length: 512
+    cpu_threads: 2
+    timeout_s: 10
+  semantic:
+    enabled: true
+    model: embeddinggemma         # Ollama 로컬 모델: ollama pull embeddinggemma
+    timeout_s: 30
+    conversations_enabled: true
+    conversation_top_k: 3
+    conversation_context_chars: 2400
+    retention_days: 90
+    min_similarity: 0.3
   chunk_chars: 1200
   chunk_overlap_chars: 150
+  # Document-only recursive chunks; measured tokens include title/task prefix.
+  # Overlap is an upper bound; whole units are retained only when they fit.
+  # Questions are embedded whole and do not use these chunk budgets.
+  chunk_max_tokens: 384
+  chunk_overlap_tokens: 48
+  refresh_interval_s: 5
+  max_chunks_per_document: 6
+  neighbor_chunks: 1
   max_chunks_per_answer: 6
+  max_structured_chunks: 16  # PDF 전체 목록·비교 질문의 구조 조회 상한; 입력 예산은 별도 적용
   max_file_bytes: 10485760
-  # PDF parser 결정(D012) 전에는 .pdf를 추가하지 않는다.
-  supported_extensions: [".md", ".txt"]
+  # Hybrid RRF score(d) = Σ 1 / (k + rank_i(d)); the conventional default is 60.
+  rrf_k: 60
+  # 텍스트 PDF는 로컬 파서(D012)로 처리한다. OCR은 별도다.
+  supported_extensions: [".md", ".txt", ".pdf"]
+  pdf_max_pages: 300
+  pdf_max_characters: 2000000
   # 웹 fetch 제한. SCHEMAS.md 8.6과 일치해야 한다.
   fetch:
     max_bytes: 2097152
@@ -124,7 +162,7 @@ rag:
   search:
     provider: duckduckgo            # D006: DuckDuckGo via ddgs (API 키 불필요)
     max_results: 5
-    require_min_sources: 2          # 교차 확인 목표. 미달 시 답변에 '근거 부족' 라벨
+    require_min_sources: 2  # 호환성용; 출처 수로 근거를 판단하지 않음
     cost_per_request: "0.00"       # USD 문자열. DDG는 0
 
 agent:

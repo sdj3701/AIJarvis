@@ -16,10 +16,10 @@
 ## 3. 만들/변경할 파일
 
 ```text
-app/orchestrator/{loop.py,tasks.py,recovery.py}
-app/tools/impl/run_skill.py       # 기본 disabled, 선택적 골격만
-tests/integration/{test_agent_multistep.py,test_recovery.py}
-tests/data/tasks_eval.jsonl
+scripts/app/orchestrator/{loop.py,tasks.py,recovery.py}
+scripts/app/tools/impl/run_skill.py       # 기본 disabled, 선택적 골격만
+scripts/tests/integration/{test_agent_multistep.py,test_recovery.py}
+scripts/tests/data/tasks_eval.jsonl
 ```
 
 ## 4. 상태 모델
@@ -46,7 +46,7 @@ idempotency key 계산
 
 ### P5-01 TaskStore
 
-1. [SCHEMAS 5장](../../SCHEMAS.md)의 tasks/task_steps를 구현한다.
+1. [SCHEMAS 5장](../SCHEMAS.md)의 tasks/task_steps를 구현한다.
 2. `sha256(task_id + step_no + tool_name + args_hash)`로 idempotency key를 만든다.
 3. 같은 key의 succeeded 단계는 기존 결과를 반환한다.
 4. running 단계는 시작 시 사용자 검토 대상으로 표시한다.

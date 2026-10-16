@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 7 음성 입출력
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -248,7 +248,7 @@ cd D:\Ai\Jarvis
 
 ## 13. 원문에서 볼 곳
 
-- [Phase 7 README](./README.md) — 작업 ID별 상세와 게이트 항목
+- [Phase 7 README](README.md) — 작업 ID별 상세와 게이트 항목
 - [한국어 STT 운영 가이드](../reference/VOICE_STT.md) — 임계값 기본값과 실장치 점검 절차
 - [답변 중 마이크 게이트](../reference/VOICE_BARGE_IN_GATE.md) — 게이트 A/B/C 설계 상세
 - [호출·한 문장 명령 UX](../reference/VOICE_WAKE_COMMAND_UX.md) — 오인 방지와 한 문장 처리

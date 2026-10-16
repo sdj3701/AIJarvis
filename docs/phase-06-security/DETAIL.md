@@ -1,6 +1,6 @@
 # 세부 개발문서 — Phase 6 보안 점검과 v0.5 판정
 
-> 이 폴더의 [README.md](./README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
+> 이 폴더의 [README.md](README.md)에 적힌 작업을 배경·이유·주의점까지 풀어 쓴 세부
 > 개발문서다. 설명은 게임 개발 용어에 빗대어 쓴다. 인터페이스·설정 키·완료 기준의 단일
 > 기준은 `README.md`와 기준 문서이며, 내용이 어긋나면 기준 문서를 따른다.
 >
@@ -222,7 +222,7 @@ python scripts\backup.py restore --archive <test-archive> --target <empty-test-r
 
 ## 9. 원문에서 볼 곳
 
-- [Phase 6 README](./README.md) — 작업 ID별 상세와 백업·복원 절차
+- [Phase 6 README](README.md) — 작업 ID별 상세와 백업·복원 절차
 - [위협 모델](../reference/THREAT_MODEL.md) — T01~T20 전체 목록
 - [운영 문서](../operations/README.md) — v0.5 릴리스 체크리스트
 - [D007·D008](../00-start-here/DECISIONS.md) — 백업 관련 미결정 항목

@@ -11,7 +11,7 @@
       │
       ▼
 ┌────────────────────────────────────────────────────────┐
-│ Agent Loop (app/orchestrator/agent.py)                 │
+│ Agent Loop (scripts/app/orchestrator/agent.py)                 │
 │                                                        │
 │ 1. Step 1: web_search  (웹 검색 및 출처 URL 수집)       │
 │      ▼                                                 │
@@ -34,7 +34,7 @@
 ### 2.1 개념 및 역할
 Step 1(검색)과 Step 2(본문 추출)에서 얻은 `<untrusted_content>` 데이터를 프롬프트에 주입하고, LLM이 **출처 URL과 인용구에만 기반하여 사실(Fact)을 정리하고 마크다운 문서를 작성**하는 단계입니다.
 
-### 2.2 구현 코드 (`app/orchestrator/agent.py`의 `_decide` 및 `_observe`)
+### 2.2 구현 코드 (`scripts/app/orchestrator/agent.py`의 `_decide` 및 `_observe`)
 
 ```python
 def _decide(
@@ -52,14 +52,14 @@ def _decide(
         max_output_tokens=self._settings.llm.max_output_tokens,
     )
     self._budget.check("llm", estimated, ctx=ctx)
-    
+
     # 2. 도구 프롬프트 및 사용자 목표 구성
     tools_prompt = load_tools_prompt()
     agent_instruction = (
         f"사용자 목표: {goal}\n"
         "한 번에 하나의 도구만 호출하거나, 모든 단계가 끝났으면 최종 답변을 작성하세요."
     )
-    
+
     # 3. 이전 단계의 도구 관찰 결과(Observation)를 누적 주입
     if observations:
         lines = [agent_instruction, "", "이전 단계 관찰:"]
@@ -70,14 +70,14 @@ def _decide(
                 label = message.name or "tool"
                 lines.append(f"[{label} 결과]\n{message.content}")
         agent_instruction = "\n".join(lines)
-        
+
     plan = self._prompt.build(
         current_user_text=agent_instruction,
         history=(),
         cancel=ctx.cancel,
         extra_system=(tools_prompt,),
     )
-    
+
     # 4. LLM 호출 (도구 스펙 제공)
     tool_specs = self._registry.llm_tool_specs()
     response = self._llm.complete(
@@ -102,7 +102,7 @@ LLM이 생성한 요약문을 `notes/` 등 지정된 샌드박스 폴더에 안�
 2. `Medium` 위험도 작업으로 분류되어 **사용자 승인 대기(`TurnOutcome.pending_approval`)로 루프 일시 중단**.
 3. 승인 완료 후 티켓(`ApprovalTicket`)을 검증하고 `write_atomic`으로 안전하게 생성.
 
-### 3.2 구현 코드 (`app/tools/impl/create_file.py`)
+### 3.2 구현 코드 (`scripts/app/tools/impl/create_file.py`)
 
 ```python
 """Create text files under allowed sandbox roots."""
@@ -133,7 +133,7 @@ class CreateFileTool:
         target = Path(str(normalized.get("path", "")))
         content = str(normalized.get("content", ""))
         overwrite = bool(normalized.get("overwrite", False))
-        
+
         if not target:
             return ToolResult(
                 ok=False,
@@ -145,7 +145,7 @@ class CreateFileTool:
                 truncated=False,
                 untrusted=False,
             )
-            
+
         if target.exists() and not overwrite:
             return ToolResult(
                 ok=False,
@@ -157,7 +157,7 @@ class CreateFileTool:
                 truncated=False,
                 untrusted=False,
             )
-            
+
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
             # 원자적 쓰기 (임시 파일 생성 후 atomic rename)
@@ -167,7 +167,7 @@ class CreateFileTool:
                 "파일을 생성하지 못했습니다.",
                 {"path": str(target), "error": str(error)},
             ) from error
-            
+
         return ToolResult(
             ok=True,
             output=f"파일을 생성했습니다: {target}",
@@ -189,7 +189,7 @@ class CreateFileTool:
 - `Low` 위험도로 분류되어 정책 허용 범위 내에서 자동 실행됩니다.
 - 경로 탐색(`..` Traversal)이나 시스템 영역 접근은 Canonical Path 검증으로 사전 차단됩니다.
 
-### 4.2 구현 코드 (`app/tools/impl/open_folder.py`)
+### 4.2 구현 코드 (`scripts/app/tools/impl/open_folder.py`)
 
 ```python
 """Open an existing folder under an allowed sandbox root."""
@@ -218,7 +218,7 @@ class OpenFolderTool:
         start = time.monotonic()
         normalized = tctx.normalized_args or {}
         folder = str(normalized.get("path", ""))
-        
+
         if not folder:
             return ToolResult(
                 ok=False,
@@ -230,7 +230,7 @@ class OpenFolderTool:
                 truncated=False,
                 untrusted=False,
             )
-            
+
         try:
             if os.name == "nt":
                 os.startfile(folder)
@@ -248,7 +248,7 @@ class OpenFolderTool:
                 "폴더를 열지 못했습니다.",
                 {"path": folder, "error": str(error)},
             ) from error
-            
+
         return ToolResult(
             ok=True,
             output=f"폴더를 열었습니다: {folder}",
@@ -268,7 +268,7 @@ class OpenFolderTool:
 ### 5.1 개념 및 역할
 에이전트가 모든 단계를 마쳤을 때, `Task` 상태를 `succeeded`로 전이하고 사용자에게 최종 답변과 함께 **완료/실패/취소/미실행 단계 목록**을 명확하게 포맷팅하여 투명하게 전달합니다.
 
-### 5.2 구현 코드 (`app/orchestrator/agent.py`의 `format_step_breakdown`)
+### 5.2 구현 코드 (`scripts/app/orchestrator/agent.py`의 `format_step_breakdown`)
 
 ```python
 def format_step_breakdown(steps: Sequence[StepRecord], *, max_steps: int) -> str:
@@ -282,7 +282,7 @@ def format_step_breakdown(steps: Sequence[StepRecord], *, max_steps: int) -> str
         for number in range(1, max_steps + 1)
         if number not in executed
     ]
-    
+
     lines = ["## 단계 현황"]
     lines.append("완료: " + (", ".join(completed) if completed else "없음"))
     lines.append("실패: " + (", ".join(failed) if failed else "없음"))

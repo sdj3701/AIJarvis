@@ -1,43 +1,93 @@
 # 개발 진행 현황
 
-이 파일은 현재 상태만 기록하는 운영형 문서다. 상세 요구나 설계를 복사하지 않고 Phase 문서의 작업 ID와 검증 증거만 연결한다.
+현재 상태와 검증 증거를 기록한다. 상세 요구는 [PLAN](PLAN.md), 실행 순서는
+[Phase 3](phase-03-research/README.md), 전체 지도는 [개발 흐름](DEVELOPMENT_FLOW.md)을 따른다.
 
-> 마지막 문서 정리: 2026-08-19 (P0-02~P0-08 완료, Phase 0 게이트 대기)
-> 현재 상태: `rebuild/v2` Phase 0 구현 완료. 공식 게이트는 작업 트리 정리 후 실행
-> 현재 Phase: Phase 0
-> 착수 전 환경 조건: Python 3.13.15 설치 및 실행 확인. Phase 0 진입 조건을 충족한다.
-> 브랜치: `rebuild/v2`. 프로토타입 게이트 기록은 비교용이며 v2 완료가 아니다.
+> 마지막 정리: 2026-10-16 — v2 폴더 정리·main 전환
+> 브랜치: `main`; 개발 데이터: `D:\Jarvis-v2-dev`
+> 현재 작업: R3-01~07 구현·검증, R3-08 자동 평가·문서 적용
+> 남은 인수: 실장치 UI/음성·정식 릴리스; [구현 보고](rag/RAG_R3_IMPLEMENTATION.md)
+
+PDF `.md` 자동 저장 후속 적용: `implemented_verified`. 기존 DB/벡터 저장을 유지하면서 전용 폴더에
+전체 Markdown을 내보낸다. 제공 PDF의 DB/파일 일치·34청크/벡터·검색 3건·복원을 확인했고 개발 DB에도
+재색인 없이 적용했다. [변경·시험·파일 위치](rag/RAG_PDF_INGESTION.md)의 7절 참고. EXE 재빌드는 별도다.
+
+
+RG-ANSWER-QUALITY: `implemented_verified`. 재귀 34청크/기존 벡터를 유지하고 동일 PDF 100문항의
+완전 정답이 60→82개(+22%p), 인용 178건 위치 오류 0건, 회귀 568개 통과다. 남은 일부 답변 5개와
+불필요한 보류 10개, 범위 밖 mypy 오류 7개를 기록했다. [변경·검증·제한](rag/RAG_ANSWER_QUALITY.md).
+
+REPO-LAYOUT: 문서는 docs, 실행 코드는 scripts/app, 테스트는 scripts/tests, 평가 결과는 artifacts/evaluations로 이동했다. Python app 모듈명과 운영 데이터 위치는 유지한다. 전체 테스트 812개 통과(외부 환경 5개 제외), 패키지·런처·문서 검증 완료. 기존 Ruff 52개 및 mypy 7개는 별도 잔여 항목이다. [폴더·검증·main 전환](REPOSITORY_LAYOUT.md).
 
 ## 1. 상태 값
 
 - `not_started`: 미착수
 - `in_progress`: 작업 중
-- `blocked`: 외부 결정·환경·결함 때문에 진행 불가
-- `gate_failed`: 구현됐지만 Phase 게이트 실패
-- `completed`: 게이트 종료 코드 0과 증거 기록 완료
+- `implemented_unverified`: 관련 구현이 있지만 최신 정식 게이트/인수 증거가 없음
+- `implemented_verified`: 해당 코드·자동 회귀·실제 모델 평가 확인; 정식 릴리스와 별개
+- `unverified`: 이번 점검에서 전체 범위·완료를 확인하지 않음
+- `blocked`: 외부 결정/환경 때문에 진행 불가
+- `gate_failed`: 정식 게이트 실패
+- `completed`: 요구 범위와 정식 게이트의 통과 증거까지 기록
 
-## 2. Phase 대시보드
+## 2. 현재 구현과 릴리스 상태
 
-아래 상태는 `rebuild/v2` 기준이다. 프로토타입 `main`의 완료 기록은 5장에만 남긴다.
+| 영역 | 상태 | 확인 범위와 남은 증거 |
+|---|---|---|
+| 기반·대화·기억 | implemented_unverified | 설정·SQLite·Ollama·대화 기억 코드 존재; 과거 Phase 0 표만으로 현재 상태 판단 금지 |
+| 문서 RAG·로컬 임베딩·재정렬 | implemented_unverified | R3 코드·자동 회귀·실제 모델 확인; 실장치 인수와 최신 정식 릴리스 게이트는 미완료 |
+| PC 도구·에이전트·보안 | unverified | 관련 코드 존재; 이번 RAG 문서 개정에서 전체 인수 검증하지 않음 |
+| 음성·GUI·런처 | unverified | 관련 코드/루트 런처 존재; 실장치·깨끗한 설치 환경 인수 증거 별도 필요 |
+| v1 안정화 | unverified | 최신 버전의 7일 운영 증거 확인 필요 |
 
-| Phase | 상태 | 구현 문서 | 게이트 증거 | 비고 |
-|-------|------|-----------|-------------|------|
-| 0 기반 | in_progress | [Phase 0](./phase-00-foundation/README.md) | — | P0-01~P0-08 구현 완료. `pytest -m phase0` 154 passed. 공식 게이트 대기 |
-| 1 대화 | not_started | [Phase 1](./phase-01-chat/README.md) | — | D005 decided |
-| 2 기억 | not_started | [Phase 2](./phase-02-memory/README.md) | — | |
-| 3 검색/RAG | not_started | [Phase 3](./phase-03-research/README.md) | — | D006 decided, D012 pending |
-| 4 PC 도구 | not_started | [Phase 4](./phase-04-tools/README.md) | — | |
-| 5 에이전트 | not_started | [Phase 5](./phase-05-agent/README.md) | — | |
-| 6 보안 게이트 | not_started | [Phase 6](./phase-06-security/README.md) | — | D007~D008 필요 |
-| 7 음성 | not_started | [Phase 7](./phase-07-voice/README.md) | — | D009·D010·D016~D018 decided |
-| 8 상주 UI | not_started | [Phase 8](./phase-08-resident-ui/README.md) | — | D013~D015 필요 |
-| v1 안정화 | not_started | [운영](./operations/README.md) | — | 7일 기록 필요 |
+과거 프로토타입의 gate 성공은 5장에 보존하고 현재 v2 완료 증거로 쓰지 않는다.
+루트 `Jarvis.exe`는 `.venv\Scripts\pythonw.exe -m app --gui`를 실행하는 런처다.
+소스와 별도로 고정된 PyInstaller 산출물이라고 가정하지 않는다.
 
 ## 3. 현재 작업 큐
 
-Phase 0 문서의 작업 ID와 동일하게 유지한다.
+| 작업 | 상태 | 증거/남은 행동 |
+|---|---|---|
+| R3-01 질문 계획·후속 질문 | implemented_verified | QueryPlan 회귀·실제 후속 질문 |
+| R3-02 역할별 임베딩 | implemented_verified | digest/캐시 격리·실제 raw/role 비교 |
+| R3-03 문맥·토큰 청크 | implemented_verified | recursive-context-v4, 문단·원문 보존·토큰 상한·질문 경로 분리 |
+| R3-04 갱신·세대 | implemented_verified | 설정 변경·삭제·중단·롤백·사본 복구 |
+| R3-05 문맥 선택·예산 | implemented_verified | 512토큰 뒤쪽·이웃·중복 제거·입력 예산 |
+| R3-06 답변 모드 | implemented_verified | text/voice·출처·기억·오류/내부 질문 분기 |
+| R3-07 계산 근거 | implemented_verified | 합/차·단위·날짜 회귀·실제 합계 생성 |
+| R3-08 평가·운영 인수 | in_progress | 자동 평가·문서 완료; 물리 UI/음성·정식 릴리스 인수 남음 |
 
-| 작업 | 상태 | 담당 | 시작 | 완료 | 증거/메모 |
+### 최신 검증 증거
+
+2026-10-15 PDF 후속 적용: [구현·검증 보고](rag/RAG_PDF_INGESTION.md). 실제 6쪽 PDF를 직접 등록해
+34청크, 최대 381토큰, 제목 전용/조항 혼합 0건, 검색 Hit@1=8/9·Hit@3=9/9를 확인했다.
+최종 Phase 0~3·security 531개 통과, 실제 답변 회귀 17/17 통과. 개발 DB는 21문서·54청크로 갱신했다.
+아래 재귀 청크 수치는 PDF 지원 전 이력이다.
+
+2026-10-15 재귀 청크 보완: [적용 보고](rag/RAG_RECURSIVE_CHUNKING.md),
+[새 결과](../artifacts/evaluations/rag-recursive-20261015). 개발 문서 20개를 백업 후 새 세대로 교체했다.
+짧은 문서 20개는 각각 한 청크, 최대 123토큰이며 모든 청크의 토큰 측정 완료·DB 무결성 정상이다.
+- 최종 Phase 0~3·security **513 passed**, 집중 회귀 **45 passed**. Ruff·RAG mypy 통과.
+- 최종 실제 답변 **17/17**, 검색 Hit@1=9/11·Hit@5=11/11. 실제 Unicode 문서도 토큰 상한·원문 보존 확인.
+
+아래는 **2026-10-14 기준선**이며 새 코드 검증과 합산하지 않는다.
+
+- Phase 0~3·security 직접 pytest: **488 passed**, 260 deselected.
+- 전체 비네트워크·비slow pytest: **728 passed, 기존 setup 오류 8건**, 12 deselected.
+  작업 전 사본에서 동일한 Sandbox 인자 누락 8건 재현.
+- 실제 로컬 모델 답변: **17/17**. 검색 합성 11질의: Hit@1=9/11, Hit@5=11/11.
+- 수정 Python Ruff 통과. RAG/query_plan mypy 26소스 통과; 전체는 기존 음성·GUI 타입 오류 7개.
+- 정식 `gate.py --phase 3`: 기존 미커밋 변경 때문에 실행 거부. 직접 pytest와 정식 게이트를 구분한다.
+- [구현 보고·한계](rag/RAG_R3_IMPLEMENTATION.md), [결과 폴더](../artifacts/evaluations/rag-r3-20261014), [TESTING](TESTING.md).
+
+과거 75개 집중 회귀·20문서 200질의·12답변 평가와 이번 수치를 합산하지 않는다.
+평가는 합성 DB에서 수행한다. 2026-10-15 별도 적용 단계에서 개발 DB의 기존 문서 색인을 갱신했다.
+
+### 과거 Phase 0 작업 기록
+
+아래는 2026-08-18~19 당시 작업 단위 기록이다. 현재 대시보드나 최신 Phase gate로 해석하지 않는다.
+
+| 작업 | 당시 상태 | 담당 | 시작 | 완료 | 당시 증거/메모 |
 |------|------|------|------|------|-----------|
 | P0-01 프로젝트와 품질 도구 | completed | Cursor | 2026-08-18 | 2026-08-18 | collect-only 453, ruff/mypy 통과, lock은 `--extra=dev` |
 | P0-02 설정 모델과 로더 | completed | Cursor | 2026-08-19 | 2026-08-19 | example 3파일 로드, deny·해시·v2 config dir |
@@ -48,24 +98,17 @@ Phase 0 문서의 작업 ID와 동일하게 유지한다.
 | P0-07 원자적 쓰기·복구·단일 인스턴스 | completed | Cursor | 2026-08-19 | 2026-08-19 | tmp 격리, lock, 종료 코드 1 |
 | P0-08 CLI와 조립 | completed | Cursor | 2026-08-19 | 2026-08-19 | `python -m app` echo, LLM 없음 |
 
-Phase가 바뀌면 이 표를 새 Phase 작업 ID로 교체한다. 완료 이력은 아래 증거 로그에 남기므로 이전 작업 표를 계속 누적하지 않는다.
+## 4. 남은 결정과 제한
 
-## 4. 현재 blocker
+| 항목 | 상태 | 영향 |
+|---|---|---|
+| D023 RAG 책임·답변 정책 | decided | R3 코드와 자동 평가 적용 |
+| D024 청크/문맥/갱신 수치 | decided (개발 기본값) | 384/48토큰·이웃1·5초 확인; 실무 최적화 별도 |
+| D012 PDF parser | decided | `.md`·`.txt`·텍스트 `.pdf`; OCR/복잡한 레이아웃 별도 |
+| D007·D008 백업 | decided | 선택 완료와 복원 인수 통과는 별개 |
+| D013~D015 배포·UI | pending | 현재 개발용 런처 존재와 정식 패키징 결정은 별개 |
 
-Phase 0을 막는 항목은 없다.
-
-| 결정/문제 | 영향 | 상태 | 해결 문서 |
-|-----------|------|------|-----------|
-| D005 LLM 런타임·모델 | Phase 1 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D006 검색 API | Phase 3 웹 검색 | decided (duckduckgo) | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D012 PDF parser | Phase 3 PDF | pending, `.pdf` 비활성 | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D007~D008 백업 | Phase 6 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D009 TTS·D010 호출·D016 STT | Phase 7 | decided | [DECISIONS](./00-start-here/DECISIONS.md) |
-| D017 끼어들기 게이트 | Phase 7 | decided | [VOICE_BARGE_IN_GATE](./reference/VOICE_BARGE_IN_GATE.md) |
-| D018 호출·한 문장 명령 | Phase 7 | decided | [VOICE_WAKE_COMMAND_UX](./reference/VOICE_WAKE_COMMAND_UX.md) |
-| D013~D015 패키징/UI | Phase 8 | pending | [DECISIONS](./00-start-here/DECISIONS.md) |
-
-D005~D018은 Phase 0 진입을 막지 않는다. 해당 Phase에 들어가기 전에 다시 확인한다.
+정식 값과 근거는 [DECISIONS](00-start-here/DECISIONS.md)를 따른다.
 
 ## 5. Phase 게이트 증거 로그
 
@@ -90,10 +133,10 @@ Phase를 완료할 때 행을 추가한다. 프로토타입 행은 비교용이�
 
 ## 6. 업데이트 규칙
 
-1. 작업 시작 전에 현재 작업 행을 `in_progress`로 바꾼다.
-2. 테스트 실패만으로 `blocked`를 쓰지 않는다. 구현 문제는 `in_progress` 또는 `gate_failed`다.
-3. 외부 결정이 없으면 안전하게 진행할 수 없는 경우만 `blocked`다.
-4. Phase 완료는 사람이 판단하지 않고 gate 종료 코드 0으로만 기록한다.
-5. 코드·스키마·정책이 바뀌면 관련 기준 문서를 먼저 수정한다.
-6. 실패 로그에 시크릿·대화 원문을 붙이지 않는다.
-7. `rebuild/v2` 완료 행은 해당 브랜치에서 게이트를 통과한 뒤에만 추가한다.
+1. 시작 시 작업을 in_progress로, 요구 검증과 게이트 증거가 있을 때 completed로 바꾼다.
+2. 기존 테스트 통과만으로 새 요구의 MISSING을 지우지 않는다.
+3. 문서·설계 완료, 코드 적용, migration, 실제 모델 평가, 릴리스 승인을 구분한다.
+4. 게이트에는 branch/commit 또는 소스 hash·명령·종료 코드·증거 경로를 남긴다.
+5. 실패 로그에 시크릿이나 사용자 문서/대화 원문을 붙이지 않는다.
+
+인용 개선 및 TC 1·2 결과: [변경 보고](rag/RAG_CITATION_FIXES.md).
