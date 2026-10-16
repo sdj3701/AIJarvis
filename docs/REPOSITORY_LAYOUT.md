@@ -29,7 +29,8 @@ Jarvis/
 ├── config/                  배포 가능한 설정 예제
 ├── assets/                  아이콘 등 정적 자산
 ├── bin/                     로컬에서 빌드하는 실행 파일
-├── local/                   백업·이전 체크아웃·로그·임시 파일 (Git 제외)
+├── local/                   백업·로그·임시 파일 (Git 제외)
+├── AIJarvis/                기존 Git 앱의 경로 호환용 별도 체크아웃 (로컬 전용)
 ├── .venv/                   개발 Python 환경 (Git 제외)
 ├── pyproject.toml           패키지·테스트·품질 검사 설정
 ├── requirements.lock        고정 의존성과 해시
@@ -86,7 +87,20 @@ GUI 실행은 `scripts/launchers/Jarvis_UI.bat`, CLI는 `Jarvis.bat`, 음성은 
 | `results/` | `artifacts/evaluations/` |
 | `evaluation_queries.json` | `datasets/evaluation_queries.json` |
 | 루트 배치 파일·PyInstaller spec | `scripts/launchers/`, `scripts/packaging/` |
-| 중첩 `AIJarvis/`, 임시 파일·로그 | `local/archive/`, `local/tmp/`, `local/logs/` |
+| 임시 파일·로그 | `local/tmp/`, `local/logs/` |
+| 중첩 `AIJarvis/` | 기존 위치 유지 (Git 앱 경로 호환, 상위 저장소의 Git 추적 제외) |
+
+### 기존 Git 앱 경로 호환
+
+정리 중 별도 체크아웃 `AIJarvis/`를 `local/archive/AIJarvis/`로 옮겼으나,
+Git 앱이 이전 위치의 `.git/config`를 계속 참조해 파일을 찾지 못하는 오류가 발생했다.
+2026-10-16에 해당 체크아웃을 원래 위치로 복구했으며, 미커밋 변경 7개와 Git 설정을 보존했다.
+이동 후 앱이 생성한 불완전한 `.git/fork` 폴더는 `local/maintenance/`에 별도로 보관했다.
+
+현재 개발·커밋·push 기준은 **`D:\Ai\Jarvis`의 `main`**이다.
+`D:\Ai\Jarvis\AIJarvis`는 이전 작업을 보존한 독립 체크아웃이며 최신 v2 작업 경로가 아니다.
+Git 앱에서도 최신 v2를 보려면 상위 `D:\Ai\Jarvis`를 저장소로 연다.
+기존 체크아웃은 사용하는 앱의 저장소 경로를 전환하기 전까지 다시 이동하지 않는다.
 
 Git 전환은 기존 main의 커밋 이력을 유지하는 fast-forward로 진행한다.
 이전 main을 사용하는 prototype 체크아웃은 보관 브랜치로 전환하고, 현재 v2 체크아웃을 main으로 사용한다.
