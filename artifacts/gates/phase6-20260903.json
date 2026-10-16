@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "phase": 6,
+  "started_at": "2026-09-03T14:01:26.766+09:00",
+  "finished_at": "2026-09-03T14:01:54.401+09:00",
+  "exit_code": 0,
+  "commit": "69384f8",
+  "worktree_clean": true,
+  "marker_expr": "(phase0 or phase1 or phase2 or phase3 or phase4 or phase5 or phase6) and not allow_network",
+  "tests": {
+    "passed": 410,
+    "failed": 0,
+    "skipped": 1,
+    "skipped_reasons": []
+  },
+  "metrics": [
+    {
+      "name": "security.critical_high_defects",
+      "value": 0,
+      "threshold": 0,
+      "ok": true,
+      "note": "위협 모델 및 레드팀 테스트 기준 Critical/High 결함 0건"
+    },
+    {
+      "name": "tasks_eval.success_rate",
+      "value": 1.0,
+      "threshold": 0.95,
+      "ok": true,
+      "note": "50건 복합 에이전트 태스크 평가셋 95% 이상 통과"
+    },
+    {
+      "name": "audit_chain.verified",
+      "value": true,
+      "threshold": true,
+      "ok": true,
+      "note": "감사 로그 해시 체인 변조 검출 및 연속성 검증 통과"
+    },
+    {
+      "name": "backup_restore.verified",
+      "value": true,
+      "threshold": true,
+      "ok": true,
+      "note": "격리 테스트 디렉터리 복원 후 기억 검색 쿼리 성공"
+    }
+  ],
+  "unmet": [],
+  "notes": [
+    "Phase 6 v0.5 릴리스 게이트 완료.",
+    "신규 기능 추가 없이 Phase 0~5의 신뢰 경계·복구·백업을 전수 검증했습니다."
+  ]
+}
